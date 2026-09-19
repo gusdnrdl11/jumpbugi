@@ -56,6 +56,9 @@ play = True
 entered_screen = False
 to_x = 0
 
+font_point= pygame.font.SysFont(None,30)
+point = 0
+
 while play:
     deltatime =fps.tick(60) # fps 조절 (스피드 조절)
     for event in pygame.event.get():
@@ -112,6 +115,7 @@ while play:
         print("한성부기랑 충돌")
         x_pos_hansungcat = rect_sangsangbugi_side.right
         x_speed_hansungcat = -x_speed_hansungcat
+        point += 10
         
     
 
@@ -119,9 +123,16 @@ while play:
     # background.blit(사용할 배경,(0,0)) 여기선 배경을 안쓰고 그냥 투명한 색으로 채워만 놓음
     background.fill((255, 255, 255))
 
+    #점수를 표현해주기
+   
+
+
     # 이미지 그리기
     background.blit(hansungcat,(x_pos_hansungcat, y_pos_hansungcat))  
-    background.blit(sangsangbugi_side,(x_pos_sangsangbugi_side, y_pos_sangsangbugi_side))  
+    background.blit(sangsangbugi_side,(x_pos_sangsangbugi_side, y_pos_sangsangbugi_side))
+
+    text_point = font_point.render(str(point), True, (0,0,0))
+    background.blit(text_point, (10,10))
 
     pygame.display.update()
 
