@@ -2,13 +2,12 @@ import pygame
 
 pygame.init()
 
-
 background = pygame.display.set_mode((480,360))
 pygame.display.set_caption("Hansungrun")
 
 fps = pygame.time.Clock()
 
-# image_bg = pygame.image.load() 배경인데 배경은 안넣음 상대경로로 줘야 다른컴퓨터에서도 프로젝트가 실행됨 "image/sangsangbugi.png"
+stage_1 = pygame.image.load("image/stage_1.png").convert_alpha()
 hansungcat = pygame.image.load("image/hansungcat.png").convert_alpha()
 sangsangbugi_side = pygame.image.load("image/sangsangbugi_side.png").convert_alpha()
 
@@ -30,6 +29,10 @@ new_width_hansungcat = int(original_width_hansungcat * new_height / original_hei
 # 높이는 같은 기준으로 해줄것이기 때문
 new_width_sangsangbugi_side = int(original_width_sangsangbugi_side * new_height / original_height_sangsangbugi_side)   
 
+stage_1 = pygame.transform.smoothscale(
+    stage_1,
+    (size_bg_width, size_bg_height))
+
 hansungcat = pygame.transform.smoothscale(
     hansungcat,
     (new_width_hansungcat, new_height))
@@ -37,7 +40,6 @@ hansungcat = pygame.transform.smoothscale(
 sangsangbugi_side = pygame.transform.smoothscale(
     sangsangbugi_side,
     (new_width_sangsangbugi_side, new_height))
-
 
 GROUND_OFFSET_bugi = 2 # 이미지 크기 때문에 바닥에 발이 닿게 수정
 GROUND_OFFSET_cat = 7  # 이미지 크기 때문에 바닥에 발이 닿게 수정
@@ -54,13 +56,15 @@ y_pos_sangsangbugi_side = size_bg_height - new_height + GROUND_OFFSET_bugi
 
 x_speed_hansungcat = 6 # 장애물이 전진해오는 초기 속도
 
-# 무한 반복문 게임을 종료하기 위한 변수
+# 무한 반복문
 play = True
+# 게임의 재시작 여부 
+game_over =False
 
 jump_speed = -15    # 점프를 시작할때의 속도
 # 파이썬의 경우 0,0 이 좌측 상단임 즉 캐릭터가 서있는 곳의 좌표는 +라는것 
 # 즉 점프를 할때 스피드임
-gravity = 0.4  # 중력
+gravity = 0.6  # 중력
 # 왜 중력이 있어야해? 점점점 자연스럽게 떨어지기 위해서 직선으로 슉 떨어지는게 아니라 자연스럽게 포물선으로 떨어져야함
 velocity_y = 0  # y축 속도
 is_jumping =  False # 점프중인지 확인하는 변수
@@ -72,9 +76,12 @@ font_point= pygame.font.SysFont(None,30) # 기본 글자체 / 크기
 point = 0
 passed = False
 
-# 게임오버
+# 게임오버 텍스트
 font_gameover = pygame.font.SysFont(None,80)
+font_press = pygame.font.SysFont(None,30)
+
 text_gameover = font_gameover.render('GAME OVER',True,(255,0,0)) # 가운데 bool값은 좀더 부드러운 처리해줌
+text_press = font_press.render('press the Enter Restart',True,(255,0,0))
 
 size_text_width = text_gameover.get_rect().size[0]     # 텍스트를 가운데 넣어주기 위해서 텍스트 좌표를 계산해서 넣어줌
 size_text_height = text_gameover.get_rect().size[1]
@@ -85,78 +92,110 @@ y_pos_text = size_bg_height / 2 - size_text_height/2
 while play:
     deltatime =fps.tick(60) # fps 조절 (스피드 조절)
     for event in pygame.event.get():
-         if event.type == pygame.QUIT:
+         if event.type == pygame.QUIT: # 게임을 아예 종료 X버튼을 눌러서
              play = False
 
-         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                if not is_jumping:   # 스페이스바가 눌리면
-                    velocity_y = jump_speed # y축 속도를 처음 점프속도로 넣어줌
-                    is_jumping = True   # 현재 점프중이니까 점프 인지 아닌지 판별하기 위한 변수를 True로 바꿔줌
+         if event.type == pygame.KEYDOWN:   # 이벤트 타입 키다운
+              # 게임오버 상태라면 ENTER로 재시작 / esc 게임 종료
+            if event.key == pygame.K_ESCAPE:    # esc 눌리면 게임 종료
+                play = False
+
+           # 게임오버 상태라면 ENTER로 재시작
+           # 엔터가 눌러서 재시작이 되면 모든 값을들 게임 초기값으로 변경함
+            elif game_over and event.key == pygame.K_RETURN:
+                y_pos_sangsangbugi_side = ground_y  # y축 위치값을 초기화
+                velocity_y = 0
+                is_jumping = False
+
+                x_pos_hansungcat = size_bg_width
+
+                point = 0
+                passed = False
+
+                game_over = False
+
+            # 게임 중일 때만 점프
+            elif not game_over and event.key == pygame.K_SPACE: 
+                if not is_jumping:
+                    velocity_y = jump_speed
+                    is_jumping = True
+                    # 게임오버가 아니고 스페이스 키가 눌렸을때 점프 스피드를 주고 점프중이라는 변수값을 True로 변경
+
+    # 게임오버가 아닐 때만 게임 진행
+    if not game_over:
+
+        # 점프
+        if is_jumping: 
+            velocity_y += gravity   # 점점 숫자가 늘어야 아래로 향하는거임
+            y_pos_sangsangbugi_side += velocity_y   # 상상부기의 위칫값이 그라운드에 섰을때까지
+
+            if y_pos_sangsangbugi_side >= ground_y: # 상상부기 위치가 그라운드와 동일하거나 넘어가면
+                y_pos_sangsangbugi_side = ground_y  # 그라운드 위치로 상상부기 위치를 맞춰줌
+                velocity_y = 0                      # 그라운드에 있으니 속도를 0으로 초기화
+                is_jumping = False                  # 점프가 완료됐으니 점프 상태를 False
+
+        # 장애물 이동
+        x_pos_hansungcat -= x_speed_hansungcat
+
+        # 히트박스 갱신
+        rect_sangsangbugi_side = sangsangbugi_side.get_rect(
+            topleft=(x_pos_sangsangbugi_side,
+                     y_pos_sangsangbugi_side))
+
+        rect_hansungcat = hansungcat.get_rect(
+            topleft=(x_pos_hansungcat,
+                     y_pos_hansungcat))
+
+        hitbox_sangsangbugi = rect_sangsangbugi_side.inflate(-40, -40)
+        hitbox_hansungcat = rect_hansungcat.inflate(-50, -35)
+
+        # 충돌
+        if hitbox_sangsangbugi.colliderect(hitbox_hansungcat):
+            game_over = True
+        if (rect_sangsangbugi_side.left >= rect_hansungcat.right) and not passed:
+            point += 10
+            passed =True
+
+        # 한성캣의 취이가 x값 -로 벗어나게 되면 화면을 벗어난거임
+        # 그러면 한성캣의 좌표를 다시 오른쪽 화면 밖 좌표값으로 초기화해줘서 마치 재등장한것처럼 만들어주면됨
+        if x_pos_hansungcat + new_width_hansungcat < 0 : 
+            x_pos_hansungcat = size_bg_width
+            passed = False
 
 
-    # 점프
-    if is_jumping:  # 현재 상태가 점프임? True or False
-        velocity_y += gravity
-        y_pos_sangsangbugi_side += velocity_y 
-        # y축 속도가 점점점 떨어져서 자연스럽게 포물선으로 내려와야함
-        # x축은 자연스럽게 앞으로 가면 떨어짐
-        # 쿠키런 스타일로 개조하기 위해서는 x축은 고정한 위치에 있으면 되고 y축의 점프만 있으면 됨
-        # 장애물의 경우 좌우가 아닌 특정 방향 우->좌로 이동하고 화면 밖을 벗어나게 되면 장애물의 좌표를 
-        # 초기 등장 좌표로 하여 반복하여 등장하게 만들면 됨
+    # 배경
+    background.blit(stage_1, (0,0))
 
-        if y_pos_sangsangbugi_side >= ground_y: # 땅에 도착했음? 값이 커지면 커질수록 아래로 내려감 좌표평면을 기억할것!
-            y_pos_sangsangbugi_side = ground_y 
-            velocity_y = 0
-            is_jumping = False
+    # 캐릭터
+    background.blit(hansungcat,
+                    (x_pos_hansungcat, y_pos_hansungcat))
 
-    # 한성캣의 좌측으로 이동
-    x_pos_hansungcat -= x_speed_hansungcat
+    background.blit(sangsangbugi_side,
+                    (x_pos_sangsangbugi_side, y_pos_sangsangbugi_side))
 
-    rect_sangsangbugi_side = sangsangbugi_side.get_rect()
-    rect_sangsangbugi_side.left = x_pos_sangsangbugi_side
-    rect_sangsangbugi_side.top = y_pos_sangsangbugi_side
-
-    rect_hansungcat = hansungcat.get_rect()
-    rect_hansungcat.left = x_pos_hansungcat
-    rect_hansungcat.top = y_pos_hansungcat
-
-    # 상상부기가 한성캣을 점프해서 넘어갔는가?그렇다면 점수를 더해줘!
-    # 위치가 중요하다 먼저 점수를 판정하고 장애물의 위치를 초기화 한다 
-    # 위치를 변경시키면 장애물의 위치값이 초기화되서 점수가 안올라감(초기화된 위치는 0이상이니까)
-    if (rect_sangsangbugi_side.left >= rect_hansungcat.right) and not passed:
-        point += 10
-        passed =True
-
-    # 한성캣의 취이가 x값 -로 벗어나게 되면 화면을 벗어난거임
-    # 그러면 한성캣의 좌표를 다시 오른쪽 화면 밖 좌표값으로 초기화해줘서 마치 재등장한것처럼 만들어주면됨
-    if x_pos_hansungcat + new_width_hansungcat < 0 : 
-        x_pos_hansungcat = size_bg_width
-        passed = False
-
-    # 충돌시에 게임 오버
-    if rect_sangsangbugi_side.colliderect(rect_hansungcat):
-        background.blit(text_gameover,(x_pos_text,y_pos_text))
-        pygame.display.update()
-        pygame.time.delay(2000)
-        play = False # 게임이 종료되게 만드려면 이 변수가 있어야함 
-        # 다만 지금은 게임이 종료되면 GAME OVER가 뜨고 뜬 상태를 유지하고 난 후에 키를 입력받는데
-        # 어떤 엔터키를 입력받자 그러면 재시작할수 있게 말이지
-        # x_speed_hansungcat = -x_speed_hansungcat 충돌시에 반대편으로 이동하게 만드는건데 
-        # 쿠키런 스타일은 그냥 빠져 나가야 하기 때문에 필요 없음
-
-    # 배경 깔기
-    # background.blit(사용할 배경,(0,0)) 여기선 배경을 안쓰고 그냥 투명한 색으로 채워만 놓음
-    background.fill((255, 255, 255))
-
-    # 이미지 그리기
-    background.blit(hansungcat,(x_pos_hansungcat, y_pos_hansungcat))  
-    background.blit(sangsangbugi_side,(x_pos_sangsangbugi_side, y_pos_sangsangbugi_side))
-
+    # 점수
     text_point = font_point.render(str(point), True, (0,0,0))
     background.blit(text_point, (10,10))
 
+    # 게임오버 글자 / 재시작 메세지
+    if game_over:
+        background.blit(text_gameover,
+                        (x_pos_text, y_pos_text))
+        background.blit(text_press,
+                        (x_pos_text+50, y_pos_text+80))
+    # 배경의 순서는 HTML의 Z-index와 같음.차곡 차곡 쌓이니 그 위에 점수와 메세지를 얹어서 표현해줘야함
+    # 이미지 갱신
     pygame.display.update()
 
 pygame.quit()
+
+# TODO
+# 1. 장애물 여러 종류 추가
+# 2. 장애물 랜덤 등장
+# 3. 생존 시간 점수 + 장애물 통과 보너스
+# 4. 일정 시간마다 속도 / 장애물 수 증가
+# 5. 낮 -> 밤 배경 전환
+# 6. PAUSE 기능 여부 고민
+# 7. 웹 배포 구조 검토
+# 8. 이미지의 움직임
 
