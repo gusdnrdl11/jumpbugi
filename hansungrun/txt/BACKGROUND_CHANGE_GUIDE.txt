@@ -1,0 +1,22 @@
+﻿계절 배경 및 낮·밤 전환 안내
+
+현재 게임: 봄 낮 → 플레이 30초에 밤 전환 시작 → 33초에 밤 완성
+60초에 낮 전환 시작 → 63초에 낮 완성 → 30초 주기로 반복
+전환은 3초 동안 밝기 변화의 시작과 끝을 부드럽게 만드는 방식입니다.
+일시정지·게임오버에서는 환경 시간도 멈춥니다.
+재시작하면 봄 낮과 환경 시간 0초로 돌아갑니다.
+긴 프레임에서는 배경 시간은 실제 경과 시간을 반영하고 물리 이동만 0.1초로 제한합니다.
+
+설정: prototype_game.py의 DAY_NIGHT_INTERVAL, BACKGROUND_FADE_SECONDS
+이미지: image/hansung_{spring,summer,autumn,winter}_{morning,night}.png
+게임에서 읽는 이름: image/hansung_morning.png, image/hansung_night.png (봄 버전)
+기존 원본: image/hansung_morning_original.png, image/hansung_night_original.png
+계절 자동 변경은 구현하지 않았으며 여름·가을·겨울은 사용할 수 있는 별도 자산입니다.
+
+검증 절차
+1. txt/test_game09_candidate.txt에 기존 검사와 전환·이미지 검사를 작성합니다.
+2. runpy.run_path로 텍스트 안의 검사 코드를 읽어 unittest로 실행합니다.
+3. 전체 통과한 텍스트를 test/test_game09.py에 복사합니다.
+4. python -B -m unittest discover -s test -v 로 최종 검사를 실행합니다.
+5. 실제 렌더링의 낮·전환 중·밤을 정지 이미지로 확인합니다.
+자동 검사는 실제 창에서 느끼는 조작감이나 움직임의 자연스러움을 모두 보장하지 않습니다.

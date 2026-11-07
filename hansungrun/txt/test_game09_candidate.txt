@@ -1,4 +1,4 @@
-"""화면을 열지 않고 실행: python -B -m unittest -v test_game09"""
+"""프로젝트 루트: python -B -m unittest discover -s test -v"""
 import os
 import tempfile
 import unittest
@@ -10,7 +10,7 @@ os.environ['SDL_AUDIODRIVER'] = 'dummy'
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 import pygame
-import game09 as game
+import prototype_game as game
 
 
 class GameTests(unittest.TestCase):
@@ -43,7 +43,7 @@ class GameTests(unittest.TestCase):
             # 실제 출력 픽셀을 원본의 순환 좌표와 비교해 빈 공간과 좌표 오차를 검사한다.
             app.draw()
             for x in (0, 240, 479):
-                source_x = (x - app.background_x) % 960
+                source_x = int((x - app.background_x) % 960)
                 self.assertEqual(app.screen.get_at((x, 150)),
                                  app.stage.get_at((source_x, 150)))
 
@@ -104,21 +104,24 @@ class GameTests(unittest.TestCase):
         self.assertEqual(game.HansungRun(self.record).high_score, 120)
         self.assertFalse(self.record.with_suffix('.tmp').exists())
 
-    def test_running_legs_only_and_animation_freeze(self):
+    def test_four_poses_and_animation_freeze(self):
         app = self.app
         self.assertEqual(len(app.run_frames), 4)
         width, height = app.player_image.get_size()
-        leg_top = int(height * game.LEG_START_RATIO)
-        upper = pygame.image.tobytes(app.run_frames[0].subsurface((0, 0, width, leg_top)), 'RGBA')
+        leg_top = int(height * 0.78)  # 다리 영역에 실제 포즈 차이가 있는지 검사한다.
         legs = set()
         for frame in app.run_frames:
             self.assertEqual(frame.get_size(), (width, height))
-            self.assertEqual(pygame.image.tobytes(frame.subsurface((0, 0, width, leg_top)), 'RGBA'), upper)
             legs.add(pygame.image.tobytes(frame.subsurface((0, leg_top, width, height-leg_top)), 'RGBA'))
         self.assertEqual(len(legs), 4)
         for _ in range(game.RUN_FRAME_TICKS):
             app.update()
         self.assertEqual(app.animation_tick // game.RUN_FRAME_TICKS, 1)
+        app.obstacle_y = -1000
+        for expected in (2, 3, 0):
+            for _ in range(game.RUN_FRAME_TICKS):
+                app.update()
+            self.assertEqual(app.animation_tick // game.RUN_FRAME_TICKS, expected)
         self.key(pygame.K_SPACE)
         frozen = app.animation_tick
         app.update()
@@ -146,7 +149,7 @@ class GameTests(unittest.TestCase):
                 self.assertEqual(app.obstacle_x, 480)
 
     def test_exit_records_score_once(self):
-        for event in (pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE),
+        for event in (pygame.event.Event(pygame.KEYDOWN, key=pygame.K_F4, mod=pygame.KMOD_CTRL),
                       pygame.event.Event(pygame.QUIT)):
             self.app.running = True
             self.app.score += 10
@@ -195,9 +198,37 @@ class GameTests(unittest.TestCase):
         app.draw()
         self.assertEqual(app.screen.blit.call_count, 8)
 
+    def test_pause_and_timing(self):
+        # 점프 도중 모든 상태가 멈추고 재개하면 이어지는지 확인한다.
+        app = self.app
+        app.obstacle_y = -1000
+        self.key(pygame.K_SPACE)
+        app.update()
+        self.key(pygame.K_ESCAPE)
+        frozen = (app.player_y, app.velocity_y, app.background_x, app.obstacle_x, app.animation_tick, app.score)
+        self.key(pygame.K_SPACE)
+        app.update(0.1)
+        self.assertEqual(frozen, (app.player_y, app.velocity_y, app.background_x, app.obstacle_x, app.animation_tick, app.score))
+        app.draw()
+        self.key(pygame.K_ESCAPE)
+        app.update()
+        self.assertNotEqual(app.player_y, frozen[0])
+        # 60Hz와 120Hz에서 같은 시간 동안 같은 이동과 점프가 나와야 한다.
+        states = []
+        for hz in (60, 120):
+            app.reset()
+            app.obstacle_y = -1000
+            self.key(pygame.K_SPACE)
+            for _ in range(hz // 6):
+                app.update(1 / hz)
+            states.append((app.player_y, app.velocity_y, app.background_x, app.obstacle_x))
+        for actual, expected in zip(*states):
+            self.assertAlmostEqual(actual, expected)
+
     def test_exit_and_resource_path(self):
         self.key(pygame.K_ESCAPE)
-        self.assertFalse(self.app.running)
+        self.assertTrue(self.app.running)
+        self.assertTrue(self.app.paused)
         self.app.running = True
         pygame.event.post(pygame.event.Event(pygame.QUIT))
         self.app.run()
@@ -209,6 +240,88 @@ class GameTests(unittest.TestCase):
                              (960, 360))
         finally:
             os.chdir(original)
+
+    def test_day_night_boundaries_and_return(self):
+        app = self.app
+        app.player_y = -1000
+        # 실제 update 경로로 30초 전까지 진행한다.
+        for _ in range(299):
+            app.update(0.1)
+        self.assertEqual(app.night_alpha, 0)
+        app.update(0.1)
+        self.assertAlmostEqual(app.background_elapsed, 30)
+        self.assertEqual(app.night_alpha, 0)
+        app.update_background(1.5)
+        self.assertIn(app.night_alpha, (127, 128))
+        app.update_background(1.5)
+        self.assertEqual(app.night_alpha, 255)
+        self.assertEqual(pygame.image.tobytes(app.stage, 'RGB'),
+                         pygame.image.tobytes(app.night_stage, 'RGB'))
+        app.update_background(27)
+        self.assertEqual(app.night_alpha, 255)
+        app.update_background(1.5)
+        self.assertIn(app.night_alpha, (127, 128))
+        app.update_background(1.5)
+        self.assertEqual(app.night_alpha, 0)
+        self.assertEqual(pygame.image.tobytes(app.stage, 'RGB'),
+                         pygame.image.tobytes(app.day_stage, 'RGB'))
+
+    def test_background_freeze_reset_and_long_frame(self):
+        app = self.app
+        app.player_y = -1000
+        app.update(31.5)
+        self.assertAlmostEqual(app.background_elapsed, 31.5)
+        self.assertIn(app.night_alpha, (127, 128))
+        self.assertAlmostEqual(app.background_x, -36)
+        frozen = (app.background_elapsed, app.night_alpha,
+                  pygame.image.tobytes(app.stage, 'RGB'))
+        for flag in ('paused', 'game_over'):
+            setattr(app, flag, True)
+            app.update(10)
+            self.assertEqual(frozen, (app.background_elapsed, app.night_alpha,
+                                     pygame.image.tobytes(app.stage, 'RGB')))
+            setattr(app, flag, False)
+        app.reset()
+        self.assertEqual((app.background_elapsed, app.night_alpha, app.background_x), (0, 0, 0))
+        self.assertEqual(pygame.image.tobytes(app.stage, 'RGB'),
+                         pygame.image.tobytes(app.day_stage, 'RGB'))
+
+    def test_fade_pixels_scroll_alignment_and_monotonicity(self):
+        app = self.app
+        app.player_y = -1000
+        app.obstacle_y = -1000
+        app.update_background(30)
+        values = []
+        for _ in range(30):
+            app.update_background(0.1)
+            values.append(app.night_alpha)
+        self.assertEqual(values, sorted(values))
+        self.assertEqual(values[-1], 255)
+        app.reset()
+        app.player_y = app.obstacle_y = -1000
+        app.update_background(31.5)
+        app.background_x = -959
+        app.draw()
+        expected = app.day_stage.copy()
+        overlay = app.night_stage.copy()
+        overlay.set_alpha(app.night_alpha)
+        expected.blit(overlay, (0, 0))
+        for x in (0, 240, 479):
+            source_x = (x + 959) % app.background_width
+            self.assertEqual(app.screen.get_at((x, 150)), expected.get_at((source_x, 150)))
+        self.assertIsNone(app.stage.get_alpha())
+
+    def test_seasonal_assets(self):
+        for season in ('spring', 'summer', 'autumn', 'winter'):
+            for time in ('morning', 'night'):
+                image = game.load_image(f'hansung_{season}_{time}.png')
+                self.assertEqual(image.get_size(), (2048, 768))
+                self.assertEqual(pygame.mask.from_surface(image).count(), 2048 * 768)
+        for time in ('morning', 'night'):
+            active = game.load_image(f'hansung_{time}.png')
+            spring = game.load_image(f'hansung_spring_{time}.png')
+            self.assertEqual(pygame.image.tobytes(active, 'RGB'),
+                             pygame.image.tobytes(spring, 'RGB'))
 
 
 if __name__ == '__main__':
