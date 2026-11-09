@@ -1,0 +1,6 @@
+# Python 캐시
+__pycache__/
+*.pyc
+
+# VS Code 개인 설정
+.vscode/
