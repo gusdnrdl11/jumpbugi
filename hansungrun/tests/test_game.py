@@ -48,7 +48,7 @@ class GameTests(unittest.TestCase):
         for _ in range(60):
             self.game.update()
         self.assertFalse(self.game.state.is_jumping)
-        self.game.state.obstacle_x = 0
+        self.game.state.obstacle_x = 60
         self.game.update()
         self.assertTrue(self.game.state.game_over)
         self.game.draw()

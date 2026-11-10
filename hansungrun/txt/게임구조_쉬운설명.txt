@@ -329,19 +329,18 @@ save_high_score(path, score)는 저장 폴더를 준비하고,
       test_game.py          ← 기본 동작 검사
       test_game09.py        ← 상세 회귀 검사
     docs/
-      README.md             ← 문서 목차와 실행 안내
       TODO.md               ← 다음 작업
       CHANGELOG.md          ← 완료 작업
       ARCHITECTURE.md       ← 현재 구조
       STUDY_NOTES.md        ← 학습 노트
-      게임구조_쉬운설명.txt  ← 지금 읽는 문서
       archive/              ← 이전 문서와 배경 작업 자료
 
 그림은 hansungrun/image, 기록은 hansungrun/txt에서 찾습니다.
 상위 폴더의 image와 txt는 내부로 이동했습니다.
 config.py의 실제 위치를 기준으로 찾으므로 터미널의 현재 위치가 바뀌어도
 같은 그림과 기록을 사용합니다. 프로젝트를 옮길 때 내부 폴더도 함께 옮깁니다.
-문서 목차는 같은 docs 폴더의 README.md에서 확인할 수 있습니다.
+문서 목차는 프로젝트 최상위 README.md에서 확인할 수 있습니다.
+이 문서는 txt/게임구조_쉬운설명.txt에 보존한 학습 자료입니다.
 
 설정값은 실행 중 편집한다고 화면에 자동 반영되는 구조는 아닙니다.
 값을 고쳤다면 게임을 다시 실행해서 확인하면 됩니다.

@@ -5,6 +5,7 @@ import pygame
 if __package__:
     from .config import (
         BACKGROUND_FADE_SECONDS,
+        BACKGROUND_FILES,
         BACKGROUND_SPEED,
         CHARACTER_HEIGHT,
         DAY_NIGHT_INTERVAL,
@@ -13,19 +14,27 @@ if __package__:
         JUMP_SPEED,
         OBSTACLE_FILES,
         OBSTACLE_GROUND_OFFSET,
-        OBSTACLE_HITBOX_SHRINK,
         OBSTACLE_SPEED,
         PASS_BONUS,
         PHYSICS_HZ,
         PLAYER_GROUND_OFFSET,
-        PLAYER_HITBOX_SHRINK,
         RUN_FRAME_TICKS,
-        SCREEN_SIZE
+        SCREEN_SIZE,
+        SURVIVAL_POINTS_PER_SECOND,
+        SPEED_INCREASE_RATIO,
+        CHICKEN_UNLOCK_SECONDS,
+        CHICKEN_TYPES,
+        FLYING_HEAD_GAP,
+        OBSTACLE_FRAME_TICKS,
+        OBSTACLE_RECOVERY_SECONDS,
+        GROUND_PATTERNS,
+        SUMMER_PATTERNS,
     )
     from .storage import load_high_score, save_high_score
 else:
     from config import (
         BACKGROUND_FADE_SECONDS,
+        BACKGROUND_FILES,
         BACKGROUND_SPEED,
         CHARACTER_HEIGHT,
         DAY_NIGHT_INTERVAL,
@@ -34,24 +43,35 @@ else:
         JUMP_SPEED,
         OBSTACLE_FILES,
         OBSTACLE_GROUND_OFFSET,
-        OBSTACLE_HITBOX_SHRINK,
         OBSTACLE_SPEED,
         PASS_BONUS,
         PHYSICS_HZ,
         PLAYER_GROUND_OFFSET,
-        PLAYER_HITBOX_SHRINK,
         RUN_FRAME_TICKS,
-        SCREEN_SIZE
+        SCREEN_SIZE,
+        SURVIVAL_POINTS_PER_SECOND,
+        SPEED_INCREASE_RATIO,
+        CHICKEN_UNLOCK_SECONDS,
+        CHICKEN_TYPES,
+        FLYING_HEAD_GAP,
+        OBSTACLE_FRAME_TICKS,
+        OBSTACLE_RECOVERY_SECONDS,
+        GROUND_PATTERNS,
+        SUMMER_PATTERNS,
     )
     from storage import load_high_score, save_high_score
 
 
 class GameState:
     def __init__(self, player_size, obstacle_sizes, frame_count, background_width,
-                 high_score_path=HIGH_SCORE_PATH):
+                 high_score_path=HIGH_SCORE_PATH, *, player_masks, obstacle_masks,
+                 obstacle_frame_masks=None):
         self.player_size = player_size
         self.obstacle_sizes = obstacle_sizes
         self.frame_count = frame_count
+        self.player_masks = player_masks
+        self.obstacle_masks = obstacle_masks
+        self.obstacle_frame_masks = obstacle_frame_masks or {}
         self.background_width = background_width
         self.ground_y = SCREEN_SIZE[1] - CHARACTER_HEIGHT + PLAYER_GROUND_OFFSET
         self.high_score_path = Path(high_score_path)
@@ -74,29 +94,69 @@ class GameState:
         self.player_y = self.ground_y
         self.velocity_y = 0
         self.is_jumping = False
+        self.background_elapsed = 0.0
+        self.pattern_queue = []
+        self.current_pattern = ()
+        self.first_obstacle = True
         self.spawn_obstacle()
         self.animation_tick = 0
         self.background_x = 0
-        self.background_elapsed = 0.0
+        self.background_from_index = 0
+        self.background_to_index = 0
+        self.background_alpha = 0
         self.night_alpha = 0
         self.score = 0
+        self.survival_elapsed = 0.0
         self.passed = False
         self.game_over = False
         self.paused = False
 
 
-    def spawn_obstacle(self):
-        """세 종류 중 균등 무작위 선택. 같은 종류가 연속 등장할 수도 있다."""
-        self.obstacle_name = random.choice(OBSTACLE_FILES)
+    def spawn_obstacle(self, name=None):
+        """첫 봄에는 정지 이미지 장애물만, 이후에는 날갯짓 유형도 허용한다."""
+        if name is not None:
+            self.obstacle_name = name
+        elif self.first_obstacle:
+            self.obstacle_name = random.choice(OBSTACLE_FILES)
+        else:
+            if not self.chicken_obstacles_enabled:
+                self.pattern_queue = [kind for kind in self.pattern_queue if kind not in CHICKEN_TYPES]
+            if not self.pattern_queue:
+                pool = GROUND_PATTERNS
+                if self.chicken_obstacles_enabled:
+                    pool += SUMMER_PATTERNS
+                pool = [pattern for pattern in pool if all(
+                    kind in self.obstacle_sizes and (self.chicken_obstacles_enabled or kind not in CHICKEN_TYPES)
+                    for kind in pattern)]
+                self.current_pattern = random.choice(pool)
+                self.pattern_queue = list(self.current_pattern)
+            self.obstacle_name = self.pattern_queue.pop(0)
         self.obstacle_size = self.obstacle_sizes[self.obstacle_name]
         # 작은 상찌도 공중에 뜨지 않게 그림의 아래쪽을 같은 바닥에 맞춘다.
         self.obstacle_y = SCREEN_SIZE[1] - self.obstacle_size[1] + OBSTACLE_GROUND_OFFSET
-        # 그림이 작아지면 부딪힘 검사 상자도 함께 작아져야 한다.
-        # 큰 그림의 보정값을 그대로 빼면 작은 상자의 폭이 음수가 될 수 있다.
-        scale = self.obstacle_size[1] / CHARACTER_HEIGHT
-        self.obstacle_hitbox_shrink = tuple(int(value * scale) for value in OBSTACLE_HITBOX_SHRINK)
-        self.obstacle_x = SCREEN_SIZE[0]
+        if self.obstacle_is_flying:
+            self.obstacle_y = self.ground_y - FLYING_HEAD_GAP - self.obstacle_size[1]
+        # 한 마리가 화면을 완전히 벗어난 뒤 다음 마리를 만든다. 다음 5% 가속도 여유에 포함.
+        self.obstacle_spawn_x = (SCREEN_SIZE[0] if self.first_obstacle else max(
+            SCREEN_SIZE[0], self.player_size[0] + OBSTACLE_SPEED * PHYSICS_HZ
+            * self.speed_multiplier * (1 + SPEED_INCREASE_RATIO) * OBSTACLE_RECOVERY_SECONDS))
+        self.obstacle_x = self.obstacle_spawn_x
+        self.first_obstacle = False
+        self.obstacle_animation_tick = 0.0
         self.passed = False
+
+    @property
+    def chicken_obstacles_enabled(self):
+        return self.background_elapsed + 1e-9 >= CHICKEN_UNLOCK_SECONDS
+
+    @property
+    def obstacle_is_flying(self):
+        return self.obstacle_name.endswith('_flying')
+
+    @property
+    def obstacle_frame_index(self):
+        frames = self.obstacle_frame_masks.get(self.obstacle_name)
+        return int(self.obstacle_animation_tick // OBSTACLE_FRAME_TICKS) % len(frames) if frames else 0
 
 
     def stop(self):
@@ -104,39 +164,68 @@ class GameState:
         self.record_high_score()
         self.running = False
 
+    @property
+    def player_frame_index(self):
+        """점프 중에는 화면과 충돌 모두 달리기 첫 프레임을 사용한다."""
+        return 0 if self.is_jumping else int(self.animation_tick // RUN_FRAME_TICKS)
+
+    def collides_with_obstacle(self):
+        """화면에 그리는 정수 좌표와 동일한 위치에서 불투명 픽셀을 비교한다."""
+        offset = (int(self.obstacle_x), int(self.obstacle_y) - int(self.player_y))
+        frames = self.obstacle_frame_masks.get(self.obstacle_name)
+        mask = frames[self.obstacle_frame_index] if frames else self.obstacle_masks[self.obstacle_name]
+        return self.player_masks[self.player_frame_index].overlap(
+            mask, offset
+        ) is not None
+
+    @property
+    def speed_multiplier(self):
+        """30초마다 배경 전환이 시작될 때 속도를 5%씩 누적한다."""
+        stage = int((self.background_elapsed + 1e-9) // DAY_NIGHT_INTERVAL)
+        return (1 + SPEED_INCREASE_RATIO) ** stage
+
 
     def update(self, dt=1 / PHYSICS_HZ):
         """경과 시간만큼 진행하며 작은 단계로 나눠 충돌 누락을 방지한다."""
         if self.game_over or self.paused:
             return
+        dt = max(dt, 0.0)
+        previous_seconds = int(self.survival_elapsed + 1e-9)
+        self.survival_elapsed += dt
+        self.score += (int(self.survival_elapsed + 1e-9) - previous_seconds) * SURVIVAL_POINTS_PER_SECOND
         # 환경 시계는 실제 플레이 시간을 사용하고, 물리만 긴 지연을 제한한다.
-        self.update_background(max(dt, 0.0))
+        self.update_background(dt)
         # 창 이동 등 긴 지연 후에는 최대 0.1초까지만 따라잡는다.
-        remaining = min(max(dt, 0.0), 0.1) * PHYSICS_HZ
+        remaining = min(dt, 0.1) * PHYSICS_HZ
         while remaining > 1e-9 and not self.game_over:
-            step = min(remaining, 1.0)
+            # 가속 후에도 한 번의 충돌 검사 사이 장애물 이동은 최대 6픽셀이다.
+            step = min(remaining, 1.0 / self.speed_multiplier)
             self.update_step(step)
             remaining -= step
 
 
     def update_background(self, dt):
-        """30초마다 낮/밤을 바꾸며 3초 동안 부드럽게 섞는다."""
+        """계절별 낮·밤 8장을 30초마다 순환하고 3초 동안 섞는다."""
         self.background_elapsed += dt
         cycle = int((self.background_elapsed + 1e-9) // DAY_NIGHT_INTERVAL)
         elapsed = max(0.0, self.background_elapsed - cycle * DAY_NIGHT_INTERVAL)
         progress = min(elapsed / BACKGROUND_FADE_SECONDS, 1.0)
         # 시작과 끝의 변화 속도를 낮춰 갑자기 밝기가 꺾이지 않게 한다.
         eased = progress * progress * (3 - 2 * progress)
-        weight = (eased if cycle % 2 else 1 - eased) if cycle else 0.0
-        alpha = round(255 * weight)
-        self.night_alpha = alpha
+        self.background_to_index = cycle % len(BACKGROUND_FILES)
+        self.background_from_index = (cycle - 1) % len(BACKGROUND_FILES) if cycle else 0
+        self.background_alpha = round(255 * eased) if cycle else 0
+        # HUD 색은 전환하는 두 그림의 낮/밤 밝기에 맞춰 보간한다.
+        source_night = self.background_from_index % 2
+        target_night = self.background_to_index % 2
+        self.night_alpha = round(255 * (source_night * (1 - eased) + target_night * eased))
 
     def update_step(self, step):
         """기존 한 프레임 수치에 시간 비율을 적용한다."""
         # 장애물과 같은 속도로 이동하며 반복 경계를 넘은 이동량도 보존한다.
         # 게임오버 시 위에서 반환하므로 배경도 정지한다.
         self.background_x = -(
-            (-self.background_x + BACKGROUND_SPEED * step) % self.background_width
+            (-self.background_x + BACKGROUND_SPEED * self.speed_multiplier * step) % self.background_width
         )
         if not self.is_jumping:
             self.animation_tick = (self.animation_tick + step) % (self.frame_count * RUN_FRAME_TICKS)
@@ -149,14 +238,13 @@ class GameState:
                 self.velocity_y = 0
                 self.is_jumping = False
 
-        self.obstacle_x -= OBSTACLE_SPEED * step
+        self.obstacle_x -= OBSTACLE_SPEED * self.speed_multiplier * step
+        self.obstacle_animation_tick += step
         player_rect = pygame.Rect((0, 0), self.player_size)
-        player_rect.topleft = (0, self.player_y)
+        player_rect.topleft = (0, int(self.player_y))
         obstacle_rect = pygame.Rect((0, 0), self.obstacle_size)
-        obstacle_rect.topleft = (self.obstacle_x, self.obstacle_y)
-        player_hitbox = player_rect.inflate(*PLAYER_HITBOX_SHRINK)
-        obstacle_hitbox = obstacle_rect.inflate(*self.obstacle_hitbox_shrink)
-        if player_hitbox.colliderect(obstacle_hitbox):
+        obstacle_rect.topleft = (int(self.obstacle_x), int(self.obstacle_y))
+        if player_rect.colliderect(obstacle_rect) and self.collides_with_obstacle():
             self.game_over = True
             # 통과마다 저장하지 않고 한 판이 끝난 시점에만 최고점수를 반영한다.
             self.record_high_score()

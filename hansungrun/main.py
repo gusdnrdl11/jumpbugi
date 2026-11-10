@@ -19,20 +19,22 @@ class HansungRun:
             self.view.player_image.get_size(),
             {name: image.get_size() for name, image in self.view.obstacle_images.items()},
             len(self.view.run_frames), self.view.background_width, high_score_path,
+            player_masks=self.view.player_masks, obstacle_masks=self.view.obstacle_masks,
+            obstacle_frame_masks=self.view.obstacle_frame_masks,
         )
         self.clock = pygame.time.Clock()
 
     def reset(self):
         self.state.reset()
-        self.view.sync_background(self.state.night_alpha)
+        self.view.sync_background(self.state)
 
     def update(self, dt=1 / PHYSICS_HZ):
         self.state.update(dt)
-        self.view.sync_background(self.state.night_alpha)
+        self.view.sync_background(self.state)
 
     def update_background(self, dt):
         self.state.update_background(dt)
-        self.view.sync_background(self.state.night_alpha)
+        self.view.sync_background(self.state)
 
     def draw(self):
         self.view.draw(self.state)

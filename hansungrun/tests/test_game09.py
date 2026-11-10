@@ -48,7 +48,7 @@ class GameTests(unittest.TestCase):
             if previous - 6 + previous_width >= 0:
                 self.assertEqual(app.state.obstacle_x, previous - 6)
             else:
-                self.assertEqual(app.state.obstacle_x, 480)
+                self.assertEqual(app.state.obstacle_x, app.state.obstacle_spawn_x)
             # 실제 출력 픽셀을 원본의 순환 좌표와 비교해 빈 공간과 좌표 오차를 검사한다.
             app.draw()
             for x in (0, 240, 479):
@@ -72,7 +72,7 @@ class GameTests(unittest.TestCase):
 
     def test_collision_freeze_and_restart(self):
         app = self.app
-        app.state.obstacle_x = 0
+        app.state.obstacle_x = 60
         app.update()
         self.assertTrue(app.state.game_over)
         frozen = (app.state.background_x, app.state.obstacle_x, app.state.player_y, app.state.score)
@@ -95,10 +95,10 @@ class GameTests(unittest.TestCase):
         self.assertFalse(self.record.exists())
         app.update()
         self.assertEqual(app.state.score, 10)
-        self.assertEqual(app.state.obstacle_x, 480)
+        self.assertEqual(app.state.obstacle_x, app.state.obstacle_spawn_x)
         self.assertFalse(app.state.passed)
         # 실제 충돌로 판을 종료했을 때만 새 기록이 표시·저장된다.
-        app.state.obstacle_x = 0
+        app.state.obstacle_x = 60
         app.update()
         self.assertTrue(app.state.game_over)
         self.assertEqual(app.state.high_score, 10)
@@ -142,20 +142,22 @@ class GameTests(unittest.TestCase):
     def test_each_random_obstacle_collision_and_reuse(self):
         app = self.app
         for name in game.OBSTACLE_FILES:
-            with patch.object(backend.random, 'choice', return_value=name) as choose:
+            with patch.object(backend.random, 'choice',
+                              side_effect=lambda pool: name if pool == game.OBSTACLE_FILES else pool[0]) as choose:
                 app.reset()
                 choose.assert_called_once_with(game.OBSTACLE_FILES)
                 self.assertEqual(app.state.obstacle_name, name)
                 self.assertIs(app.view.obstacle_images[app.state.obstacle_name], app.view.obstacle_images[name])
                 self.assertEqual(app.view.obstacle_images[app.state.obstacle_name].get_height(), game.OBSTACLE_HEIGHTS[name])
-                app.state.obstacle_x = 0
+                # 현재 5% 축소 마스크에서도 몸통이 확실하게 겹치는 위치.
+                app.state.obstacle_x = 60
                 app.update()
                 self.assertTrue(app.state.game_over)
                 app.reset()
                 app.state.obstacle_x = -app.view.obstacle_images[app.state.obstacle_name].get_width() - 1
                 app.update()
-                self.assertEqual(app.state.obstacle_name, name)
-                self.assertEqual(app.state.obstacle_x, 480)
+                self.assertIn(app.state.obstacle_name, app.view.obstacle_images)
+                self.assertEqual(app.state.obstacle_x, app.state.obstacle_spawn_x)
 
     def test_exit_records_score_once(self):
         for event in (pygame.event.Event(pygame.KEYDOWN, key=pygame.K_F4, mod=pygame.KMOD_CTRL),
@@ -174,18 +176,16 @@ class GameTests(unittest.TestCase):
         self.assertEqual(app.view.obstacle_images[app.state.obstacle_name].get_size(), (39, 40))
         self.assertEqual(app.state.obstacle_y, 327)
         rect = app.view.obstacle_images[app.state.obstacle_name].get_rect(topleft=(60, app.state.obstacle_y))
-        hitbox = rect.inflate(*app.state.obstacle_hitbox_shrink)
-        self.assertGreater(hitbox.width, 0)
-        self.assertGreater(hitbox.height, 0)
+        self.assertGreater(app.view.obstacle_masks['sangjji.png'].count(), 0)
         self.assertEqual(rect.bottom, 367)
-        app.state.obstacle_x = 60
+        # 실제 윤곽 기준으로 이미 겹친 뒤가 아니라 접근 전에 점프한다.
+        app.state.obstacle_x = 120
         self.key(pygame.K_SPACE)
         app.update()
         self.assertFalse(app.state.game_over)
         # 점프하지 않으면 작은 상찌도 실제로 부딪혀야 한다.
         app.reset()
-        with patch.object(backend.random, 'choice', return_value='sangjji.png'):
-            app.state.spawn_obstacle()
+        app.state.spawn_obstacle('sangjji.png')
         app.state.obstacle_x = 60
         app.update()
         self.assertTrue(app.state.game_over)
@@ -250,7 +250,7 @@ class GameTests(unittest.TestCase):
         finally:
             os.chdir(original)
 
-    def test_day_night_boundaries_and_return(self):
+    def test_spring_night_and_summer_day_boundaries(self):
         app = self.app
         app.state.player_y = -1000
         # 실제 update 경로로 30초 전까지 진행한다.
@@ -265,7 +265,7 @@ class GameTests(unittest.TestCase):
         app.update_background(1.5)
         self.assertEqual(app.state.night_alpha, 255)
         self.assertEqual(pygame.image.tobytes(app.view.stage, 'RGB'),
-                         pygame.image.tobytes(app.view.night_stage, 'RGB'))
+                         pygame.image.tobytes(app.view.background_stages[1], 'RGB'))
         app.update_background(27)
         self.assertEqual(app.state.night_alpha, 255)
         app.update_background(1.5)
@@ -273,7 +273,7 @@ class GameTests(unittest.TestCase):
         app.update_background(1.5)
         self.assertEqual(app.state.night_alpha, 0)
         self.assertEqual(pygame.image.tobytes(app.view.stage, 'RGB'),
-                         pygame.image.tobytes(app.view.day_stage, 'RGB'))
+                         pygame.image.tobytes(app.view.background_stages[2], 'RGB'))
 
     def test_background_freeze_reset_and_long_frame(self):
         app = self.app
@@ -281,7 +281,7 @@ class GameTests(unittest.TestCase):
         app.update(31.5)
         self.assertAlmostEqual(app.state.background_elapsed, 31.5)
         self.assertIn(app.state.night_alpha, (127, 128))
-        self.assertAlmostEqual(app.state.background_x, -36)
+        self.assertAlmostEqual(app.state.background_x, -36 * 1.05)
         frozen = (app.state.background_elapsed, app.state.night_alpha,
                   pygame.image.tobytes(app.view.stage, 'RGB'))
         for flag in ('paused', 'game_over'):
@@ -293,7 +293,7 @@ class GameTests(unittest.TestCase):
         app.reset()
         self.assertEqual((app.state.background_elapsed, app.state.night_alpha, app.state.background_x), (0, 0, 0))
         self.assertEqual(pygame.image.tobytes(app.view.stage, 'RGB'),
-                         pygame.image.tobytes(app.view.day_stage, 'RGB'))
+                         pygame.image.tobytes(app.view.background_stages[0], 'RGB'))
 
     def test_fade_pixels_scroll_alignment_and_monotonicity(self):
         app = self.app
@@ -311,8 +311,8 @@ class GameTests(unittest.TestCase):
         app.update_background(31.5)
         app.state.background_x = -959
         app.draw()
-        expected = app.view.day_stage.copy()
-        overlay = app.view.night_stage.copy()
+        expected = app.view.background_stages[0].copy()
+        overlay = app.view.background_stages[1].copy()
         overlay.set_alpha(app.state.night_alpha)
         expected.blit(overlay, (0, 0))
         for x in (0, 240, 479):
@@ -341,9 +341,12 @@ class BackendTests(unittest.TestCase):
             record = Path(directory) / 'score.txt'
             sizes = {name: (80, game.OBSTACLE_HEIGHTS[name])
                      for name in game.OBSTACLE_FILES}
+            masks = dict(player_masks=[pygame.Mask((90, 120), fill=True) for _ in range(4)],
+                         obstacle_masks={name: pygame.Mask(size, fill=True)
+                                         for name, size in sizes.items()})
             with patch.object(pygame.display, 'set_mode', side_effect=AssertionError('화면 접근')), \
                  patch.object(pygame.image, 'load', side_effect=AssertionError('이미지 접근')):
-                state = backend.GameState((90, 120), sizes, 4, 960, record)
+                state = backend.GameState((90, 120), sizes, 4, 960, record, **masks)
                 state.obstacle_y = -1000
                 state.jump()
                 state.update(0.1)
@@ -354,7 +357,7 @@ class BackendTests(unittest.TestCase):
                 self.assertEqual((state.player_y, state.background_elapsed), frozen)
                 state.score = 42
                 state.stop()
-                restored = backend.GameState((90, 120), sizes, 4, 960, record)
+                restored = backend.GameState((90, 120), sizes, 4, 960, record, **masks)
                 self.assertEqual(restored.high_score, 42)
 
 

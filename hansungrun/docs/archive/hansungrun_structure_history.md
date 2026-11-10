@@ -67,8 +67,8 @@
 - 검사 실행: `python -B -m unittest -v test_game09`
 - 게임 코드: game09.py
 - 회귀 검사: test_game09.py
-- 쉬운 공부 노트: [GAME09_STUDY.txt](GAME09_STUDY.txt) — 오늘 작업한 코드의 원리와 핵심 줄을 초등학생 눈높이로 설명한 UTF-8 메모장 파일
-- 화면 미리보기: [GAME09_PREVIEW.png](GAME09_PREVIEW.png) — 4개 다리 포즈와 3종 장애물의 화면을 모은 정지 이미지. 점수는 예시 값이며 실제 플레이 결과가 아니다.
+- 쉬운 공부 노트: [GAME09_STUDY.txt](../../txt/GAME09_STUDY.txt) — 오늘 작업한 코드의 원리와 핵심 줄을 초등학생 눈높이로 설명한 UTF-8 메모장 파일
+- 화면 미리보기: [GAME09_PREVIEW.png](../../image/이미지자료/GAME09_PREVIEW.png) — 4개 다리 포즈와 3종 장애물의 화면을 모은 정지 이미지. 점수는 예시 값이며 실제 플레이 결과가 아니다.
 - 최고점수: game09.py 옆 high_score.txt. 기존 기록은 유지하고 테스트는 별도의 임시 저장 파일을 사용한다.
 
 ## 2. 현재 동작

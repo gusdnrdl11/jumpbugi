@@ -1,6 +1,8 @@
 # 한성런 학습 노트
 
-상세 입문 설명은 [쉬운 설명 TXT](게임구조_쉬운설명.txt), 실제 배치는 [ARCHITECTURE](ARCHITECTURE.md)에 있습니다.
+> 사람을 위한 학습 자료입니다. AI는 일반 프로젝트 대화에서 이 문서를 참조하지 않습니다. 세부 기준은 [AGENTS](../AGENTS.md)를 따릅니다.
+
+상세 입문 설명은 [쉬운 설명 TXT](../txt/게임구조_쉬운설명.txt), 실제 배치는 [ARCHITECTURE](ARCHITECTURE.md)에 있습니다.
 
 ## 먼저 기억할 역할
 

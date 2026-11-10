@@ -1,6 +1,6 @@
-﻿# 1. 한성런 기획 및 현재 구조
+# 1. 한성런 기획 및 현재 구조
 
-검토 기준: 2026-11-07, [prototype_game.py](prototype_game.py).
+검토 기준: 2026-11-07 당시 prototype_game.py(과거 구현). 현재 진입점은 [main.py](../../main.py)다.
 
 ## 게임 목표
 
