@@ -24,6 +24,16 @@ if __package__:
         SPEED_INCREASE_RATIO,
         CHICKEN_UNLOCK_SECONDS,
         CHICKEN_TYPES,
+        CHICKEN_GROUND_OFFSET,
+        HANSUNGCAT_TYPES,
+        HANSUNGCAT_UNLOCK_SECONDS,
+        HANSUNGCAT_PATTERNS,
+        SANGJJI_TYPES,
+        SANGJJI_CLUSTER_TYPES,
+        SANGJJI_UNLOCK_SECONDS,
+        SANGJJI_GROUND_OFFSET,
+        SANGJJI_BURROW_DISTANCE,
+        SANGJJI_PATTERNS,
         FLYING_HEAD_GAP,
         OBSTACLE_FRAME_TICKS,
         OBSTACLE_RECOVERY_SECONDS,
@@ -53,6 +63,16 @@ else:
         SPEED_INCREASE_RATIO,
         CHICKEN_UNLOCK_SECONDS,
         CHICKEN_TYPES,
+        CHICKEN_GROUND_OFFSET,
+        HANSUNGCAT_TYPES,
+        HANSUNGCAT_UNLOCK_SECONDS,
+        HANSUNGCAT_PATTERNS,
+        SANGJJI_TYPES,
+        SANGJJI_CLUSTER_TYPES,
+        SANGJJI_UNLOCK_SECONDS,
+        SANGJJI_GROUND_OFFSET,
+        SANGJJI_BURROW_DISTANCE,
+        SANGJJI_PATTERNS,
         FLYING_HEAD_GAP,
         OBSTACLE_FRAME_TICKS,
         OBSTACLE_RECOVERY_SECONDS,
@@ -113,7 +133,7 @@ class GameState:
 
 
     def spawn_obstacle(self, name=None):
-        """첫 봄에는 정지 이미지 장애물만, 이후에는 날갯짓 유형도 허용한다."""
+        """여름에 날갯짓, 가을에 한성캣, 겨울에 새 상찌와 묶음 장애물을 해금한다."""
         if name is not None:
             self.obstacle_name = name
         elif self.first_obstacle:
@@ -121,21 +141,41 @@ class GameState:
         else:
             if not self.chicken_obstacles_enabled:
                 self.pattern_queue = [kind for kind in self.pattern_queue if kind not in CHICKEN_TYPES]
+            if not self.hansungcat_obstacles_enabled:
+                self.pattern_queue = [kind for kind in self.pattern_queue if kind not in HANSUNGCAT_TYPES]
+            if not self.sangjji_obstacles_enabled:
+                self.pattern_queue = [kind for kind in self.pattern_queue if kind not in SANGJJI_TYPES]
             if not self.pattern_queue:
                 pool = GROUND_PATTERNS
                 if self.chicken_obstacles_enabled:
                     pool += SUMMER_PATTERNS
+                if self.hansungcat_obstacles_enabled:
+                    pool += HANSUNGCAT_PATTERNS
+                if self.sangjji_obstacles_enabled:
+                    pool += SANGJJI_PATTERNS
                 pool = [pattern for pattern in pool if all(
                     kind in self.obstacle_sizes and (self.chicken_obstacles_enabled or kind not in CHICKEN_TYPES)
+                    and (self.hansungcat_obstacles_enabled or kind not in HANSUNGCAT_TYPES)
+                    and (self.sangjji_obstacles_enabled or kind not in SANGJJI_TYPES)
                     for kind in pattern)]
                 self.current_pattern = random.choice(pool)
                 self.pattern_queue = list(self.current_pattern)
             self.obstacle_name = self.pattern_queue.pop(0)
+        # 겨울 이후 기본 상찌 순서도 한 번에 넘는 2·3마리 묶음 중 하나로 바꾼다.
+        # 명시적인 이름 지정은 검증용으로 유지한다.
+        if name is None and self.sangjji_obstacles_enabled and self.obstacle_name == 'sangjji.png':
+            clusters = [kind for kind in SANGJJI_CLUSTER_TYPES if kind in self.obstacle_sizes]
+            if clusters:
+                self.obstacle_name = random.choice(clusters)
         self.obstacle_size = self.obstacle_sizes[self.obstacle_name]
         # 작은 상찌도 공중에 뜨지 않게 그림의 아래쪽을 같은 바닥에 맞춘다.
         self.obstacle_y = SCREEN_SIZE[1] - self.obstacle_size[1] + OBSTACLE_GROUND_OFFSET
         if self.obstacle_is_flying:
             self.obstacle_y = self.ground_y - FLYING_HEAD_GAP - self.obstacle_size[1]
+        elif self.obstacle_name in CHICKEN_TYPES:
+            self.obstacle_y = SCREEN_SIZE[1] - self.obstacle_size[1] + CHICKEN_GROUND_OFFSET
+        elif self.obstacle_name == 'sangjji.png' or self.obstacle_name in SANGJJI_TYPES:
+            self.obstacle_y = SCREEN_SIZE[1] - self.obstacle_size[1] + SANGJJI_GROUND_OFFSET
         # 한 마리가 화면을 완전히 벗어난 뒤 다음 마리를 만든다. 다음 5% 가속도 여유에 포함.
         self.obstacle_spawn_x = (SCREEN_SIZE[0] if self.first_obstacle else max(
             SCREEN_SIZE[0], self.player_size[0] + OBSTACLE_SPEED * PHYSICS_HZ
@@ -150,12 +190,23 @@ class GameState:
         return self.background_elapsed + 1e-9 >= CHICKEN_UNLOCK_SECONDS
 
     @property
+    def hansungcat_obstacles_enabled(self):
+        return self.background_elapsed + 1e-9 >= HANSUNGCAT_UNLOCK_SECONDS
+
+    @property
+    def sangjji_obstacles_enabled(self):
+        return self.background_elapsed + 1e-9 >= SANGJJI_UNLOCK_SECONDS
+
+    @property
     def obstacle_is_flying(self):
         return self.obstacle_name.endswith('_flying')
 
     @property
     def obstacle_frame_index(self):
         frames = self.obstacle_frame_masks.get(self.obstacle_name)
+        if frames and self.obstacle_name == 'sangjji_burrow':
+            progress = min(1.0, max(0.0, (SCREEN_SIZE[0] - self.obstacle_x) / SANGJJI_BURROW_DISTANCE))
+            return int(progress * (len(frames) - 1))
         return int(self.obstacle_animation_tick // OBSTACLE_FRAME_TICKS) % len(frames) if frames else 0
 
 

@@ -9,6 +9,10 @@ PHYSICS_HZ = 60
 CHARACTER_HEIGHT = 120
 PLAYER_GROUND_OFFSET = 2
 OBSTACLE_GROUND_OFFSET = 7
+# 지상 날갯짓 캐릭터의 발 전체가 화면 안에 보이도록 바닥에서 2픽셀 띄운다.
+CHICKEN_GROUND_OFFSET = -2
+# 작은 상찌도 발과 꼬리가 화면 아래로 잘리지 않게 올린다.
+SANGJJI_GROUND_OFFSET = -2
 OBSTACLE_SPEED = 6
 BACKGROUND_SPEED = OBSTACLE_SPEED
 JUMP_SPEED = -15
@@ -39,6 +43,19 @@ OBSTACLE_FILES = ('hansungcat.png', 'ggoggoandgguggu.png', 'sangjji.png')
 # 장애물마다 키를 정하는 표다. 상찌는 120의 1/3인 40픽셀로 작게 보여 준다.
 OBSTACLE_HEIGHTS = {name: (CHARACTER_HEIGHT // 3 if name == 'sangjji.png'
                            else CHARACTER_HEIGHT) for name in OBSTACLE_FILES}
+HANSUNGCAT_TYPES = ('hansungcat_2.png', 'hansungcat_3.png', 'hansungcat_4.png')
+# 두 번째 첨부(_3)는 원본 비율로 표시해 기존 캣보다 넓은 큰 장애물로 유지한다.
+OBSTACLE_HEIGHTS.update({name: CHARACTER_HEIGHT for name in HANSUNGCAT_TYPES})
+HANSUNGCAT_UNLOCK_SECONDS = 4 * DAY_NIGHT_INTERVAL  # 첫 가을부터 이후 봄에도 계속 허용.
+SANGJJI_CLUSTER_TYPES = ('sangjji_pair', 'sangjji_triple')
+SANGJJI_TYPES = ('sangjji_2.png', 'sangjji_burrow') + SANGJJI_CLUSTER_TYPES
+SANGJJI_UNLOCK_SECONDS = 6 * DAY_NIGHT_INTERVAL  # 첫 겨울부터 다음 봄에도 계속 허용.
+SANGJJI_CLUSTER_GAP = 3
+SANGJJI_BURROW_SIZE = (112, 64)
+# 화면 진입부터 x=180까지 땅을 파고 들어간 뒤에는 구덩이로 남는다.
+SANGJJI_BURROW_DISTANCE = 300
+OBSTACLE_HEIGHTS.update({name: (SANGJJI_BURROW_SIZE[1] if name == 'sangjji_burrow'
+                               else CHARACTER_HEIGHT // 3) for name in SANGJJI_TYPES})
 CHICKEN_TYPES = ('chicken_white_ground', 'chicken_brown_ground',
                  'chicken_white_flying', 'chicken_brown_flying')
 OBSTACLE_HEIGHTS.update({name: (80 if name.endswith('flying') else 96) for name in CHICKEN_TYPES})
@@ -58,4 +75,16 @@ SUMMER_PATTERNS = (
     ('sangjji.png', 'chicken_brown_flying', 'chicken_white_ground'),
     ('hansungcat.png', 'chicken_white_flying', 'chicken_brown_ground'),
     ('chicken_brown_flying', 'chicken_white_flying', 'sangjji.png'),
+)
+HANSUNGCAT_PATTERNS = (
+    ('hansungcat_2.png', 'sangjji.png'),
+    ('hansungcat_3.png', 'hansungcat_2.png'),
+    ('hansungcat_4.png', 'chicken_white_flying', 'sangjji.png'),
+    ('chicken_brown_ground', 'hansungcat_4.png', 'hansungcat_3.png'),
+)
+SANGJJI_PATTERNS = (
+    ('sangjji_2.png', 'sangjji_burrow'),
+    ('sangjji_burrow', 'sangjji.png'),
+    ('sangjji_pair', 'chicken_white_flying'),
+    ('sangjji_triple', 'sangjji_2.png'),
 )

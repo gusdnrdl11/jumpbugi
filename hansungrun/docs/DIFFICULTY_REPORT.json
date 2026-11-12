@@ -20,21 +20,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 92,
-          "max_x": 280,
-          "window_ms": 522
+          "min_x": 98,
+          "max_x": 278,
+          "window_ms": 500
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 124,
+          "max_x": 214,
+          "window_ms": 250
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 106,
+          "max_x": 120,
+          "window_ms": 39
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 114,
+          "max_x": 194,
+          "window_ms": 222
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 108,
-          "max_x": 228,
-          "window_ms": 333
+          "min_x": 112,
+          "max_x": 224,
+          "window_ms": 311
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 108,
-          "max_x": 228,
-          "window_ms": 333
+          "min_x": 112,
+          "max_x": 224,
+          "window_ms": 311
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -47,6 +65,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 889
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 104,
+          "max_x": 278,
+          "window_ms": 483
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 98,
+          "max_x": 236,
+          "window_ms": 383
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 98,
+          "max_x": 194,
+          "window_ms": 267
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 96,
+          "max_x": 212,
+          "window_ms": 322
         }
       }
     },
@@ -68,21 +110,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 94,
-          "max_x": 294,
-          "window_ms": 529
+          "min_x": 100,
+          "max_x": 292,
+          "window_ms": 508
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 126,
+          "max_x": 226,
+          "window_ms": 265
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 108,
+          "max_x": 134,
+          "window_ms": 69
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 116,
+          "max_x": 208,
+          "window_ms": 243
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 110,
-          "max_x": 242,
-          "window_ms": 349
+          "min_x": 114,
+          "max_x": 236,
+          "window_ms": 323
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 110,
-          "max_x": 240,
-          "window_ms": 344
+          "min_x": 114,
+          "max_x": 236,
+          "window_ms": 323
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -95,6 +155,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 847
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 104,
+          "max_x": 292,
+          "window_ms": 497
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 250,
+          "window_ms": 397
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 208,
+          "window_ms": 286
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 96,
+          "max_x": 226,
+          "window_ms": 344
         }
       }
     },
@@ -116,21 +200,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 94,
-          "max_x": 310,
-          "window_ms": 544
+          "min_x": 100,
+          "max_x": 306,
+          "window_ms": 519
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 128,
+          "max_x": 238,
+          "window_ms": 277
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 110,
+          "max_x": 148,
+          "window_ms": 96
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 118,
+          "max_x": 224,
+          "window_ms": 267
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 110,
-          "max_x": 256,
-          "window_ms": 368
+          "min_x": 114,
+          "max_x": 250,
+          "window_ms": 343
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 112,
-          "max_x": 256,
-          "window_ms": 363
+          "min_x": 116,
+          "max_x": 250,
+          "window_ms": 338
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -143,6 +245,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 806
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 106,
+          "max_x": 306,
+          "window_ms": 504
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 264,
+          "window_ms": 413
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 222,
+          "window_ms": 307
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 96,
+          "max_x": 242,
+          "window_ms": 368
         }
       }
     },
@@ -164,21 +290,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 94,
-          "max_x": 326,
-          "window_ms": 557
+          "min_x": 100,
+          "max_x": 322,
+          "window_ms": 533
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 130,
+          "max_x": 252,
+          "window_ms": 293
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 112,
+          "max_x": 162,
+          "window_ms": 120
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 120,
+          "max_x": 240,
+          "window_ms": 288
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 112,
-          "max_x": 272,
-          "window_ms": 384
+          "min_x": 116,
+          "max_x": 266,
+          "window_ms": 360
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 112,
-          "max_x": 270,
-          "window_ms": 379
+          "min_x": 118,
+          "max_x": 266,
+          "window_ms": 355
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -191,6 +335,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 768
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 106,
+          "max_x": 322,
+          "window_ms": 518
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 280,
+          "window_ms": 432
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 238,
+          "window_ms": 331
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 96,
+          "max_x": 258,
+          "window_ms": 389
         }
       }
     },
@@ -212,21 +380,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 94,
-          "max_x": 342,
-          "window_ms": 567
+          "min_x": 100,
+          "max_x": 338,
+          "window_ms": 544
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 134,
+          "max_x": 266,
+          "window_ms": 302
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 114,
+          "max_x": 178,
+          "window_ms": 146
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 122,
+          "max_x": 256,
+          "window_ms": 306
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 112,
-          "max_x": 288,
-          "window_ms": 402
+          "min_x": 118,
+          "max_x": 282,
+          "window_ms": 375
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 114,
-          "max_x": 286,
-          "window_ms": 393
+          "min_x": 120,
+          "max_x": 282,
+          "window_ms": 370
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -239,6 +425,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 731
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 106,
+          "max_x": 340,
+          "window_ms": 535
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 296,
+          "window_ms": 448
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 254,
+          "window_ms": 352
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 96,
+          "max_x": 274,
+          "window_ms": 407
         }
       }
     },
@@ -260,21 +470,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 94,
-          "max_x": 360,
-          "window_ms": 579
+          "min_x": 100,
+          "max_x": 356,
+          "window_ms": 557
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 136,
+          "max_x": 282,
+          "window_ms": 318
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 116,
+          "max_x": 194,
+          "window_ms": 170
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 124,
+          "max_x": 274,
+          "window_ms": 326
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 114,
-          "max_x": 304,
-          "window_ms": 414
+          "min_x": 120,
+          "max_x": 298,
+          "window_ms": 387
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 116,
-          "max_x": 304,
-          "window_ms": 409
+          "min_x": 122,
+          "max_x": 298,
+          "window_ms": 383
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -287,6 +515,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 696
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 108,
+          "max_x": 358,
+          "window_ms": 544
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 314,
+          "window_ms": 466
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 272,
+          "window_ms": 374
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 96,
+          "max_x": 292,
+          "window_ms": 427
         }
       }
     },
@@ -308,21 +560,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 96,
-          "max_x": 378,
-          "window_ms": 585
+          "min_x": 102,
+          "max_x": 374,
+          "window_ms": 564
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 138,
+          "max_x": 298,
+          "window_ms": 332
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 118,
+          "max_x": 210,
+          "window_ms": 191
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 128,
+          "max_x": 292,
+          "window_ms": 340
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 116,
-          "max_x": 322,
-          "window_ms": 427
+          "min_x": 122,
+          "max_x": 316,
+          "window_ms": 402
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 118,
-          "max_x": 320,
-          "window_ms": 419
+          "min_x": 124,
+          "max_x": 316,
+          "window_ms": 398
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -335,6 +605,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 663
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 108,
+          "max_x": 376,
+          "window_ms": 556
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 102,
+          "max_x": 330,
+          "window_ms": 473
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 102,
+          "max_x": 288,
+          "window_ms": 386
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 98,
+          "max_x": 310,
+          "window_ms": 439
         }
       }
     },
@@ -356,21 +650,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 96,
-          "max_x": 398,
-          "window_ms": 596
+          "min_x": 102,
+          "max_x": 392,
+          "window_ms": 572
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 142,
+          "max_x": 314,
+          "window_ms": 340
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 120,
+          "max_x": 228,
+          "window_ms": 213
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 130,
+          "max_x": 312,
+          "window_ms": 359
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 116,
-          "max_x": 340,
-          "window_ms": 442
+          "min_x": 124,
+          "max_x": 334,
+          "window_ms": 415
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 120,
-          "max_x": 340,
-          "window_ms": 434
+          "min_x": 126,
+          "max_x": 334,
+          "window_ms": 411
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -383,6 +695,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 632
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 108,
+          "max_x": 396,
+          "window_ms": 569
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 102,
+          "max_x": 350,
+          "window_ms": 490
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 102,
+          "max_x": 308,
+          "window_ms": 407
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 98,
+          "max_x": 330,
+          "window_ms": 458
         }
       }
     },
@@ -404,21 +740,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 96,
+          "min_x": 102,
           "max_x": 400,
-          "window_ms": 572
+          "window_ms": 560
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 144,
+          "max_x": 332,
+          "window_ms": 353
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 124,
+          "max_x": 248,
+          "window_ms": 233
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 132,
+          "max_x": 332,
+          "window_ms": 376
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 118,
-          "max_x": 360,
-          "window_ms": 455
+          "min_x": 126,
+          "max_x": 352,
+          "window_ms": 425
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 122,
-          "max_x": 358,
-          "window_ms": 444
+          "min_x": 130,
+          "max_x": 352,
+          "window_ms": 417
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -431,6 +785,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 602
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 110,
+          "max_x": 400,
+          "window_ms": 545
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 102,
+          "max_x": 370,
+          "window_ms": 504
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 102,
+          "max_x": 328,
+          "window_ms": 425
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 98,
+          "max_x": 350,
+          "window_ms": 474
         }
       }
     },
@@ -452,21 +830,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 96,
+          "min_x": 104,
           "max_x": 400,
-          "window_ms": 544
+          "window_ms": 530
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 148,
+          "max_x": 350,
+          "window_ms": 362
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 126,
+          "max_x": 268,
+          "window_ms": 254
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 136,
+          "max_x": 350,
+          "window_ms": 383
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 120,
-          "max_x": 380,
-          "window_ms": 466
+          "min_x": 128,
+          "max_x": 372,
+          "window_ms": 437
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 124,
-          "max_x": 380,
-          "window_ms": 458
+          "min_x": 132,
+          "max_x": 372,
+          "window_ms": 430
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -479,6 +875,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 573
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 110,
+          "max_x": 400,
+          "window_ms": 519
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 104,
+          "max_x": 390,
+          "window_ms": 512
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 104,
+          "max_x": 348,
+          "window_ms": 437
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 98,
+          "max_x": 372,
+          "window_ms": 491
         }
       }
     },
@@ -500,21 +920,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 98,
+          "min_x": 104,
           "max_x": 400,
-          "window_ms": 515
+          "window_ms": 505
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 150,
+          "max_x": 370,
+          "window_ms": 375
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 128,
+          "max_x": 288,
+          "window_ms": 273
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 138,
+          "max_x": 370,
+          "window_ms": 396
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 122,
-          "max_x": 400,
-          "window_ms": 474
+          "min_x": 130,
+          "max_x": 394,
+          "window_ms": 450
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 126,
-          "max_x": 400,
-          "window_ms": 467
+          "min_x": 134,
+          "max_x": 394,
+          "window_ms": 443
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -527,6 +965,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 546
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 112,
+          "max_x": 400,
+          "window_ms": 491
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 104,
+          "max_x": 400,
+          "window_ms": 505
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 104,
+          "max_x": 370,
+          "window_ms": 454
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 98,
+          "max_x": 394,
+          "window_ms": 505
         }
       }
     },
@@ -548,21 +1010,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 98,
+          "min_x": 106,
           "max_x": 400,
-          "window_ms": 490
+          "window_ms": 477
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 154,
+          "max_x": 390,
+          "window_ms": 383
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 132,
+          "max_x": 310,
+          "window_ms": 289
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 142,
+          "max_x": 392,
+          "window_ms": 406
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 126,
+          "min_x": 134,
           "max_x": 400,
-          "window_ms": 445
+          "window_ms": 432
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 130,
+          "min_x": 138,
           "max_x": 400,
-          "window_ms": 439
+          "window_ms": 426
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -575,6 +1055,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 520
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 112,
+          "max_x": 400,
+          "window_ms": 468
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 106,
+          "max_x": 400,
+          "window_ms": 477
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 106,
+          "max_x": 392,
+          "window_ms": 464
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 98,
+          "max_x": 400,
+          "window_ms": 490
         }
       }
     },
@@ -596,21 +1100,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 100,
+          "min_x": 106,
           "max_x": 400,
-          "window_ms": 464
+          "window_ms": 455
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 158,
+          "max_x": 400,
+          "window_ms": 374
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 134,
+          "max_x": 332,
+          "window_ms": 306
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 146,
+          "max_x": 400,
+          "window_ms": 393
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 128,
+          "min_x": 138,
           "max_x": 400,
-          "window_ms": 421
+          "window_ms": 405
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 132,
+          "min_x": 140,
           "max_x": 400,
-          "window_ms": 415
+          "window_ms": 402
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -623,6 +1145,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 495
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 114,
+          "max_x": 400,
+          "window_ms": 442
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 106,
+          "max_x": 400,
+          "window_ms": 455
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 106,
+          "max_x": 400,
+          "window_ms": 455
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 98,
+          "max_x": 400,
+          "window_ms": 467
         }
       }
     },
@@ -644,21 +1190,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 100,
+          "min_x": 108,
           "max_x": 400,
-          "window_ms": 442
+          "window_ms": 430
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 162,
+          "max_x": 400,
+          "window_ms": 351
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 138,
+          "max_x": 356,
+          "window_ms": 321
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 148,
+          "max_x": 400,
+          "window_ms": 371
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 132,
+          "min_x": 140,
           "max_x": 400,
-          "window_ms": 395
+          "window_ms": 383
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 136,
+          "min_x": 144,
           "max_x": 400,
-          "window_ms": 389
+          "window_ms": 377
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -671,6 +1235,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 471
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 114,
+          "max_x": 400,
+          "window_ms": 421
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 108,
+          "max_x": 400,
+          "window_ms": 430
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 108,
+          "max_x": 400,
+          "window_ms": 430
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 98,
+          "max_x": 400,
+          "window_ms": 445
         }
       }
     },
@@ -692,21 +1280,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 100,
+          "min_x": 108,
           "max_x": 400,
-          "window_ms": 421
+          "window_ms": 410
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 166,
+          "max_x": 400,
+          "window_ms": 328
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 142,
+          "max_x": 382,
+          "window_ms": 337
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 152,
+          "max_x": 400,
+          "window_ms": 348
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 134,
+          "min_x": 144,
           "max_x": 400,
-          "window_ms": 373
+          "window_ms": 359
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 138,
+          "min_x": 148,
           "max_x": 400,
-          "window_ms": 368
+          "window_ms": 354
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -719,6 +1325,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 449
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 116,
+          "max_x": 400,
+          "window_ms": 398
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 108,
+          "max_x": 400,
+          "window_ms": 410
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 108,
+          "max_x": 400,
+          "window_ms": 410
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 98,
+          "max_x": 400,
+          "window_ms": 424
         }
       }
     },
@@ -740,21 +1370,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 102,
+          "min_x": 110,
           "max_x": 400,
-          "window_ms": 398
+          "window_ms": 387
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 170,
+          "max_x": 400,
+          "window_ms": 307
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 146,
+          "max_x": 400,
+          "window_ms": 339
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 156,
+          "max_x": 400,
+          "window_ms": 326
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 138,
+          "min_x": 148,
           "max_x": 400,
-          "window_ms": 350
+          "window_ms": 337
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 142,
+          "min_x": 152,
           "max_x": 400,
-          "window_ms": 345
+          "window_ms": 331
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -767,6 +1415,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 428
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 118,
+          "max_x": 400,
+          "window_ms": 377
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 110,
+          "max_x": 400,
+          "window_ms": 387
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 110,
+          "max_x": 400,
+          "window_ms": 387
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 400,
+          "window_ms": 401
         }
       }
     },
@@ -788,21 +1460,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 104,
+          "min_x": 112,
           "max_x": 400,
-          "window_ms": 377
+          "window_ms": 366
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 174,
+          "max_x": 400,
+          "window_ms": 288
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 150,
+          "max_x": 400,
+          "window_ms": 318
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 160,
+          "max_x": 400,
+          "window_ms": 305
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 142,
+          "min_x": 152,
           "max_x": 400,
-          "window_ms": 328
+          "window_ms": 316
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 146,
+          "min_x": 156,
           "max_x": 400,
-          "window_ms": 323
+          "window_ms": 310
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -815,6 +1505,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 407
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 118,
+          "max_x": 400,
+          "window_ms": 359
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 112,
+          "max_x": 400,
+          "window_ms": 366
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 112,
+          "max_x": 400,
+          "window_ms": 366
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 400,
+          "window_ms": 382
         }
       }
     },
@@ -836,21 +1550,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 104,
+          "min_x": 112,
           "max_x": 400,
-          "window_ms": 359
+          "window_ms": 349
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 180,
+          "max_x": 400,
+          "window_ms": 267
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 154,
+          "max_x": 400,
+          "window_ms": 298
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 164,
+          "max_x": 400,
+          "window_ms": 286
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 144,
+          "min_x": 156,
           "max_x": 400,
-          "window_ms": 310
+          "window_ms": 296
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 148,
+          "min_x": 160,
           "max_x": 400,
-          "window_ms": 305
+          "window_ms": 291
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -863,6 +1595,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 388
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 120,
+          "max_x": 400,
+          "window_ms": 339
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 112,
+          "max_x": 400,
+          "window_ms": 349
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 112,
+          "max_x": 400,
+          "window_ms": 349
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 400,
+          "window_ms": 364
         }
       }
     },
@@ -884,21 +1640,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 104,
+          "min_x": 114,
           "max_x": 400,
-          "window_ms": 342
+          "window_ms": 330
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 184,
+          "max_x": 400,
+          "window_ms": 249
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 158,
+          "max_x": 400,
+          "window_ms": 279
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 170,
+          "max_x": 400,
+          "window_ms": 265
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 148,
+          "min_x": 162,
           "max_x": 400,
-          "window_ms": 291
+          "window_ms": 275
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 152,
+          "min_x": 164,
           "max_x": 400,
-          "window_ms": 286
+          "window_ms": 272
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -911,6 +1685,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 369
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 122,
+          "max_x": 400,
+          "window_ms": 321
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 114,
+          "max_x": 400,
+          "window_ms": 330
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 114,
+          "max_x": 400,
+          "window_ms": 330
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 400,
+          "window_ms": 346
         }
       }
     },
@@ -932,21 +1730,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 106,
+          "min_x": 116,
           "max_x": 400,
-          "window_ms": 323
+          "window_ms": 312
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 190,
+          "max_x": 400,
+          "window_ms": 231
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 162,
+          "max_x": 400,
+          "window_ms": 262
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 174,
+          "max_x": 400,
+          "window_ms": 248
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 152,
+          "min_x": 166,
           "max_x": 400,
-          "window_ms": 273
+          "window_ms": 257
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 156,
+          "min_x": 168,
           "max_x": 400,
-          "window_ms": 268
+          "window_ms": 255
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -959,6 +1775,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 352
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 124,
+          "max_x": 400,
+          "window_ms": 303
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 116,
+          "max_x": 400,
+          "window_ms": 312
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 116,
+          "max_x": 400,
+          "window_ms": 312
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 400,
+          "window_ms": 330
         }
       }
     },
@@ -980,21 +1820,39 @@
         },
         "sangjji.png": {
           "action": "jump",
-          "min_x": 106,
+          "min_x": 118,
           "max_x": 400,
-          "window_ms": 308
+          "window_ms": 295
+        },
+        "hansungcat_2.png": {
+          "action": "jump",
+          "min_x": 196,
+          "max_x": 400,
+          "window_ms": 214
+        },
+        "hansungcat_3.png": {
+          "action": "jump",
+          "min_x": 168,
+          "max_x": 400,
+          "window_ms": 243
+        },
+        "hansungcat_4.png": {
+          "action": "jump",
+          "min_x": 180,
+          "max_x": 400,
+          "window_ms": 230
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 156,
+          "min_x": 170,
           "max_x": 400,
-          "window_ms": 255
+          "window_ms": 241
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 160,
+          "min_x": 174,
           "max_x": 400,
-          "window_ms": 251
+          "window_ms": 237
         },
         "chicken_white_flying": {
           "action": "stay_grounded",
@@ -1007,6 +1865,30 @@
           "min_x": 80,
           "max_x": 400,
           "window_ms": 335
+        },
+        "sangjji_2.png": {
+          "action": "jump",
+          "min_x": 126,
+          "max_x": 400,
+          "window_ms": 287
+        },
+        "sangjji_pair": {
+          "action": "jump",
+          "min_x": 118,
+          "max_x": 400,
+          "window_ms": 295
+        },
+        "sangjji_triple": {
+          "action": "jump",
+          "min_x": 118,
+          "max_x": 400,
+          "window_ms": 295
+        },
+        "sangjji_burrow": {
+          "action": "jump",
+          "min_x": 100,
+          "max_x": 400,
+          "window_ms": 314
         }
       }
     }
@@ -1016,25 +1898,25 @@
       "hz": 30,
       "survived_seconds": 600.0,
       "game_over": false,
-      "jumps": 291,
-      "score": 4290,
-      "obstacle": "chicken_brown_ground"
+      "jumps": 293,
+      "score": 4230,
+      "obstacle": "chicken_white_flying"
     },
     {
       "hz": 60,
       "survived_seconds": 600.0,
       "game_over": false,
-      "jumps": 291,
-      "score": 4290,
-      "obstacle": "chicken_brown_ground"
+      "jumps": 294,
+      "score": 4230,
+      "obstacle": "chicken_white_flying"
     },
     {
       "hz": 120,
       "survived_seconds": 600.0,
       "game_over": false,
-      "jumps": 291,
-      "score": 4290,
-      "obstacle": "chicken_brown_ground"
+      "jumps": 296,
+      "score": 4230,
+      "obstacle": "chicken_white_flying"
     }
   ]
 }

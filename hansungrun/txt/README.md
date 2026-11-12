@@ -1,9 +1,11 @@
-# 보존 자료와 실행 데이터
+# 최고점수 데이터
 
-이 폴더의 텍스트 설명은 사람을 위한 학습·참고 자료입니다. AI는 사용자가 해당 자료를 명시적으로 다루도록 요청하지 않는 한 프로젝트 답변, 현재 사양 판단, 코드 수정의 근거로 참조하지 않습니다. [AI 안내](../AGENTS.md)를 따릅니다.
+이 폴더에는 게임이 사용하는 `high_score.txt`와 이 안내를 둡니다. 최고점수는 `config.HIGH_SCORE_PATH`가 가리키는 실제 실행 데이터이므로 임의 삭제하거나 초기화하지 않습니다. 테스트는 별도 임시 점수 파일을 사용합니다.
 
-- `high_score.txt`: 실제 최고점수 데이터. 실행에 사용하므로 보존합니다.
-- `게임구조_쉬운설명.txt`: 역할 분리를 설명하는 학습 자료. 현재 구현의 기준 문서는 아닙니다.
-- `GAME09_STUDY.txt`: 과거 코드 설명과 연습 문제. `prototype_game.py`, `md/` 등의 예전 경로와 API가 남아 있으므로 현재 실행 지침으로 사용하지 않습니다.
+문서는 역할별로 `docs/`에 모았습니다.
+
+- [STUDY_NOTES](../docs/STUDY_NOTES.md): 공부하면서 배운 내용. 기존 두 학습 TXT를 통합했습니다.
+- [ARCHITECTURE](../docs/ARCHITECTURE.md): 현재 한성런 구조.
+- [GAME_IDEA](../docs/GAME_IDEA.md): 게임 기획과 아이디어.
 
 현재 실행 안내는 [README](../README.md), 구조는 [ARCHITECTURE](../docs/ARCHITECTURE.md)에 있습니다.

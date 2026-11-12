@@ -1,4 +1,4 @@
-"""실제 출력 이미지의 알파 픽셀을 독립적으로 비교하는 충돌 검사."""
+"""알파 픽셀·마스크 충돌과 게임오버·재시작 검사."""
 import os
 import tempfile
 import unittest
@@ -152,6 +152,36 @@ class MaskCollisionTests(unittest.TestCase):
         expected = app.view.player_masks[0].overlap(
             app.view.obstacle_masks[state.obstacle_name], (-1, int(state.obstacle_y) - 222)) is not None
         self.assertEqual(state.collides_with_obstacle(), expected)
+
+
+class CollisionLifecycleTests(unittest.TestCase):
+    def setUp(self):
+        pygame.init()
+        self.addCleanup(pygame.quit)
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.record = Path(directory.name) / 'high_score.txt'
+        self.app = HansungRun(self.record)
+        pygame.event.clear()
+
+    def key(self, value):
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=value))
+        self.app.handle_events()
+
+    def test_collision_freeze_and_restart(self):
+        app = self.app
+        app.state.obstacle_x = 60
+        app.update()
+        self.assertTrue(app.state.game_over)
+        frozen = (app.state.background_x, app.state.obstacle_x, app.state.player_y, app.state.score)
+        self.key(pygame.K_SPACE)
+        app.update()
+        self.assertEqual(frozen, (app.state.background_x, app.state.obstacle_x, app.state.player_y, app.state.score))
+        self.key(pygame.K_RETURN)
+        self.assertFalse(app.state.game_over)
+        self.assertEqual((app.state.background_x, app.state.obstacle_x, app.state.score), (0, 480, 0))
+        self.assertEqual((app.state.player_y, app.state.velocity_y, app.state.is_jumping),
+                         (app.state.ground_y, 0, False))
 
 
 if __name__ == '__main__':

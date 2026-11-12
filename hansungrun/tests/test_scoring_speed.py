@@ -1,4 +1,4 @@
-"""생존 득점과 배경 전환 가속의 경계·정지·저장 회귀 검사."""
+"""생존 득점·통과 보너스·최고점수 저장과 배경 전환 가속 검사."""
 import os
 import tempfile
 import unittest
@@ -11,9 +11,11 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 if __package__ and __package__.startswith('hansungrun.'):
     from ..backend import GameState
+    from ..main import HansungRun
     from .. import config
 else:
     from backend import GameState
+    from main import HansungRun
     import config
 
 
@@ -98,6 +100,55 @@ class ScoringSpeedTests(unittest.TestCase):
         self.assertEqual(self.record.read_text(), '12')
         state.update(100)
         self.assertEqual(state.score, 12)
+
+
+class ScoringPersistenceTests(unittest.TestCase):
+    def setUp(self):
+        pygame.init()
+        self.addCleanup(pygame.quit)
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.record = Path(directory.name) / 'high_score.txt'
+        self.app = HansungRun(self.record)
+        pygame.event.clear()
+
+    def test_bonus_once_respawn_and_high_score_persistence(self):
+        app = self.app
+        self.assertEqual(app.state.high_score, 0)
+        self.assertFalse(self.record.exists())
+        app.state.obstacle_x = -app.view.obstacle_images[app.state.obstacle_name].get_width() + config.OBSTACLE_SPEED
+        app.update()
+        self.assertEqual((app.state.score, app.state.high_score), (10, 0))
+        self.assertFalse(self.record.exists())
+        app.update()
+        self.assertEqual(app.state.score, 10)
+        self.assertEqual(app.state.obstacle_x, app.state.obstacle_spawn_x)
+        self.assertFalse(app.state.passed)
+        # 실제 충돌로 판을 종료했을 때만 새 기록이 표시·저장된다.
+        app.state.obstacle_x = 60
+        app.update()
+        self.assertTrue(app.state.game_over)
+        self.assertEqual(app.state.high_score, 10)
+        app.reset()
+        self.assertEqual((app.state.score, app.state.high_score), (0, 10))
+        self.assertEqual(HansungRun(self.record).state.high_score, 10)
+        app.state.score = 5
+        app.state.record_high_score()
+        self.assertEqual(self.record.read_text(), '10')
+        app.state.score = 120
+        app.state.record_high_score()
+        self.assertEqual(HansungRun(self.record).state.high_score, 120)
+        self.assertFalse(self.record.with_suffix('.tmp').exists())
+
+    def test_exit_records_score_once(self):
+        for event in (pygame.event.Event(pygame.KEYDOWN, key=pygame.K_F4, mod=pygame.KMOD_CTRL),
+                      pygame.event.Event(pygame.QUIT)):
+            self.app.state.running = True
+            self.app.state.score += 10
+            pygame.event.post(event)
+            self.app.handle_events()
+            self.assertFalse(self.app.state.running)
+            self.assertEqual(int(self.record.read_text()), self.app.state.score)
 
 
 if __name__ == '__main__':

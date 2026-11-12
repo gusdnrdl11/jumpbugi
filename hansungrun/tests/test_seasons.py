@@ -12,9 +12,11 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 if __package__ and __package__.startswith('hansungrun.'):
     from .. import config
+    from ..assets import load_image
     from ..main import HansungRun
 else:
     import config
+    from assets import load_image
     from main import HansungRun
 
 
@@ -130,6 +132,99 @@ class SeasonCycleTests(unittest.TestCase):
                 self.app.draw()
                 self.app.update_background(1.5)
                 self.app.draw()
+
+
+class BackgroundTransitionTests(unittest.TestCase):
+    def setUp(self):
+        pygame.init()
+        self.addCleanup(pygame.quit)
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.record = Path(directory.name) / 'high_score.txt'
+        self.app = HansungRun(self.record)
+        pygame.event.clear()
+
+    def test_spring_night_and_summer_day_boundaries(self):
+        app = self.app
+        app.state.player_y = -1000
+        # 실제 update 경로로 30초 전까지 진행한다.
+        for _ in range(299):
+            app.update(0.1)
+        self.assertEqual(app.state.night_alpha, 0)
+        app.update(0.1)
+        self.assertAlmostEqual(app.state.background_elapsed, 30)
+        self.assertEqual(app.state.night_alpha, 0)
+        app.update_background(1.5)
+        self.assertIn(app.state.night_alpha, (127, 128))
+        app.update_background(1.5)
+        self.assertEqual(app.state.night_alpha, 255)
+        self.assertEqual(pygame.image.tobytes(app.view.stage, 'RGB'),
+                         pygame.image.tobytes(app.view.background_stages[1], 'RGB'))
+        app.update_background(27)
+        self.assertEqual(app.state.night_alpha, 255)
+        app.update_background(1.5)
+        self.assertIn(app.state.night_alpha, (127, 128))
+        app.update_background(1.5)
+        self.assertEqual(app.state.night_alpha, 0)
+        self.assertEqual(pygame.image.tobytes(app.view.stage, 'RGB'),
+                         pygame.image.tobytes(app.view.background_stages[2], 'RGB'))
+
+    def test_background_freeze_reset_and_long_frame(self):
+        app = self.app
+        app.state.player_y = -1000
+        app.update(31.5)
+        self.assertAlmostEqual(app.state.background_elapsed, 31.5)
+        self.assertIn(app.state.night_alpha, (127, 128))
+        self.assertAlmostEqual(app.state.background_x, -36 * 1.05)
+        frozen = (app.state.background_elapsed, app.state.night_alpha,
+                  pygame.image.tobytes(app.view.stage, 'RGB'))
+        for flag in ('paused', 'game_over'):
+            setattr(app.state, flag, True)
+            app.update(10)
+            self.assertEqual(frozen, (app.state.background_elapsed, app.state.night_alpha,
+                                     pygame.image.tobytes(app.view.stage, 'RGB')))
+            setattr(app.state, flag, False)
+        app.reset()
+        self.assertEqual((app.state.background_elapsed, app.state.night_alpha, app.state.background_x), (0, 0, 0))
+        self.assertEqual(pygame.image.tobytes(app.view.stage, 'RGB'),
+                         pygame.image.tobytes(app.view.background_stages[0], 'RGB'))
+
+    def test_fade_pixels_scroll_alignment_and_monotonicity(self):
+        app = self.app
+        app.state.player_y = -1000
+        app.state.obstacle_y = -1000
+        app.update_background(30)
+        values = []
+        for _ in range(30):
+            app.update_background(0.1)
+            values.append(app.state.night_alpha)
+        self.assertEqual(values, sorted(values))
+        self.assertEqual(values[-1], 255)
+        app.reset()
+        app.state.player_y = app.state.obstacle_y = -1000
+        app.update_background(31.5)
+        app.state.background_x = -959
+        app.draw()
+        expected = app.view.background_stages[0].copy()
+        overlay = app.view.background_stages[1].copy()
+        overlay.set_alpha(app.state.night_alpha)
+        expected.blit(overlay, (0, 0))
+        for x in (0, 240, 479):
+            source_x = (x + 959) % app.state.background_width
+            self.assertEqual(app.view.screen.get_at((x, 150)), expected.get_at((source_x, 150)))
+        self.assertIsNone(app.view.stage.get_alpha())
+
+    def test_seasonal_assets(self):
+        for season in ('spring', 'summer', 'autumn', 'winter'):
+            for time in ('morning', 'night'):
+                image = load_image(f'hansung_{season}_{time}.png')
+                self.assertEqual(image.get_size(), (2048, 768))
+                self.assertEqual(pygame.mask.from_surface(image).count(), 2048 * 768)
+        for time in ('morning', 'night'):
+            active = load_image(f'hansung_{time}.png')
+            spring = load_image(f'hansung_spring_{time}.png')
+            self.assertEqual(pygame.image.tobytes(active, 'RGB'),
+                             pygame.image.tobytes(spring, 'RGB'))
 
 
 if __name__ == '__main__':

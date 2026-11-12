@@ -1,12 +1,16 @@
 """프론트: 화면·이미지·글꼴·배경 혼합·출력."""
 import pygame
 if __package__:
-    from .assets import load_image, load_run_frames, load_chicken_frames, collision_mask
+    from .assets import (load_image, load_run_frames, load_chicken_frames,
+                         load_hansungcat_frames, load_sangjji_obstacles, collision_mask)
     from .config import (
         BACKGROUND_SIZE,
         BACKGROUND_FILES,
         CHARACTER_HEIGHT,
         CHICKEN_TYPES,
+        HANSUNGCAT_TYPES,
+        SANGJJI_BURROW_SIZE,
+        SANGJJI_CLUSTER_GAP,
         HUD_GAP,
         HUD_MARGIN,
         OBSTACLE_FILES,
@@ -15,12 +19,16 @@ if __package__:
         SCREEN_SIZE
     )
 else:
-    from assets import load_image, load_run_frames, load_chicken_frames, collision_mask
+    from assets import (load_image, load_run_frames, load_chicken_frames,
+                        load_hansungcat_frames, load_sangjji_obstacles, collision_mask)
     from config import (
         BACKGROUND_SIZE,
         BACKGROUND_FILES,
         CHARACTER_HEIGHT,
         CHICKEN_TYPES,
+        HANSUNGCAT_TYPES,
+        SANGJJI_BURROW_SIZE,
+        SANGJJI_CLUSTER_GAP,
         HUD_GAP,
         HUD_MARGIN,
         OBSTACLE_FILES,
@@ -50,11 +58,21 @@ class GameView:
             name: load_image(name, height=OBSTACLE_HEIGHTS[name]) for name in OBSTACLE_FILES
         }
         self.obstacle_frames = {name: [image] for name, image in self.obstacle_images.items()}
+        for name in HANSUNGCAT_TYPES:
+            self.obstacle_frames[name] = (load_hansungcat_frames(OBSTACLE_HEIGHTS[name])
+                                          if name == 'hansungcat_2.png' else
+                                          [load_image(name, height=OBSTACLE_HEIGHTS[name])])
+            self.obstacle_images[name] = self.obstacle_frames[name][0]
         chicken_sheet = load_image('ggoggoandgguggu_side.png')
         for name in CHICKEN_TYPES:
             self.obstacle_frames[name] = load_chicken_frames(
                 0 if 'white' in name else 1, OBSTACLE_HEIGHTS[name], chicken_sheet)
             self.obstacle_images[name] = self.obstacle_frames[name][0]
+        for name, frames in load_sangjji_obstacles(
+                self.obstacle_images['sangjji.png'], height=OBSTACLE_HEIGHTS['sangjji_2.png'],
+                burrow_size=SANGJJI_BURROW_SIZE, gap=SANGJJI_CLUSTER_GAP).items():
+            self.obstacle_frames[name] = frames
+            self.obstacle_images[name] = frames[0]
         # 크기 조절 후 한 번만 생성하며 실제 표시 프레임과 같은 마스크를 쓴다.
         self.player_masks = [collision_mask(frame) for frame in self.run_frames]
         self.obstacle_masks = {
