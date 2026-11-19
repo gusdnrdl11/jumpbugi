@@ -9,6 +9,7 @@ import json
 import random
 import sys
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
 
@@ -24,11 +25,21 @@ from frontend import GameView
 from main import JumpBugi
 
 
+@contextmanager
+def seeded_random(seed):
+    """장애물 선택과 개별 상찌 점프의 모든 난수를 같은 시드로 재현한다."""
+    generator = random.Random(seed)
+    with patch.object(backend.random, 'choice', side_effect=generator.choice), \
+         patch.object(backend.random, 'random', side_effect=generator.random), \
+         patch.object(backend.random, 'uniform', side_effect=generator.uniform):
+        yield
+
+
 def evaluate():
     pygame.init()
     try:
         view = GameView()
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory() as directory, seeded_random(20261111):
             def new_state():
                 return backend.GameState(
                     view.player_image.get_size(),
@@ -51,28 +62,37 @@ def evaluate():
                         state = new_state()
                         state.background_elapsed = stage * config.DAY_NIGHT_INTERVAL
                         state.spawn_obstacle(name)
+                        pass_points = state.obstacle_pass_bonus
                         state.obstacle_x = distance
-                        if not state.obstacle_is_flying:
+                        if state.obstacle_requires_jump:
                             state.jump()
                         for _ in range(240):
                             state.update(1 / 120)
-                            if state.game_over or state.score >= config.PASS_BONUS:
+                            if state.game_over or state.score >= pass_points:
                                 break
-                        if state.score >= config.PASS_BONUS and not state.game_over:
+                        if state.score >= pass_points and not state.game_over:
                             safe.append(distance)
                     windows[stage][name] = safe
                     row['obstacles'][name] = {
-                        'action': 'stay_grounded' if name.endswith('_flying') else 'jump',
+                        'action': ('pattern_dependent' if
+                                   (name in config.WAVE_IMAGE_FILES and stage * config.DAY_NIGHT_INTERVAL >= config.WAVE_JUMP_UNLOCK_SECONDS)
+                                   or name == 'hsucat_run.png'
+                                   or name.endswith('_flying')
+                                   or (name in config.SJ_SINGLE_JUMP_TYPES + config.SJ_CLUSTER_TYPES
+                                       and stage * config.DAY_NIGHT_INTERVAL >= config.SJ_JUMP_UNLOCK_SECONDS)
+                                   else 'stay_grounded' if name == 'sj_burrow' else 'jump'),
+                        'pass_points': pass_points,
                         'min_x': min(safe) if safe else None,
                         'max_x': max(safe) if safe else None,
                         'window_ms': round((max(safe) - min(safe)) /
                                            (config.OBSTACLE_SPEED * config.PHYSICS_HZ * factor) * 1000) if safe else 0}
+                    if row['obstacles'][name]['action'] == 'pattern_dependent':
+                        row['obstacles'][name]['sampling'] = 'seeded mixed plans; not a per-pattern safe interval'
                 report.append(row)
 
             plays = []
             for hz in (30, 60, 120):
-                generator = random.Random(20261111)
-                with patch.object(backend.random, 'choice', side_effect=generator.choice):
+                with seeded_random(20261111):
                     app = JumpBugi(Path(directory) / 'continuous_score.txt')
                     app.reset()  # 난이도 검사는 첫 실행 연출 뒤의 실제 플레이만 대상으로 한다.
                     state = app.state
@@ -81,7 +101,10 @@ def evaluate():
                         stage = min(20, int((state.background_elapsed + 1e-9) // config.DAY_NIGHT_INTERVAL))
                         safe = windows[stage][state.obstacle_name]
                         target = (min(safe) + max(safe)) / 2 if safe else 400
-                        if (not state.obstacle_is_flying and not state.is_jumping
+                        if state.obstacle_name in config.WAVE_IMAGE_FILES or state.obstacle_name in config.SJ_SINGLE_JUMP_TYPES + config.SJ_CLUSTER_TYPES:
+                            center = (state.player_size[0] - state.obstacle_size[0]) / 2
+                            target = center + config.OBSTACLE_SPEED * config.PHYSICS_HZ * state.speed_multiplier * 0.35
+                        if (state.obstacle_requires_jump and not state.is_jumping
                                 and not state.passed and state.obstacle_x <= target):
                             pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE))
                             jumps += 1
@@ -95,7 +118,7 @@ def evaluate():
                                   'game_over': state.game_over, 'jumps': jumps, 'score': state.score,
                                   'obstacle': state.obstacle_name})
             return {'mask_inset_ratio': config.OBSTACLE_MASK_INSET_RATIO,
-                    'method': '120Hz single jumps, 2px search; seeded continuous bot at 30/60/120Hz',
+                    'method': '120Hz 2px search with action per plan; seeded mixed jump plans and continuous bot at 30/60/120Hz',
                     'stages': report, 'continuous_play': plays}
     finally:
         pygame.quit()

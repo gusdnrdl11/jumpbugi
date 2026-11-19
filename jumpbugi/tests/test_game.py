@@ -97,12 +97,21 @@ class GameBehaviorTests(unittest.TestCase):
         for frame in range(1, 482):
             previous = app.state.obstacle_x
             previous_width = app.view.obstacle_images[app.state.obstacle_name].get_width()
-            app.update()
-            self.assertEqual(app.state.background_x, -((frame * config.BACKGROUND_SPEED) % 960))
-            if previous - config.OBSTACLE_SPEED + previous_width >= 0:
-                self.assertEqual(app.state.obstacle_x, previous - config.OBSTACLE_SPEED)
+            previous_background = app.state.background_x
+            dt = 1 / config.PHYSICS_HZ
+            stage = int((app.state.background_elapsed + dt + 1e-9) // config.DAY_NIGHT_INTERVAL)
+            factor = (1 + config.SPEED_INCREASE_RATIO) ** stage
+            movement = config.OBSTACLE_SPEED * factor
+            expected_background = -((-previous_background + config.BACKGROUND_SPEED * factor) % 960)
+            app.update(dt)
+            self.assertAlmostEqual(app.state.background_x, expected_background)
+            if previous - movement + previous_width >= 0:
+                self.assertAlmostEqual(app.state.obstacle_x, previous - movement)
             else:
-                self.assertEqual(app.state.obstacle_x, app.state.obstacle_spawn_x)
+                # 가속 후 세부 갱신 중 재등장하면 그 프레임의 남은 이동도 진행한다.
+                self.assertLessEqual(app.state.obstacle_x, app.state.obstacle_spawn_x)
+                self.assertGreaterEqual(app.state.obstacle_x + movement + 1e-9,
+                                        app.state.obstacle_spawn_x)
             # 실제 출력 픽셀을 원본의 순환 좌표와 비교해 빈 공간과 좌표 오차를 검사한다.
             app.draw()
             for x in (0, 240, 479):

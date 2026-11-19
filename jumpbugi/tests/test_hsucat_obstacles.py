@@ -29,11 +29,12 @@ class HsucatObstacleTests(unittest.TestCase):
 
     def test_first_autumn_unlocks_every_cat_and_later_springs_keep_them(self):
         state = self.app.state
-        for elapsed, enabled in ((0, False), (30, False), (59.999, False),
-                                 (60, False), (90, False), (119.999, False),
-                                 (120, True),
-                                 (180, True), (239.999, True), (240, True),
-                                 (270, True), (480, True), (540, True)):
+        interval = config.DAY_NIGHT_INTERVAL
+        for elapsed, enabled in ((0, False), (interval, False), (2 * interval - 0.001, False),
+                                 (2 * interval, False), (3 * interval, False), (4 * interval - 0.001, False),
+                                 (4 * interval, True),
+                                 (6 * interval, True), (8 * interval - 0.001, True), (8 * interval, True),
+                                 (9 * interval, True), (16 * interval, True), (18 * interval, True)):
             with self.subTest(elapsed=elapsed):
                 state.background_elapsed = elapsed
                 state.pattern_queue = []
@@ -46,14 +47,15 @@ class HsucatObstacleTests(unittest.TestCase):
 
     def test_first_spring_and_summer_clean_locked_cats_from_queue_and_reset_locks_again(self):
         state = self.app.state
-        for elapsed in (30, 59.999, 60, 90, 119.999):
+        interval = config.DAY_NIGHT_INTERVAL
+        for elapsed in (interval, 2 * interval - 0.001, 2 * interval, 3 * interval, 4 * interval - 0.001):
             with self.subTest(elapsed=elapsed):
                 state.background_elapsed = elapsed
                 state.pattern_queue = list(config.HSUCAT_TYPES) + ['sj.png']
                 state.spawn_obstacle()
                 self.assertEqual(state.obstacle_name, 'sj.png')
                 self.assertEqual(state.pattern_queue, [])
-        state.background_elapsed = 240
+        state.background_elapsed = len(config.BACKGROUND_FILES) * interval
         state.pattern_queue = list(config.HSUCAT_TYPES)
         for name in config.HSUCAT_TYPES:
             state.spawn_obstacle()
@@ -65,7 +67,7 @@ class HsucatObstacleTests(unittest.TestCase):
 
     def test_every_new_cat_is_reachable_by_random_pattern_choice(self):
         state = self.app.state
-        state.background_elapsed = 120
+        state.background_elapsed = config.HSUCAT_UNLOCK_SECONDS
         for pattern in config.HSUCAT_PATTERNS:
             with self.subTest(pattern=pattern):
                 state.pattern_queue = []
@@ -80,27 +82,32 @@ class HsucatObstacleTests(unittest.TestCase):
         available = {kind for pattern in config.HSUCAT_PATTERNS for kind in pattern}
         self.assertTrue(set(config.HSUCAT_TYPES).issubset(available))
 
-    def test_large_second_image_keeps_original_proportions_and_pixels(self):
-        source = pygame.image.load(str(config.IMAGE_DIR / 'hsucat_crouch.png')).convert_alpha()
+    def test_large_cat_replaces_the_still_image_with_one_cached_yawn_animation(self):
         image = self.app.view.obstacle_images['hsucat_crouch.png']
-        expected_size = (int(source.get_width() * 120 / source.get_height()), 120)
-        self.assertEqual(image.get_size(), expected_size)
+        frames = self.app.view.obstacle_frames['hsucat_crouch.png']
+        self.assertEqual(image.get_size(), config.HSUCAT_GIANT_SIZE)
         self.assertGreater(image.get_width(), self.app.view.obstacle_images['hsucat.png'].get_width())
-        expected = pygame.transform.smoothscale(source, expected_size)
-        self.assertEqual(pygame.image.tobytes(image, 'RGBA'), pygame.image.tobytes(expected, 'RGBA'))
+        self.assertIs(image, frames[0])
+        self.assertEqual(len(frames), config.HSUCAT_GIANT_FRAME_COUNT)
+        self.assertEqual(config.HSUCAT_GIANT_IMAGE_FILE, 'hsucat_yawn.png')
+        self.assertEqual(len(self.app.view.obstacle_frame_masks['hsucat_crouch.png']),
+                         config.HSUCAT_GIANT_FRAME_COUNT)
+        self.assertNotIn('hsucat_sleepy.png', self.app.view.obstacle_frames)
+        self.assertNotIn('hsucat_yawn.png', self.app.view.obstacle_frames)
 
     def test_running_sheet_has_four_distinct_frames_with_matching_masks(self):
         name = 'hsucat_run.png'
         frames = self.app.view.obstacle_frames[name]
         masks = self.app.view.obstacle_frame_masks[name]
-        self.assertEqual(len(frames), 4)
-        self.assertEqual(len(masks), 4)
+        self.assertEqual(len(frames), 8)
+        self.assertEqual(len(masks), 8)
         self.assertEqual(len({frame.get_size() for frame in frames}), 1)
         self.assertEqual(frames[0].get_height(), 120)
         self.assertGreaterEqual(len({pygame.image.tobytes(frame, 'RGBA') for frame in frames}), 3)
         state = self.app.state
-        state.spawn_obstacle(name)
-        for index, (frame, mask) in enumerate(zip(frames, masks)):
+        with patch.object(backend.random, 'random', return_value=1.0):
+            state.spawn_obstacle(name)
+        for index, (frame, mask) in enumerate(zip(frames[:4], masks[:4])):
             with self.subTest(frame=index):
                 self.assertEqual(mask.get_size(), frame.get_size())
                 self.assertGreater(mask.count(), 0)
@@ -110,14 +117,17 @@ class HsucatObstacleTests(unittest.TestCase):
                     self.app.draw()
                 self.assertIs(screen.blit.call_args_list[2].args[0], frame)
 
-    def test_grounded_player_collides_with_each_new_cat(self):
+    @patch.object(backend.random, 'random', return_value=1.0)
+    def test_grounded_player_collides_with_each_new_cat(self, _random):
         state = self.app.state
         for name in config.HSUCAT_TYPES:
             with self.subTest(name=name):
                 self.app.reset()
                 state.spawn_obstacle(name)
+                offset = (config.HSUCAT_RUN_GROUND_OFFSET if name == 'hsucat_run.png'
+                          else config.OBSTACLE_GROUND_OFFSET)
                 self.assertEqual(state.obstacle_y + state.obstacle_size[1],
-                                 config.SCREEN_SIZE[1] + config.OBSTACLE_GROUND_OFFSET)
+                                 config.SCREEN_SIZE[1] + offset)
                 contact = None
                 for x in range(state.player_size[0], -state.obstacle_size[0], -1):
                     state.obstacle_x = x
@@ -128,9 +138,11 @@ class HsucatObstacleTests(unittest.TestCase):
                 state.update_step(0)
                 self.assertTrue(state.game_over)
 
-    def test_each_new_cat_has_a_timed_jump_at_multiple_speeds_and_frame_rates(self):
+    @patch.object(backend.random, 'random', return_value=1.0)
+    def test_each_new_cat_has_a_timed_jump_at_multiple_speeds_and_frame_rates(self, _random):
         for name in config.HSUCAT_TYPES:
-            for seconds in (120, 180, 300, 600):
+            for stage in (4, 6, 10, 20):
+                seconds = stage * config.DAY_NIGHT_INTERVAL
                 for hz in (30, 60, 120):
                     with self.subTest(name=name, seconds=seconds, hz=hz):
                         self.app.reset()

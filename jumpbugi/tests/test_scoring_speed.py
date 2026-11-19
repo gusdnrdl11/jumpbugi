@@ -57,7 +57,8 @@ class ScoringSpeedTests(unittest.TestCase):
             setattr(state, flag, False)
         state.update(0.5)
         self.assertEqual(state.score, 30)
-        self.assertAlmostEqual(state.speed_multiplier, 1 + config.SPEED_INCREASE_RATIO)
+        stage = int((state.background_elapsed + 1e-9) // config.DAY_NIGHT_INTERVAL)
+        self.assertAlmostEqual(state.speed_multiplier, (1 + config.SPEED_INCREASE_RATIO) ** stage)
         state.stop()
         self.assertEqual(self.record.read_text(), '30')
         state.reset()
@@ -88,7 +89,8 @@ class ScoringSpeedTests(unittest.TestCase):
                 for _ in range(hz * 61):
                     self.state.update(1 / hz)
                 self.assertEqual(self.state.score, 61)
-                self.assertAlmostEqual(self.state.speed_multiplier, (1 + config.SPEED_INCREASE_RATIO) ** 2)
+                stage = int((self.state.background_elapsed + 1e-9) // config.DAY_NIGHT_INTERVAL)
+                self.assertAlmostEqual(self.state.speed_multiplier, (1 + config.SPEED_INCREASE_RATIO) ** stage)
 
     def test_collision_saves_combined_score_and_then_stops_scoring(self):
         state = self.state

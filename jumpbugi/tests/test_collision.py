@@ -125,10 +125,9 @@ class MaskCollisionTests(unittest.TestCase):
                 with self.subTest(name=name, hz=hz):
                     self.app.reset()
                     state = self.app.state
-                    state.obstacle_name = name
-                    state.obstacle_size = self.app.view.obstacle_images[name].get_size()
-                    state.obstacle_y = 360 - state.obstacle_size[1] + config.OBSTACLE_GROUND_OFFSET
-                    state.obstacle_x = 160
+                    state.spawn_obstacle(name)
+                    speed = config.OBSTACLE_SPEED * config.PHYSICS_HZ * state.speed_multiplier
+                    state.obstacle_x = (state.player_size[0] - state.obstacle_size[0]) / 2 + speed * 0.35
                     state.jump()
                     for _ in range(hz):
                         self.app.update(1 / hz)

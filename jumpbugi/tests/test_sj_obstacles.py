@@ -28,12 +28,13 @@ class SjObstacleTests(unittest.TestCase):
         self.app.reset()
         pygame.event.clear()
 
-    def test_first_winter_unlocks_new_types_and_later_seasons_keep_them(self):
+    def test_first_winter_unlocks_running_and_burrowing_but_groups_wait_for_second_spring(self):
         state = self.app.state
-        for elapsed, enabled in ((0, False), (60, False), (120, False),
-                                 (150, False), (179.999, False), (180, True),
-                                 (210, True), (239.999, True), (240, True),
-                                 (300, True), (480, True), (600, True)):
+        interval = config.DAY_NIGHT_INTERVAL
+        for elapsed, enabled in ((0, False), (2 * interval, False), (4 * interval, False),
+                                 (5 * interval, False), (6 * interval - 0.001, False), (6 * interval, True),
+                                 (7 * interval, True), (8 * interval - 0.001, True), (8 * interval, True),
+                                 (10 * interval, True), (16 * interval, True), (20 * interval, True)):
             with self.subTest(elapsed=elapsed):
                 state.background_elapsed = elapsed
                 state.pattern_queue = []
@@ -42,19 +43,33 @@ class SjObstacleTests(unittest.TestCase):
                 pool = choose.call_args_list[0].args[0]
                 available = {kind for pattern in pool for kind in pattern}
                 self.assertEqual(state.sj_obstacles_enabled, enabled)
+                self.assertEqual(state.sj_groups_enabled, elapsed >= config.SJ_GROUP_UNLOCK_SECONDS)
+                self.assertEqual(state.sj_escape_enabled, elapsed >= config.SJ_ESCAPE_UNLOCK_SECONDS)
+                expected = {kind for kind in config.SJ_TYPES
+                            if (kind not in config.SJ_CLUSTER_TYPES or elapsed >= config.SJ_GROUP_UNLOCK_SECONDS)
+                            and (kind != 'sj_escape' or elapsed >= config.SJ_ESCAPE_UNLOCK_SECONDS)}
                 self.assertEqual(available.intersection(config.SJ_TYPES),
-                                 set(config.SJ_TYPES) if enabled else set())
+                                 expected if enabled else set())
 
     def test_locked_queue_is_cleaned_and_reset_restores_first_spring(self):
         state = self.app.state
-        for elapsed in (0, 60, 120, 179.999):
+        interval = config.DAY_NIGHT_INTERVAL
+        for elapsed in (0, 2 * interval, 4 * interval, 6 * interval - 0.001):
             with self.subTest(elapsed=elapsed):
                 state.background_elapsed = elapsed
                 state.pattern_queue = list(config.SJ_TYPES) + ['sj.png']
                 state.spawn_obstacle()
                 self.assertEqual(state.obstacle_name, 'sj.png')
                 self.assertEqual(state.pattern_queue, [])
-        state.background_elapsed = 240
+        for elapsed in (6 * interval, 7 * interval, 8 * interval - 0.001):
+            with self.subTest(elapsed=elapsed):
+                state.background_elapsed = elapsed
+                state.pattern_queue = list(config.SJ_CLUSTER_TYPES) + ['sj_escape', 'sj_run.png']
+                state.spawn_obstacle()
+                self.assertEqual(state.obstacle_name, 'sj_run.png')
+                self.assertIsNone(state.wave_jump)
+                self.assertEqual(state.pattern_queue, [])
+        state.background_elapsed = config.SJ_GROUP_UNLOCK_SECONDS
         state.pattern_queue = list(config.SJ_TYPES)
         for name in config.SJ_TYPES:
             state.spawn_obstacle()
@@ -65,16 +80,18 @@ class SjObstacleTests(unittest.TestCase):
         self.assertEqual(state.pattern_queue, [])
         self.assertIn(state.obstacle_name, config.OBSTACLE_FILES)
 
-    def test_automatic_basic_sj_becomes_a_random_pair_or_triple_from_winter(self):
+    def test_automatic_basic_sj_becomes_a_random_pair_or_triple_from_second_spring(self):
         state = self.app.state
-        for elapsed in (0, 120, 179.999):
+        interval = config.DAY_NIGHT_INTERVAL
+        for elapsed in (0, 4 * interval, 6 * interval - 0.001,
+                        6 * interval, 7 * interval, 8 * interval - 0.001):
             state.background_elapsed = elapsed
             state.pattern_queue = ['sj.png']
             with patch.object(backend.random, 'choice') as choose:
                 state.spawn_obstacle()
             choose.assert_not_called()
             self.assertEqual(state.obstacle_name, 'sj.png')
-        for elapsed in (180, 240, 480):
+        for elapsed in (8 * interval, 16 * interval, 20 * interval):
             for name in config.SJ_CLUSTER_TYPES:
                 with self.subTest(elapsed=elapsed, cluster=name):
                     state.background_elapsed = elapsed
@@ -93,7 +110,7 @@ class SjObstacleTests(unittest.TestCase):
         pattern = ('sj.png', 'chicken.png', 'hsucat.png')
         self.assertIn(pattern, config.GROUND_PATTERNS)
         for name in config.SJ_CLUSTER_TYPES:
-            state.background_elapsed = 180
+            state.background_elapsed = config.SJ_GROUP_UNLOCK_SECONDS
             state.pattern_queue = []
             def select(pool):
                 return pattern if pattern in pool else name
@@ -110,9 +127,9 @@ class SjObstacleTests(unittest.TestCase):
         state.spawn_obstacle()
         self.assertEqual(state.obstacle_name, 'sj.png')
 
-    def test_winter_random_patterns_make_every_new_type_reachable(self):
+    def test_second_spring_random_patterns_make_every_new_type_reachable(self):
         state = self.app.state
-        state.background_elapsed = 180
+        state.background_elapsed = config.SJ_GROUP_UNLOCK_SECONDS
         seen = set()
         for pattern in config.SJ_PATTERNS:
             with self.subTest(pattern=pattern):
@@ -129,21 +146,25 @@ class SjObstacleTests(unittest.TestCase):
         self.assertTrue(set(config.SJ_TYPES).issubset(seen))
 
     def test_cluster_pixels_are_two_or_three_basic_sjs_with_small_clear_gaps(self):
-        single = self.app.view.obstacle_images['sj.png']
-        self.assertEqual(single.get_size(), (39, 40))
+        singles = self.app.view.obstacle_frames['sj.png']
+        self.assertEqual(len(singles), 4)
         for name, count in zip(config.SJ_CLUSTER_TYPES, (2, 3)):
-            with self.subTest(name=name):
-                image = self.app.view.obstacle_images[name]
-                self.assertEqual(image.get_size(), (count * 39 + (count - 1) * 3, 40))
-                for index in range(count):
-                    start = index * (single.get_width() + config.SJ_CLUSTER_GAP)
-                    copy = image.subsurface((start, 0, *single.get_size()))
-                    self.assertEqual(pygame.image.tobytes(copy, 'RGBA'),
-                                     pygame.image.tobytes(single, 'RGBA'))
-                    if index < count - 1:
-                        gap = image.subsurface((start + single.get_width(), 0,
-                                                config.SJ_CLUSTER_GAP, 40))
-                        self.assertEqual(pygame.mask.from_surface(gap, 0).count(), 0)
+            frames = self.app.view.obstacle_frames[name]
+            self.assertEqual(len(frames), len(singles))
+            for pose, (single, image) in enumerate(zip(singles, frames)):
+                with self.subTest(name=name, pose=pose):
+                    width, height = single.get_size()
+                    self.assertEqual(image.get_size(),
+                                     (count * width + (count - 1) * config.SJ_CLUSTER_GAP, height))
+                    for index in range(count):
+                        start = index * (width + config.SJ_CLUSTER_GAP)
+                        copy = image.subsurface((start, 0, width, height))
+                        self.assertEqual(pygame.image.tobytes(copy, 'RGBA'),
+                                         pygame.image.tobytes(single, 'RGBA'))
+                        if index < count - 1:
+                            gap = image.subsurface((start + width, 0,
+                                                    config.SJ_CLUSTER_GAP, height))
+                            self.assertEqual(pygame.mask.from_surface(gap, 0).count(), 0)
 
     def test_single_and_all_new_frames_fit_above_the_screen_bottom(self):
         state = self.app.state
@@ -187,10 +208,12 @@ class SjObstacleTests(unittest.TestCase):
         self.assertTrue(all(frame.get_size() == (112, 64) for frame in frames))
         self.assertNotEqual(pygame.image.tobytes(frames[0], 'RGBA'),
                             pygame.image.tobytes(frames[-1], 'RGBA'))
+        self.assertEqual(masks[-1].count(), 0)
         for x in (800, 480, 405, 330, 255, 180, 100, 0, -30):
             with self.subTest(x=x):
                 state.obstacle_x = x + (0.75 if x != 180 else 0)
-                fraction = max(0, min(1, (480 - state.obstacle_x) / 300))
+                fraction = max(0, min(1, (state.sj_hole_start_x - state.obstacle_x)
+                                       / (state.sj_hole_start_x - state.sj_hole_end_x)))
                 expected = int(fraction * (len(frames) - 1))
                 state.obstacle_animation_tick = 100000
                 self.assertEqual(state.obstacle_frame_index, expected)
@@ -205,7 +228,8 @@ class SjObstacleTests(unittest.TestCase):
                 self.assertEqual(state.collides_with_obstacle(), expected_collision)
         self.assertEqual(state.obstacle_frame_index, len(frames) - 1)
 
-    def test_grounded_player_hits_every_new_type_in_all_running_poses(self):
+    @patch.object(backend.random, 'random', return_value=1.0)
+    def test_grounded_player_hits_exposed_types_but_can_cross_the_burrow(self, _random):
         state = self.app.state
         for name in config.SJ_TYPES:
             count = 2 if name == 'sj_run.png' else 1
@@ -222,44 +246,54 @@ class SjObstacleTests(unittest.TestCase):
                             if state.collides_with_obstacle():
                                 contact = x
                                 break
-                        self.assertIsNotNone(contact)
-                        state.update_step(0)
-                        self.assertTrue(state.game_over)
+                        if name == 'sj_burrow':
+                            self.assertIsNone(contact)
+                            self.assertFalse(state.game_over)
+                        else:
+                            self.assertIsNotNone(contact)
+                            state.update_step(0)
+                            self.assertTrue(state.game_over)
 
-    def test_one_jump_clears_all_new_types_at_four_speeds_and_three_frame_rates(self):
+    @patch.object(backend.random, 'random', return_value=1.0)
+    def test_each_sj_type_is_clearable_at_unlocked_stages_and_frame_rates(self, _random):
         for name in config.SJ_TYPES:
-            for seconds in (180, 240, 300, 600):
+            stages = (8, 10, 20) if name in config.SJ_CLUSTER_TYPES or name == 'sj_escape' else (6, 8, 10, 20)
+            seconds_cases = tuple(stage * config.DAY_NIGHT_INTERVAL for stage in stages)
+            for seconds in seconds_cases:
                 for hz in (30, 60, 120):
                     with self.subTest(name=name, seconds=seconds, hz=hz):
                         self.app.reset()
                         state = self.app.state
                         state.background_elapsed = seconds
                         state.spawn_obstacle(name)
+                        count = 2 if name == 'sj_pair' else 3 if name == 'sj_triple' else 1
+                        expected_bonus = count * config.PASS_BONUS
+                        requires_jump = name != 'sj_burrow'
                         jumped = False
                         for _ in range(3 * hz):
                             speed = config.OBSTACLE_SPEED * config.PHYSICS_HZ * state.speed_multiplier
-                            if not jumped and state.obstacle_x <= 60 + speed * 0.30:
+                            if requires_jump and not jumped and state.obstacle_x <= 60 + speed * 0.30:
                                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE))
                                 jumped = True
                             self.app.handle_events()
                             self.app.update(1 / hz)
                             self.assertFalse(state.game_over)
-                            if state.score >= config.PASS_BONUS:
+                            if state.score - int(state.survival_elapsed + 1e-9) >= expected_bonus:
                                 break
-                        self.assertTrue(jumped)
-                        self.assertEqual(state.score - int(state.survival_elapsed + 1e-9), config.PASS_BONUS)
+                        self.assertEqual(jumped, requires_jump)
+                        self.assertEqual(state.score - int(state.survival_elapsed + 1e-9), expected_bonus)
 
-    def test_clusters_award_one_pass_bonus_each(self):
+    def test_clusters_award_one_pass_bonus_per_member(self):
         state = self.app.state
-        for name in config.SJ_CLUSTER_TYPES:
+        for name, count in zip(config.SJ_CLUSTER_TYPES, (2, 3)):
             with self.subTest(name=name):
                 self.app.reset()
                 state.spawn_obstacle(name)
                 state.obstacle_x = -state.obstacle_size[0]
                 state.update_step(0)
-                self.assertEqual(state.score, config.PASS_BONUS)
+                self.assertEqual(state.score, count * config.PASS_BONUS)
                 state.update_step(0)
-                self.assertEqual(state.score, config.PASS_BONUS)
+                self.assertEqual(state.score, count * config.PASS_BONUS)
 
     def test_pause_game_over_and_reset_reuse_assets_and_freeze_burrowing(self):
         state = self.app.state

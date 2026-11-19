@@ -77,7 +77,7 @@ class ObstaclePatternTests(unittest.TestCase):
             state.spawn_obstacle()
             self.assertEqual(state.obstacle_name, kind)
 
-    def test_first_spring_random_patterns_only_use_static_images(self):
+    def test_first_spring_random_patterns_only_use_basic_types(self):
         state = self.app.state
         for second in range(60):
             state.background_elapsed = second
@@ -122,7 +122,9 @@ class ObstaclePatternTests(unittest.TestCase):
         state = self.app.state
         for name in config.CHICKEN_TYPES[2:]:
             self.app.reset()
-            state.spawn_obstacle(name)
+            # 기존 아래 통과 검사는 머리 가까이 지나가는 중간 높이로 고정한다.
+            with patch.object(backend.random, 'random', return_value=0.5):
+                state.spawn_obstacle(name)
             for player_frame in range(4):
                 state.animation_tick = player_frame * config.RUN_FRAME_TICKS
                 for bird_frame in range(4):
@@ -138,7 +140,8 @@ class ObstaclePatternTests(unittest.TestCase):
                     break
             self.assertTrue(state.game_over)
 
-    def test_all_patterns_have_a_safe_run_jump_solution_at_multiple_speeds(self):
+    @patch.object(backend.random, 'random', return_value=1.0)
+    def test_all_patterns_have_a_safe_run_jump_solution_at_multiple_speeds(self, _random):
         for stage in (2, 4, 10, 20):
             for hz in (30, 60, 120):
                 for pattern in config.GROUND_PATTERNS + config.SUMMER_PATTERNS:
@@ -149,24 +152,30 @@ class ObstaclePatternTests(unittest.TestCase):
                         state.pattern_queue = list(pattern)
                         state.spawn_obstacle()
                         cleared = 0
+                        expected_bonus = 0
                         for _ in range(15 * hz):
                             speed = config.OBSTACLE_SPEED * config.PHYSICS_HZ * state.speed_multiplier
-                            if (not state.obstacle_is_flying and not state.is_jumping
-                                    and state.obstacle_x <= 60 + speed * 0.30):
+                            target = (state.player_size[0] - state.obstacle_size[0]) / 2 + speed * 0.35 \
+                                if state.obstacle_name in config.WAVE_IMAGE_FILES else 60 + speed * 0.30
+                            if (state.obstacle_requires_jump and not state.is_jumping
+                                    and state.obstacle_x <= target):
                                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE))
                             self.app.handle_events()
                             old_x = state.obstacle_x
+                            old_name = state.obstacle_name
                             self.app.update(1 / hz)
                             self.assertFalse(state.game_over)
                             if state.obstacle_x > old_x:
                                 cleared += 1
+                                expected_bonus += config.PASS_BONUS * (2 if old_name == 'sj_pair'
+                                                                      else 3 if old_name == 'sj_triple' else 1)
                                 approach = (state.obstacle_x - state.player_size[0]) / (
                                     config.OBSTACLE_SPEED * config.PHYSICS_HZ * state.speed_multiplier)
                                 self.assertGreaterEqual(approach + 1e-9, config.OBSTACLE_RECOVERY_SECONDS)
                                 if cleared == len(pattern):
                                     break
                         self.assertEqual(cleared, len(pattern))
-                        self.assertEqual(state.score, int(state.survival_elapsed + 1e-9) + 10 * len(pattern))
+                        self.assertEqual(state.score, int(state.survival_elapsed + 1e-9) + expected_bonus)
 
     def test_animation_stops_on_pause_and_game_over_and_assets_are_cached(self):
         state = self.app.state
@@ -222,7 +231,9 @@ class ExistingObstacleTests(unittest.TestCase):
         app = self.app
         with patch.object(backend.random, 'choice', return_value='sj.png'):
             app.reset()
-        self.assertEqual(app.view.obstacle_images[app.state.obstacle_name].get_size(), (39, 40))
+        self.assertEqual(app.view.obstacle_images[app.state.obstacle_name].get_height(),
+                         config.OBSTACLE_HEIGHTS['sj.png'])
+        self.assertEqual(len(app.view.obstacle_frames['sj.png']), 4)
         self.assertEqual(app.state.obstacle_y, 318)
         rect = app.view.obstacle_images[app.state.obstacle_name].get_rect(topleft=(60, app.state.obstacle_y))
         self.assertGreater(app.view.obstacle_masks['sj.png'].count(), 0)
