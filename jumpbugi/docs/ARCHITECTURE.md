@@ -7,11 +7,14 @@ jumpbugi/
 ├─ README.md            실행 안내와 문서 목차
 ├─ AGENTS.md            AI 참조 범위와 자료 관리 기준
 ├─ main.py              실행·입력·반복 순서
-├─ frontend.py          화면과 UI
-├─ backend.py           상태와 게임 규칙
-├─ difficulty.py        계절 슬롯·사이클·속도·간격·패턴 난이도
+├─ frontend.py          준비된 자원을 사용하는 화면과 UI
+├─ backend.py           GameState와 물리·충돌·득점 갱신 순서
+├─ patterns.py          해금된 패턴 풀·대기열·무작위 순서 선택
+├─ obstacles.py         장애물 점프 계획·포즈·상찌 무리 좌표
+├─ season.py            계절 슬롯·사이클·배경 전환값
+├─ difficulty.py        속도·접근 간격·패턴 난이도 확률
 ├─ config.py            공통 설정과 내부 경로
-├─ assets.py            이미지 준비
+├─ assets.py            이미지·프레임·충돌 마스크와 GameAssets 조립
 ├─ storage.py           최고점수 읽기·저장
 ├─ __init__.py          패키지 표시
 ├─ docs/
@@ -57,24 +60,34 @@ jumpbugi/
 
 ```text
 main → frontend → assets
-main → backend → storage
-backend → difficulty → config
-main / frontend / backend / assets → config
+main → backend → patterns / obstacles / season / difficulty / storage
+difficulty → season (SeasonProgress의 기존 import 경로 유지)
+patterns / obstacles / season / difficulty / assets → config
+main / frontend / backend → config
 tests → 게임 동작 확인
 ```
 
 메인·프론트·백은 같은 프로그램입니다. 백은 인터넷 서버가 아니라 게임 규칙 담당입니다. `JumpBugi`가 화면 담당 `GameView`와 상태 담당 `GameState`를 보유합니다.
 
-메인은 화면을 먼저 만들고 이미지 크기·모션 수·배경 너비·프레임별 플레이어 마스크·종류별 장애물 마스크를 백에 전달합니다. 백은 위치와 마스크 겹침으로 충돌을 계산하며 화면을 만들거나 이미지를 읽지 않습니다. 프론트는 백의 상태와 공통 `player_frame_index`를 사용해 같은 프레임을 그립니다.
+`GameView`는 화면을 만든 뒤 `assets.load_game_assets()`로 `GameAssets`를 한 번 전달받습니다. 메인은 이 자원의 이미지 크기·모션 수·배경 너비·프레임별 플레이어 마스크·종류별 장애물 마스크를 백에 전달합니다. 백은 위치와 마스크 겹침으로 충돌을 계산하며 화면을 만들거나 이미지를 읽지 않습니다. 프론트는 백의 상태와 공통 `player_frame_index`를 사용해 같은 프레임을 그립니다.
 
-assets는 그림 읽기·크기 조절·모션 시트 분리와 합성을 맡습니다. storage는 파일을 읽고 임시 파일 교체 방식으로 기록합니다. `difficulty.py`는 Pygame 화면·파일 저장과 독립적인 `SeasonProgress`·`DifficultyProfile` 및 난이도 계산을 담당합니다. config는 조절 가능한 수치와 공통 기준표입니다. 점프·충돌·득점 상태는 기존 `backend.GameState`에 유지합니다.
+`patterns.py`는 `PatternUnlocks`로 허용 유형을 판단하고, `available_patterns()`·`unlocked_queue()`·`choose_pattern()`으로 패턴 풀과 잠긴 대기열 정리·확률 선택을 담당합니다. `obstacles.py`는 `GreetingJump`·`SjMember`, 인사·달리는 한성캣·상찌의 점프 계획 생성, `frame_index()`와 `cluster_parts()`를 담당합니다. `season.py`는 `SeasonProgress`와 `BackgroundTransition`·`background_transition()`으로 진행 상태와 배경 혼합값을 계산합니다. 세 모듈은 Pygame·화면·저장과 독립적이며 `GameState`를 import하지 않습니다.
+
+`difficulty.py`는 `DifficultyProfile`과 속도·간격·패턴 확률을 담당하며, 기존 `difficulty.SeasonProgress` import도 유지합니다. `backend.GameState`는 기존 공개 속성·메서드를 유지한 채 위 계산 함수에 값을 전달합니다. `backend.GreetingJump`·`backend.SjMember` 경로도 같은 클래스에 연결합니다. config는 조절 가능한 수치와 공통 기준표이며 storage는 파일을 읽고 임시 파일 교체 방식으로 기록합니다.
+
+`assets.py`는 그림 읽기·크기 조절·모션 시트 분리·합성·마스크 생성과 `GameAssets` 조립에 집중하고, `frontend.py`는 배경 사본·글꼴·UI·렌더링에 집중합니다. 캐릭터별 시트 처리 함수는 동일한 자원 준비 흐름을 공유하므로 파일 길이만을 이유로 더 나누지 않았습니다. 플레이어 적분·충돌·득점은 짧은 상태 갱신이며 순서가 동작에 영향을 주므로 `backend.GameState`에 함께 유지합니다. 별도 `player.py`·`scoring.py`·`game_state.py`로 옮기기 위한 전달용 계층은 추가하지 않았습니다.
+
+의존성은 위에서 아래 방향이며 새 계산 모듈에서 backend·frontend를 다시 import하지 않습니다. 직접 파일 실행과 상위 폴더의 `jumpbugi.main` 패키지 import를 모두 유지하고, 로컬 모듈 import 그래프에 순환이 없는 것을 확인했습니다.
 
 | 수정하려는 기능 | 확인할 파일 |
 | --- | --- |
 | 점프 물리·충돌·득점 | `backend.py` + `config.py` |
-| 슬롯 길이·난이도 곡선·간격 | `difficulty.py` + `config.py` |
-| 장애물 유형·해금·패턴 선택 | `backend.py` + `difficulty.py` + `config.py` |
-| 이미지·애니메이션 준비 | `assets.py` + `frontend.py` |
+| 계절·낮밤 슬롯·배경 전환 | `season.py` + `config.py` |
+| 난이도 곡선·접근 간격·어려운 패턴 확률 | `difficulty.py` + `config.py` |
+| 패턴 풀·해금 필터·대기열 선택 | `patterns.py` + `config.py` |
+| 장애물 점프 궤적·애니메이션 포즈·상찌 무리 좌표 | `obstacles.py` + `config.py` |
+| 장애물 추가·생성 상태 연결 | `backend.py` + `patterns.py` + `assets.py` + `config.py` |
+| 이미지·애니메이션 프레임·마스크 준비 | `assets.py` |
 | 인트로·UI·입력 흐름 | `frontend.py` + `main.py` |
 | 최고점수 저장 | `storage.py` |
 
@@ -92,7 +105,7 @@ assets는 그림 읽기·크기 조절·모션 시트 분리와 합성을 맡습
 
 `transition_elapsed`로 `START_FADE_SECONDS=1.25`초의 전환 진행률을 계산합니다. `GameView.draw_startup()`은 흰 배경을 채운 뒤 `background_x`와 `background_x + background_width`에 한성대 봄 낮 배경을 이어 그립니다. 배경 알파만 0에서 255로 부드럽게 높여 이미 스크롤 중인 풍경을 드러내고 시작·조작 안내를 사라지게 합니다. 부기는 항상 그 위에 원래 알파로 그려 계속 달립니다. 전환이 끝나도 `reset()`을 호출하지 않아 스크롤 위치가 그대로 이어지고, 인트로의 달리기 시간을 `GameState.animation_tick`으로 넘겨 첫 플레이 프레임에서도 자세가 끊기지 않게 합니다.
 
-세 시작 단계에서는 `GameState`의 점수·계절·장애물·점프가 진행되지 않습니다. 배경의 가로 위치는 `transition`에서만 먼저 진행하며, 계절 시계인 `background_elapsed`는 플레이 시작까지 0으로 유지합니다. 전환 중 추가 키와 시작 키의 입력 묶음은 무시하며, QUIT와 Ctrl+F4는 모든 단계에서 종료합니다. 배경 전환이 완료되면 `playing`으로 넘어가고 다음 갱신부터 장애물이 화면으로 들어옵니다. 게임오버 후 Enter로 호출하는 `reset()`은 바로 `playing`으로 전환하므로 첫 실행 연출을 반복하지 않습니다. 시작 이미지와 안내 글자는 `GameView`가 한 번 준비해 재사용합니다.
+세 시작 단계에서는 `GameState`의 점수·계절·장애물·점프가 진행되지 않습니다. 배경의 가로 위치는 `transition`에서만 먼저 진행하며, 계절 시계인 `background_elapsed`는 플레이 시작까지 0으로 유지합니다. 전환 중 추가 키와 시작 키의 입력 묶음은 무시하며, QUIT와 Ctrl+F4는 모든 단계에서 종료합니다. 배경 전환이 완료되면 `playing`으로 넘어가고 다음 갱신부터 장애물이 화면으로 들어옵니다. 게임오버 후 Enter로 호출하는 `reset()`은 바로 `playing`으로 전환하므로 첫 실행 연출을 반복하지 않습니다. 시작 이미지는 `load_game_assets()`가 한 번 준비하고, `GameView`는 전달받은 이미지와 직접 만든 안내 글자를 재사용합니다.
 
 run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 순서로 반복합니다. `game_over`는 이번 판의 종료, `running=False`는 실행 반복 자체의 종료입니다. 정지·게임오버 동안 일반 갱신은 멈춥니다.
 
@@ -120,6 +133,8 @@ run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 �
 
 ## 장애물 유형과 패턴
 
+패턴의 후보·잠금 필터·대기열 선택은 `patterns.py`, 점프 계획과 애니메이션 포즈 계산은 `obstacles.py`에서 찾습니다. `GameState.spawn_obstacle()`는 선택한 결과를 현재 장애물 상태에 반영하며 기존 생성·무작위 선택 순서를 유지합니다.
+
 `OBSTACLE_FILES`는 기본 한성냥이·꾸꾸꼬꼬·상찌의 논리 이름 3개입니다. `config.WAVE_IMAGE_FILES`는 `hsucat.png`를 `hsucat_wave.png`, `chicken.png`를 `chicken_wave.png`로 연결하고, `SJ_BASE_IMAGE_FILE='sj_wave.png'`는 기본 상찌의 실제 시트를 정합니다. 이전 정지 PNG는 보존하며 기본 세 종류의 실제 표시는 인사 시트로 준비합니다. `CHICKEN_TYPES`는 추가된 흰색·갈색 지상형과 비행형 4개입니다. `assets.load_chicken_frames`는 `chicken_flap.png`의 2행×4열을 캐릭터별로 분리하고 동일한 크기·발 위치로 정렬합니다. 시트는 시작 시 한 번 읽으며 지상형은 높이 96, 비행형은 80입니다.
 
 `assets.load_greeting_frames(filename, height)`는 2×2 인사 시트의 네 포즈를 공통 배율로 준비하고 양발 중심과 발바닥 높이를 맞춥니다. 기본 꾸꾸·꼬꼬는 흰색·갈색 두 캐릭터를 합친 146×120, 한성냥이는 85×120이며, 지상 발끝은 `WAVE_GROUND_OFFSET=-2`로 y=358에 맞춥니다. 상찌 로더도 같은 정렬 처리를 사용해 기존 42×40을 유지합니다.
@@ -130,7 +145,7 @@ run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 �
 
 궤적은 시간 대신 수평 이동 거리의 진행률로 계산합니다. 수평 접촉 구간 중심 `center=(player_width-obstacle_width)/2`와 반폭 `contact_half=(player_width+obstacle_width)/2`를 구한 뒤, 패턴별 여유 비율과 생성 시 속도·최소 비행 시간을 반영해 `flight_half`를 정합니다. `p=(center+flight_half-obstacle_x)/(2×flight_half)`의 0~1 구간에서 y 오프셋을 `-4×height×p×(1-p)`로 계산합니다. 높은 점프와 머리 위 점프는 전체 수평 접촉 구간에 머리 여유가 남도록 하므로, 가속이나 FPS 변화에도 아래 통과가 가능합니다. 그리기와 마스크 충돌은 이 y좌표와 고정 포즈를 함께 사용합니다.
 
-계획 데이터는 `GreetingJump(pattern, height, center_x, half_distance)`에 보관하고 `progress(x)`·`is_jumping(x)`·`y_offset(x)`로 현재 상태를 계산합니다. 기본 가로 여유 비율은 높은 점프·낮은 점프가 2.2, 머리 위 점프가 4.8이며, 생성 속도에서 최소 0.9초에 해당하는 가로 범위도 확보합니다. 아래 통과 패턴에는 `WAVE_UNDERPASS_CLEARANCE=4` 기준을 반영해 높이와 여유 비율의 최솟값을 보정합니다. 거리에 따라 궤적을 계산하므로 실제 비행 시간은 이동 속도에 따라 달라집니다.
+계획 데이터는 `obstacles.GreetingJump(pattern, height, center_x, half_distance)`에 보관하고 `progress(x)`·`is_jumping(x)`·`y_offset(x)`로 현재 상태를 계산합니다. 기본 가로 여유 비율은 높은 점프·낮은 점프가 2.2, 머리 위 점프가 4.8이며, 생성 속도에서 최소 0.9초에 해당하는 가로 범위도 확보합니다. 아래 통과 패턴에는 `WAVE_UNDERPASS_CLEARANCE=4` 기준을 반영해 높이와 여유 비율의 최솟값을 보정합니다. 거리에 따라 궤적을 계산하므로 실제 비행 시간은 이동 속도에 따라 달라집니다.
 
 `HSUCAT_TYPES`는 `hsucat_run.png`, `hsucat_crouch.png`, `hsucat_book.png`입니다. 달리기는 2×2 시트의 네 포즈를 공통 배율과 발 위치로 정렬합니다. 책 한성캣의 `hsucat_book.png`는 논리 이름으로 유지하며 실제로는 `HSUCAT_BOOK_IMAGE_FILE='hsucat_drop_book.png'`의 네 포즈를 180×120 크기로 준비합니다. 거대 한성캣의 `hsucat_crouch.png`도 기존 패턴의 논리 이름으로 유지하며, 실제 표시는 `HSUCAT_GIANT_IMAGE_FILE='hsucat_yawn.png'` 한 장으로 교체합니다. 원본 PNG는 수정하지 않습니다.
 
@@ -152,7 +167,7 @@ run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 �
 
 `sj_hole_timing`은 생성할 때 빠름·느림 중 하나를 같은 확률로 선택하고 진행 중에는 바뀌지 않습니다. `SJ_BURROW_PROFILES`는 빠름 (480, 330)·느림 (480, 170), `SJ_ESCAPE_PROFILES`는 빠름 (480, 300)·느림 (480, 180)의 시작·완료 x좌표입니다. 완료 위치는 최소 `player_width + SJ_HOLE_CLEARANCE(32)`로 보정합니다. `sj_hole_progress=clamp((start_x-x)/(start_x-end_x), 0, 1)`에 따라 포즈를 진행하므로 FPS와 가속 중에도 몸체가 플레이어와 만나기 전에 진입·탈출이 완료됩니다. 같은 속도에서 느림은 빠름보다 오래 걸리며 실제 초 단위 시간은 이동 속도를 따릅니다.
 
-`load_sj_obstacles(..., collision_frames=...)`는 표시 프레임과 별도로 몸체 전용 충돌 표면을 전달합니다. 진입은 같은 클립과 가라앉는 위치로 몸체만 합성하며, 마지막 표면은 비어 있습니다. 탈출은 축소된 그림의 초록 몸체·연노란 배 영역과 연결 외곽을 채워 몸체를 잡고 주황 구덩이를 제외합니다. 프론트가 이 표면으로 마스크를 한 번 준비하므로 빈 구덩이는 통과해도 충돌하지 않습니다. 배·머리 등 나온 몸체는 실제로 충돌합니다. 진입은 `obstacle_requires_jump=False`, 탈출은 `True`이며 둘 다 통과 10점은 공통 경로로 계산합니다.
+`load_sj_obstacles(..., collision_frames=...)`는 표시 프레임과 별도로 몸체 전용 충돌 표면을 전달합니다. 진입은 같은 클립과 가라앉는 위치로 몸체만 합성하며, 마지막 표면은 비어 있습니다. 탈출은 축소된 그림의 초록 몸체·연노란 배 영역과 연결 외곽을 채워 몸체를 잡고 주황 구덩이를 제외합니다. `load_game_assets()`가 이 표면으로 마스크를 한 번 준비하므로 빈 구덩이는 통과해도 충돌하지 않습니다. 배·머리 등 나온 몸체는 실제로 충돌합니다. 진입은 `obstacle_requires_jump=False`, 탈출은 `True`이며 둘 다 통과 10점은 공통 경로로 계산합니다.
 
 `sj_escape_enabled`는 `SJ_ESCAPE_UNLOCK_SLOT=8`을 따릅니다. 첫 사계절 이전에는 탈출이 후보와 대기열 모두에서 제외되고 다음 봄부터 등장합니다. 기존 진입·달리기는 첫 겨울 6단계 해금을 유지합니다. 정지·게임오버에서는 위치와 진행이 멈추고 새 등장·재시작 때 속도 계획을 새로 만듭니다.
 
@@ -170,7 +185,7 @@ run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 �
 
 `sj_cluster_parts`는 각 멤버의 `(frame_index, int(x), int(y))`를 반환합니다. 공중에서는 첫 프레임 0을 고정하고 지상에서는 인사 네 포즈를 순환하며, 달리기 상찌도 공중에는 첫 포즈를 고정하고 착지하면 달리기를 재개합니다. 정지·게임오버에서는 위치가 멈추므로 점프 높이도 유지되고 재시작·다음 등장 시 점프 계획과 멤버 통과 기록을 새로 만듭니다.
 
-프론트는 `obstacle_frames`와 포즈별 `obstacle_frame_masks`를 준비해 백에 전달합니다. 일반 장애물은 백의 `obstacle_frame_index`를 출력·충돌에 함께 사용합니다. 상찌 묶음은 `sj_cluster_parts`의 개별 포즈·좌표로 그리며, 같은 위치의 기본 상찌 프레임 마스크로 각각 충돌을 검사합니다. 지상의 합성 묶음 마스크만으로 공중 상찌를 판정하지 않습니다. 정지·게임오버에서는 애니메이션도 멈추고 정지 이미지의 마스크는 기존 단일 마스크를 사용합니다.
+`assets.load_game_assets()`가 `obstacle_frames`와 포즈별 `obstacle_frame_masks`를 준비하며 메인이 백에 전달합니다. 일반 장애물은 백의 `obstacle_frame_index`를 출력·충돌에 함께 사용하고 실제 포즈 선택은 `obstacles.frame_index()`에 위임합니다. 상찌 묶음은 `obstacles.cluster_parts()` 결과를 노출하는 `sj_cluster_parts`의 개별 포즈·좌표로 그리며, 같은 위치의 기본 상찌 프레임 마스크로 각각 충돌을 검사합니다. 지상의 합성 묶음 마스크만으로 공중 상찌를 판정하지 않습니다. 정지·게임오버에서는 애니메이션도 멈추고 정지 이미지의 마스크는 기존 단일 마스크를 사용합니다.
 
 시작 장애물은 손 흔드는 기본 한성냥이·꾸꾸꼬꼬·상찌 중 하나입니다. 첫 봄 낮·밤(0~2단계)에는 `CHICKEN_TYPES`, `HSUCAT_TYPES`, `SJ_TYPES`를 패턴 후보와 대기열에서 모두 제외합니다. 따라서 `GROUND_PATTERNS` 중 기본 세 종류로만 구성된 순서만 선택합니다. 날갯짓 지상·비행형은 첫 여름 낮인 2단계부터, 추가 한성캣은 첫 가을 낮인 4단계부터, 달리기·굴 파기 상찌는 첫 겨울 낮인 6단계부터 허용합니다. 상찌 무리·랜덤 점프·구덩이 탈출은 그다음 봄인 8단계부터 허용하며, 그 전에 생성된 기본·달리기 상찌는 지상 동작을 유지합니다. 재시작하면 누적 시간과 대기열을 초기화해 등장 조건을 복원합니다.
 
@@ -188,7 +203,7 @@ run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 �
 
 낮 또는 밤 하나가 한 슬롯이며 기본 `DAY_NIGHT_INTERVAL=25`초입니다. `BACKGROUND_FILES`는 봄 낮·밤, 여름 낮·밤, 가을 낮·밤, 겨울 낮·밤의 8장입니다. 한 사계절은 8슬롯 × 25초 = 200초입니다.
 
-`difficulty.SeasonProgress`는 환경 시계와 슬롯 길이를 받아 진행 상태를 계산합니다. `GameState`가 노출하는 `total_slots_passed`는 누적 슬롯 번호, `current_slot`은 `total_slots_passed % 8`, `season_cycle_count`는 `total_slots_passed // 8`입니다. `DAY_NIGHT_INTERVAL`은 슬롯의 실제 길이를 결정하며, 장애물 해금·속도·난이도는 슬롯과 사이클을 기준으로 판단합니다. 따라서 슬롯 길이를 바꾸어도 해금 조건을 초 단위로 다시 수정할 필요가 없습니다. 슬롯 8에서 다시 봄 낮으로 돌아가도 누적 진행·속도·점수는 초기화하지 않습니다.
+`season.SeasonProgress`는 환경 시계와 슬롯 길이를 받아 진행 상태를 계산합니다. 기존 `difficulty.SeasonProgress` 경로에서도 같은 클래스를 사용할 수 있습니다. `GameState`가 노출하는 `total_slots_passed`는 누적 슬롯 번호, `current_slot`은 `total_slots_passed % 8`, `season_cycle_count`는 `total_slots_passed // 8`입니다. `DAY_NIGHT_INTERVAL`은 슬롯의 실제 길이를 결정하며, 장애물 해금·속도·난이도는 슬롯과 사이클을 기준으로 판단합니다. 따라서 슬롯 길이를 바꾸어도 해금 조건을 초 단위로 다시 수정할 필요가 없습니다. 슬롯 8에서 다시 봄 낮으로 돌아가도 누적 진행·속도·점수는 초기화하지 않습니다.
 
 | 해금 슬롯 | 추가되는 유형·동작 |
 | --- | --- |
@@ -214,19 +229,21 @@ run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 �
 
 `HARD_PATTERN_PROBABILITIES=(0.15, 0.45, 0.75)`는 해금된 기존 패턴 중 `HARD_PATTERNS` 풀을 우선 선택할 확률입니다. 우선 선택하지 않으면 어려운 순서를 포함한 전체 해금 풀에서 고릅니다. 따라서 이 수치는 어려운 패턴의 최종 등장 비율과 같지는 않습니다. `PATTERN_CHAIN_PROBABILITIES=(0.25, 0.65, 0.9)`는 선택한 순서 전체를 대기열에 넣을 확률이며, 나머지는 첫 장애물만 내보내고 다음에 다시 선택합니다. 사이클 2 이후에는 마지막 확률을 유지합니다. 각 유형의 점프·비행 높이 선택 확률과 안전 궤적은 별도 설정을 따릅니다.
 
-백은 `background_from_index`, `background_to_index`, `background_alpha`로 이전·다음 배경과 4초 전환 혼합도를 관리합니다. `night_alpha`는 점수 글자색의 낮·밤 밝기 계산용으로 유지합니다. 프론트는 시작할 때 준비한 `background_stages` 8장을 같은 출력 크기·스크롤 위치에서 합성합니다.
+`season.background_transition()`은 같은 계절 시계에서 이전·다음 배경 인덱스와 4초 전환 혼합도·밤 밝기를 계산해 `BackgroundTransition`으로 반환합니다. 백은 이를 기존 `background_from_index`, `background_to_index`, `background_alpha`, `night_alpha` 속성에 반영합니다. 프론트는 `GameAssets`로 받은 `background_stages` 8장을 같은 출력 크기·스크롤 위치에서 합성하며 `night_alpha`를 점수 글자색의 낮·밤 밝기 계산에 사용합니다.
 
 `sync_background(state)`는 배경 인덱스 두 개와 혼합도를 함께 캐시합니다. 같은 알파값이더라도 다른 계절이면 다시 그리며, 공용 오버레이 표면에 대상 배경을 복사해 원본 이미지를 변경하지 않습니다. 정지·게임오버 중에는 그대로 유지하고 재시작 시 봄 낮을 즉시 복원합니다.
 
 ## 마스크 충돌
 
-`assets.collision_mask`는 최종 출력 크기의 알파값이 `COLLISION_ALPHA_THRESHOLD`보다 큰 픽셀을 사용합니다. `frontend`가 플레이어 4프레임과 기존 장애물·새 캐릭터의 포즈별 마스크를 시작 시 한 번 준비합니다. 기존 사이드 이미지는 프레임 크기·정렬 기준으로 유지하며 충돌 윤곽에는 실제 달리기 프레임을 사용합니다.
+`assets.collision_mask`는 최종 출력 크기의 알파값이 `COLLISION_ALPHA_THRESHOLD`보다 큰 픽셀을 사용합니다. `assets.load_game_assets()`가 플레이어 4프레임과 기존 장애물·새 캐릭터의 포즈별 마스크를 시작 시 한 번 준비합니다. 기존 사이드 이미지는 프레임 크기·정렬 기준으로 유지하며 충돌 윤곽에는 실제 달리기 프레임을 사용합니다.
 
 장애물은 높이의 설정 비율(최소 1픽셀)만큼 8방향으로 테두리를 깎습니다. 현재 설정 6%에서 높이 120의 장애물은 7픽셀, 높이 40의 상찌는 2픽셀, 높이 64의 굴 파기는 4픽셀입니다. 투명 여백을 채우거나 사각형으로 축소하지 않으므로 실제 윤곽 안쪽에 판정이 남습니다. 굴 진입·탈출은 표시용 구덩이와 별개인 몸체 전용 마스크를 사용하며, 진입 완료 후 빈 구덩이는 충돌하지 않습니다. 플레이어 마스크는 줄이지 않습니다.
 
 백은 사각형으로 후보를 거른 뒤 마스크 겹침으로 게임오버를 결정합니다. `int()`로 변환한 동일한 출력 좌표와 프레임 번호를 렌더링·충돌 양쪽에 사용합니다. 픽셀 검사는 물리 갱신 시점의 위치에서 수행하며 연속 궤적 전체를 검사하는 방식은 아닙니다.
 
 ## 자동 검사
+
+기존 146개 검사는 기능별 통합 검사로 유지합니다. 새 모듈로 계산 위치를 옮겼지만 `GameState`의 공개 계약은 같으므로 테스트 파일을 이름만 바꾸거나 삭제·합치지 않았습니다. 리팩터링 전후에는 326개 계획·26,995프레임·828화면과 전체 자원·저장 파일 해시를 비교해 결과가 같은 것을 확인했습니다. 전체 회귀 검사와 실제 실행의 최종 결과는 [CHANGELOG](CHANGELOG.md)에 기록합니다.
 
 ```powershell
 python -B -m unittest discover -s tests -v

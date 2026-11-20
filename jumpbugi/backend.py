@@ -1,14 +1,14 @@
-"""백: 좌표·점프·충돌·점수·낮밤 시간을 계산한다. 화면을 그리지 않는다."""
+"""게임 상태와 갱신 순서. 기능별 계산을 연결하고 화면은 그리지 않는다."""
 from __future__ import annotations
 from pathlib import Path
-from dataclasses import dataclass
 import random
 import math
 import pygame
 if __package__:
+    from . import obstacles, patterns as pattern_rules
+    from .obstacles import GreetingJump, SjMember
+    from .season import SeasonProgress, background_transition
     from .config import (
-        BACKGROUND_FADE_SECONDS,
-        BACKGROUND_FILES,
         BACKGROUND_SPEED,
         CHARACTER_HEIGHT,
         DAY_NIGHT_INTERVAL,
@@ -27,45 +27,22 @@ if __package__:
         CHICKEN_UNLOCK_SLOT,
         CHICKEN_TYPES,
         CHICKEN_GROUND_OFFSET,
-        HSUCAT_TYPES,
-        HSUCAT_GIANT_YAWN_START_X,
-        HSUCAT_GIANT_YAWN_END_X,
-        HSUCAT_BOOK_DROP_DISTANCE,
         HSUCAT_RUN_MODES,
-        HSUCAT_RUN_FRAME_COUNT,
-        HSUCAT_FALL_START_X,
-        HSUCAT_FALL_END_X,
         HSUCAT_RUN_GROUND_OFFSET,
         HSUCAT_RUN_JUMP_HEIGHTS,
-        HSUCAT_RUN_JUMP_CONTACT_FACTOR,
-        HSUCAT_RUN_JUMP_MIN_SECONDS,
-        HSUCAT_RUN_JUMP_CLEARANCE,
         HSUCAT_UNLOCK_SLOT,
-        HSUCAT_PATTERNS,
         SJ_TYPES,
         SJ_CLUSTER_TYPES,
         SJ_CLUSTER_GAP,
-        SJ_HOP_PROBABILITY,
         SJ_GROUP_UNLOCK_SLOT,
         SJ_JUMP_UNLOCK_SLOT,
         SJ_SINGLE_JUMP_TYPES,
-        SJ_JUMP_HEIGHTS,
-        SJ_HIGH_CONTACT_FACTOR,
-        SJ_HIGH_MIN_SECONDS,
-        SJ_HIGH_PLAYER_CLEARANCE,
-        SJ_LOW_CONTACT_FACTOR,
-        SJ_LOW_MIN_SECONDS,
-        SJ_HOP_TRIGGER_X,
-        SJ_HOP_TRIGGER_SPACING,
         SJ_HOP_TRIGGER_JITTER,
         WAVE_IMAGE_FILES,
         WAVE_GROUND_OFFSET,
         WAVE_JUMP_UNLOCK_SLOT,
         WAVE_JUMP_PROBABILITY,
         WAVE_JUMP_HEIGHTS,
-        WAVE_JUMP_CONTACT_FACTORS,
-        WAVE_JUMP_MIN_SECONDS,
-        WAVE_UNDERPASS_CLEARANCE,
         SJ_UNLOCK_SLOT,
         SJ_GROUND_OFFSET,
         SJ_HOLE_TYPES,
@@ -73,20 +50,17 @@ if __package__:
         SJ_ESCAPE_PROFILES,
         SJ_ESCAPE_UNLOCK_SLOT,
         SJ_HOLE_CLEARANCE,
-        SJ_PATTERNS,
         FLYING_LEVELS,
         FLYING_HEAD_GAPS,
-        OBSTACLE_FRAME_TICKS,
-        HARD_PATTERNS,
-        GROUND_PATTERNS,
-        SUMMER_PATTERNS,
     )
     from .storage import load_high_score, save_high_score
-    from .difficulty import SeasonProgress, profile_for_slot, speed_multiplier_for_slot
+    from .difficulty import profile_for_slot, speed_multiplier_for_slot
 else:
+    import obstacles
+    import patterns as pattern_rules
+    from obstacles import GreetingJump, SjMember
+    from season import SeasonProgress, background_transition
     from config import (
-        BACKGROUND_FADE_SECONDS,
-        BACKGROUND_FILES,
         BACKGROUND_SPEED,
         CHARACTER_HEIGHT,
         DAY_NIGHT_INTERVAL,
@@ -105,45 +79,22 @@ else:
         CHICKEN_UNLOCK_SLOT,
         CHICKEN_TYPES,
         CHICKEN_GROUND_OFFSET,
-        HSUCAT_TYPES,
-        HSUCAT_GIANT_YAWN_START_X,
-        HSUCAT_GIANT_YAWN_END_X,
-        HSUCAT_BOOK_DROP_DISTANCE,
         HSUCAT_RUN_MODES,
-        HSUCAT_RUN_FRAME_COUNT,
-        HSUCAT_FALL_START_X,
-        HSUCAT_FALL_END_X,
         HSUCAT_RUN_GROUND_OFFSET,
         HSUCAT_RUN_JUMP_HEIGHTS,
-        HSUCAT_RUN_JUMP_CONTACT_FACTOR,
-        HSUCAT_RUN_JUMP_MIN_SECONDS,
-        HSUCAT_RUN_JUMP_CLEARANCE,
         HSUCAT_UNLOCK_SLOT,
-        HSUCAT_PATTERNS,
         SJ_TYPES,
         SJ_CLUSTER_TYPES,
         SJ_CLUSTER_GAP,
-        SJ_HOP_PROBABILITY,
         SJ_GROUP_UNLOCK_SLOT,
         SJ_JUMP_UNLOCK_SLOT,
         SJ_SINGLE_JUMP_TYPES,
-        SJ_JUMP_HEIGHTS,
-        SJ_HIGH_CONTACT_FACTOR,
-        SJ_HIGH_MIN_SECONDS,
-        SJ_HIGH_PLAYER_CLEARANCE,
-        SJ_LOW_CONTACT_FACTOR,
-        SJ_LOW_MIN_SECONDS,
-        SJ_HOP_TRIGGER_X,
-        SJ_HOP_TRIGGER_SPACING,
         SJ_HOP_TRIGGER_JITTER,
         WAVE_IMAGE_FILES,
         WAVE_GROUND_OFFSET,
         WAVE_JUMP_UNLOCK_SLOT,
         WAVE_JUMP_PROBABILITY,
         WAVE_JUMP_HEIGHTS,
-        WAVE_JUMP_CONTACT_FACTORS,
-        WAVE_JUMP_MIN_SECONDS,
-        WAVE_UNDERPASS_CLEARANCE,
         SJ_UNLOCK_SLOT,
         SJ_GROUND_OFFSET,
         SJ_HOLE_TYPES,
@@ -151,57 +102,12 @@ else:
         SJ_ESCAPE_PROFILES,
         SJ_ESCAPE_UNLOCK_SLOT,
         SJ_HOLE_CLEARANCE,
-        SJ_PATTERNS,
         FLYING_LEVELS,
         FLYING_HEAD_GAPS,
-        OBSTACLE_FRAME_TICKS,
-        HARD_PATTERNS,
-        GROUND_PATTERNS,
-        SUMMER_PATTERNS,
     )
     from storage import load_high_score, save_high_score
-    from difficulty import SeasonProgress, profile_for_slot, speed_multiplier_for_slot
+    from difficulty import profile_for_slot, speed_multiplier_for_slot
 
-
-@dataclass
-class SjMember:
-    offset_x: int
-    pattern: str | None
-    jump_plan: GreetingJump | None
-    passed: bool = False
-
-    @property
-    def hop_enabled(self):
-        return self.jump_plan is not None
-
-    @property
-    def trigger_x(self):
-        return (self.jump_plan.center_x + self.jump_plan.half_distance
-                if self.jump_plan is not None else None)
-
-    def is_jumping(self, group_x):
-        return self.jump_plan is not None and self.jump_plan.is_jumping(group_x)
-
-    def y_offset(self, group_x):
-        return self.jump_plan.y_offset(group_x) if self.jump_plan is not None else 0.0
-
-
-@dataclass
-class GreetingJump:
-    pattern: str
-    height: float
-    center_x: float
-    half_distance: float
-
-    def progress(self, x):
-        return (self.center_x + self.half_distance - x) / (2 * self.half_distance)
-
-    def is_jumping(self, x):
-        return 0.0 < self.progress(x) < 1.0
-
-    def y_offset(self, x):
-        progress = self.progress(x)
-        return -4 * self.height * progress * (1 - progress) if 0 < progress < 1 else 0.0
 
 
 class GameState:
@@ -256,21 +162,16 @@ class GameState:
 
     @property
     def available_patterns(self):
-        pool = GROUND_PATTERNS
-        if self.chicken_obstacles_enabled:
-            pool += SUMMER_PATTERNS
-        if self.hsucat_obstacles_enabled:
-            pool += HSUCAT_PATTERNS
-        if self.sj_obstacles_enabled:
-            pool += SJ_PATTERNS
-        return [pattern for pattern in pool if all(
-            kind in self.obstacle_sizes
-            and (self.chicken_obstacles_enabled or kind not in CHICKEN_TYPES)
-            and (self.hsucat_obstacles_enabled or kind not in HSUCAT_TYPES)
-            and (self.sj_obstacles_enabled or kind not in SJ_TYPES)
-            and (self.sj_groups_enabled or kind not in SJ_CLUSTER_TYPES)
-            and (self.sj_escape_enabled or kind != 'sj_escape')
-            for kind in pattern)]
+        return pattern_rules.available_patterns(self.obstacle_sizes, self.pattern_unlocks)
+
+    @property
+    def pattern_unlocks(self):
+        return pattern_rules.PatternUnlocks(
+            chicken=self.chicken_obstacles_enabled,
+            hsucat=self.hsucat_obstacles_enabled,
+            sj=self.sj_obstacles_enabled,
+            sj_groups=self.sj_groups_enabled,
+            sj_escape=self.sj_escape_enabled)
 
     def spawn_obstacle(self, name=None):
         """계절별 추가 유형을 해금하고 둘째 봄부터 상찌 무리와 점프를 선택한다."""
@@ -279,24 +180,9 @@ class GameState:
         elif self.first_obstacle:
             self.obstacle_name = random.choice(OBSTACLE_FILES)
         else:
-            if not self.chicken_obstacles_enabled:
-                self.pattern_queue = [kind for kind in self.pattern_queue if kind not in CHICKEN_TYPES]
-            if not self.hsucat_obstacles_enabled:
-                self.pattern_queue = [kind for kind in self.pattern_queue if kind not in HSUCAT_TYPES]
-            if not self.sj_obstacles_enabled:
-                self.pattern_queue = [kind for kind in self.pattern_queue if kind not in SJ_TYPES]
-            if not self.sj_groups_enabled:
-                self.pattern_queue = [kind for kind in self.pattern_queue if kind not in SJ_CLUSTER_TYPES]
-            if not self.sj_escape_enabled:
-                self.pattern_queue = [kind for kind in self.pattern_queue if kind != 'sj_escape']
+            self.pattern_queue = pattern_rules.unlocked_queue(self.pattern_queue, self.pattern_unlocks)
             if not self.pattern_queue:
-                pool = self.available_patterns
-                hard = [pattern for pattern in pool if pattern in HARD_PATTERNS]
-                if hard and random.random() < self.difficulty.hard_pattern_probability:
-                    pool = hard
-                self.current_pattern = random.choice(pool)
-                if random.random() >= self.difficulty.chain_probability:
-                    self.current_pattern = self.current_pattern[:1]
+                self.current_pattern = pattern_rules.choose_pattern(self.available_patterns, self.difficulty)
                 self.pattern_queue = list(self.current_pattern)
             self.obstacle_name = self.pattern_queue.pop(0)
         # 둘째 봄부터 기본 상찌 순서도 2·3마리 묶음 중 하나로 바꾼다.
@@ -355,19 +241,10 @@ class GameState:
                 and random.random() < WAVE_JUMP_PROBABILITY):
             patterns = tuple(WAVE_JUMP_HEIGHTS)
             pattern = patterns[min(int(random.random() * len(patterns)), len(patterns) - 1)]
-            height = WAVE_JUMP_HEIGHTS[pattern]
-            factor = WAVE_JUMP_CONTACT_FACTORS[pattern]
-            if pattern != 'low':
-                required_lift = (self.obstacle_y + self.obstacle_size[1] - self.ground_y
-                                 + WAVE_UNDERPASS_CLEARANCE)
-                height = max(height, required_lift + 1)
-                factor = max(factor, (1 - required_lift / height) ** -0.5)
-            contact_half = (self.player_size[0] + self.obstacle_size[0]) / 2
-            half_distance = max(factor * contact_half, WAVE_JUMP_MIN_SECONDS
-                                * OBSTACLE_SPEED * PHYSICS_HZ * self.speed_multiplier / 2)
-            self.wave_jump = GreetingJump(pattern, height,
-                                          (self.player_size[0] - self.obstacle_size[0]) / 2,
-                                          half_distance)
+            self.wave_jump = obstacles.build_greeting_jump(
+                pattern, obstacle_y=self.obstacle_y, obstacle_size=self.obstacle_size,
+                player_size=self.player_size, ground_y=self.ground_y,
+                speed_multiplier=self.speed_multiplier)
         if self.obstacle_name in SJ_CLUSTER_TYPES:
             count = 2 if self.obstacle_name == 'sj_pair' else 3
             single_width = self.obstacle_sizes['sj.png'][0]
@@ -384,45 +261,19 @@ class GameState:
         self.passed = False
 
     def build_hsucat_run_jump(self, pattern):
-        """화면 밖으로 뛰는 캣과 플레이어가 넘을 수 있는 낮은 점프를 준비한다."""
-        height = HSUCAT_RUN_JUMP_HEIGHTS[pattern]
-        factor = HSUCAT_RUN_JUMP_CONTACT_FACTOR
-        if pattern == 'high':
-            required_lift = (self.obstacle_ground_y + self.obstacle_size[1]
-                             - self.ground_y + HSUCAT_RUN_JUMP_CLEARANCE)
-            height = max(height, required_lift + 1)
-            factor = max(factor, (1 - required_lift / height) ** -0.5)
-        contact_half = (self.player_size[0] + self.obstacle_size[0]) / 2
-        speed = OBSTACLE_SPEED * PHYSICS_HZ * self.speed_multiplier
-        return GreetingJump(pattern, height, (self.player_size[0] - self.obstacle_size[0]) / 2,
-                            max(factor * contact_half, HSUCAT_RUN_JUMP_MIN_SECONDS * speed / 2))
+        return obstacles.build_hsucat_run_jump(
+            pattern, obstacle_ground_y=self.obstacle_ground_y,
+            obstacle_size=self.obstacle_size, player_size=self.player_size,
+            ground_y=self.ground_y, speed_multiplier=self.speed_multiplier)
 
     def choose_sj_jump_pattern(self):
-        roll = random.random()
-        return ('high' if roll < SJ_HOP_PROBABILITY / 2 else
-                'low' if roll < SJ_HOP_PROBABILITY else None)
+        return obstacles.choose_sj_jump_pattern()
 
     def build_sj_jump(self, pattern, width, offset=0, index=None, jitter=0):
-        """높은 상찌는 최대 점프 중인 플레이어 위로도 통과하도록 준비한다."""
-        center = (self.player_size[0] - width) / 2 - offset
-        contact_half = (self.player_size[0] + width) / 2
-        speed = OBSTACLE_SPEED * PHYSICS_HZ * self.speed_multiplier
-        height = SJ_JUMP_HEIGHTS[pattern]
-        if pattern == 'high':
-            player_rise = min(0, JUMP_SPEED + GRAVITY / 2) ** 2 / (2 * GRAVITY)
-            required_lift = (self.obstacle_ground_y + self.obstacle_size[1]
-                             - (self.ground_y - player_rise) + SJ_HIGH_PLAYER_CLEARANCE)
-            height = max(height, required_lift + 1)
-            factor = max(SJ_HIGH_CONTACT_FACTOR, (1 - required_lift / height) ** -0.5)
-            half_distance = max(factor * contact_half, SJ_HIGH_MIN_SECONDS * speed / 2)
-            if index is not None:
-                half_distance += index * (SJ_HOP_TRIGGER_SPACING + width + SJ_CLUSTER_GAP) + jitter
-        elif index is not None:
-            half_distance = max(contact_half + 1,
-                                SJ_HOP_TRIGGER_X - index * SJ_HOP_TRIGGER_SPACING - jitter - center)
-        else:
-            half_distance = max(SJ_LOW_CONTACT_FACTOR * contact_half, SJ_LOW_MIN_SECONDS * speed / 2)
-        return GreetingJump(pattern, height, center, half_distance)
+        return obstacles.build_sj_jump(
+            pattern, width, offset, index, jitter, player_size=self.player_size,
+            obstacle_size=self.obstacle_size, obstacle_ground_y=self.obstacle_ground_y,
+            ground_y=self.ground_y, speed_multiplier=self.speed_multiplier)
 
     @property
     def sj_cluster_parts(self):
@@ -430,11 +281,9 @@ class GameState:
         if self.obstacle_name not in SJ_CLUSTER_TYPES or not self.sj_members:
             return ()
         frame_count = len(self.obstacle_frame_masks.get('sj.png', ())) or 1
-        ground_frame = int(self.obstacle_animation_tick // OBSTACLE_FRAME_TICKS) % frame_count
-        return tuple((0 if member.is_jumping(self.obstacle_x) else ground_frame,
-                      int(self.obstacle_x + member.offset_x),
-                      int(self.obstacle_y + member.y_offset(self.obstacle_x)))
-                     for member in self.sj_members)
+        return obstacles.cluster_parts(
+            self.sj_members, x=self.obstacle_x, ground_y=self.obstacle_y,
+            frame_count=frame_count, animation_tick=self.obstacle_animation_tick)
 
     @property
     def greeting_jumps_enabled(self):
@@ -492,25 +341,12 @@ class GameState:
 
     @property
     def obstacle_frame_index(self):
-        if self.wave_jump_active:
-            return 0
         frames = self.obstacle_frame_masks.get(self.obstacle_name)
-        if frames and self.obstacle_name == 'hsucat_crouch.png':
-            progress = min(1.0, max(0.0, (HSUCAT_GIANT_YAWN_START_X - self.obstacle_x)
-                                    / (HSUCAT_GIANT_YAWN_START_X - HSUCAT_GIANT_YAWN_END_X)))
-            return int(progress * (len(frames) - 1))
-        if frames and self.obstacle_name == 'hsucat_run.png':
-            if self.hsucat_run_mode == 'fall' and self.obstacle_x <= HSUCAT_FALL_START_X:
-                progress = min(1.0, max(0.0, (HSUCAT_FALL_START_X - self.obstacle_x)
-                                        / (HSUCAT_FALL_START_X - HSUCAT_FALL_END_X)))
-                return HSUCAT_RUN_FRAME_COUNT + int(progress * (len(frames) - HSUCAT_RUN_FRAME_COUNT - 1))
-            return int(self.obstacle_animation_tick // OBSTACLE_FRAME_TICKS) % HSUCAT_RUN_FRAME_COUNT
-        if frames and self.obstacle_name == 'hsucat_book.png':
-            progress = min(1.0, max(0.0, (SCREEN_SIZE[0] - self.obstacle_x) / HSUCAT_BOOK_DROP_DISTANCE))
-            return int(progress * (len(frames) - 1))
-        if frames and self.obstacle_name in SJ_HOLE_TYPES:
-            return int(self.sj_hole_progress * (len(frames) - 1))
-        return int(self.obstacle_animation_tick // OBSTACLE_FRAME_TICKS) % len(frames) if frames else 0
+        return obstacles.frame_index(
+            self.obstacle_name, len(frames) if frames else 0,
+            x=self.obstacle_x, animation_tick=self.obstacle_animation_tick,
+            jumping=self.wave_jump_active, run_mode=self.hsucat_run_mode,
+            hole_progress=self.sj_hole_progress)
 
 
     def stop(self):
@@ -587,20 +423,13 @@ class GameState:
 
 
     def update_background(self, dt):
-        """계절별 낮·밤 8장을 설정한 간격으로 순환하고 부드럽게 섞는다."""
+        """같은 계절 시계의 전환값을 게임 상태에 반영한다."""
         self.background_elapsed += dt
-        cycle = self.total_slots_passed
-        elapsed = max(0.0, self.background_elapsed - cycle * DAY_NIGHT_INTERVAL)
-        progress = min(elapsed / min(BACKGROUND_FADE_SECONDS, DAY_NIGHT_INTERVAL), 1.0)
-        # 시작과 끝의 변화 속도를 낮춰 갑자기 밝기가 꺾이지 않게 한다.
-        eased = progress * progress * (3 - 2 * progress)
-        self.background_to_index = cycle % len(BACKGROUND_FILES)
-        self.background_from_index = (cycle - 1) % len(BACKGROUND_FILES) if cycle else 0
-        self.background_alpha = round(255 * eased) if cycle else 0
-        # HUD 색은 전환하는 두 그림의 낮/밤 밝기에 맞춰 보간한다.
-        source_night = self.background_from_index % 2
-        target_night = self.background_to_index % 2
-        self.night_alpha = round(255 * (source_night * (1 - eased) + target_night * eased))
+        transition = background_transition(self.background_elapsed, DAY_NIGHT_INTERVAL)
+        self.background_from_index = transition.from_index
+        self.background_to_index = transition.to_index
+        self.background_alpha = transition.alpha
+        self.night_alpha = transition.night_alpha
 
     def scroll_background(self, dt):
         """계절·점수·장애물을 진행하지 않고 배경의 스크롤 위치만 옮긴다."""

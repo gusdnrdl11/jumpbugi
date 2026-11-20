@@ -1,50 +1,22 @@
-"""프론트: 화면·이미지·글꼴·배경 혼합·출력."""
+"""프론트: 준비된 이미지와 상태를 화면·UI로 그린다."""
 import pygame
 if __package__:
-    from .assets import (load_image, prepare_intro_cover, load_run_frames, load_chicken_frames,
-                         load_hsucat_run_obstacle_frames, load_hsucat_giant_frames, load_greeting_frames, load_sj_wave_frames,
-                         load_hsucat_book_frames, load_sj_obstacles, collision_mask)
+    from .assets import load_game_assets
     from .config import (
-        BACKGROUND_SIZE,
-        BACKGROUND_FILES,
         GAME_TITLE,
-        START_IMAGE_FILE,
         CHARACTER_HEIGHT,
-        CHICKEN_TYPES,
-        HSUCAT_TYPES,
-        HSUCAT_GIANT_SIZE,
-        SJ_BURROW_SIZE,
-        SJ_CLUSTER_GAP,
         HUD_GAP,
         HUD_MARGIN,
-        OBSTACLE_FILES,
-        OBSTACLE_HEIGHTS,
-        OBSTACLE_MASK_INSET_RATIO,
-        WAVE_IMAGE_FILES,
         SCREEN_SIZE,
         PLAYER_GROUND_OFFSET,
     )
 else:
-    from assets import (load_image, prepare_intro_cover, load_run_frames, load_chicken_frames,
-                        load_hsucat_run_obstacle_frames, load_hsucat_giant_frames, load_greeting_frames, load_sj_wave_frames,
-                        load_hsucat_book_frames, load_sj_obstacles, collision_mask)
+    from assets import load_game_assets
     from config import (
-        BACKGROUND_SIZE,
-        BACKGROUND_FILES,
         GAME_TITLE,
-        START_IMAGE_FILE,
         CHARACTER_HEIGHT,
-        CHICKEN_TYPES,
-        HSUCAT_TYPES,
-        HSUCAT_GIANT_SIZE,
-        SJ_BURROW_SIZE,
-        SJ_CLUSTER_GAP,
         HUD_GAP,
         HUD_MARGIN,
-        OBSTACLE_FILES,
-        OBSTACLE_HEIGHTS,
-        OBSTACLE_MASK_INSET_RATIO,
-        WAVE_IMAGE_FILES,
         SCREEN_SIZE,
         PLAYER_GROUND_OFFSET,
     )
@@ -54,65 +26,21 @@ class GameView:
     def __init__(self):
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
         pygame.display.set_caption(GAME_TITLE)
-        start_image = load_image(START_IMAGE_FILE)
-        self.start_image = prepare_intro_cover(start_image, SCREEN_SIZE)
-        # 스크롤 배경: 긴 이미지의 비율을 유지하고 같은 표면을 이어 그린다.
-        # 배경만 불투명하게 변환해 이전 프레임과의 혼합·잔상을 방지한다.
-        # 계절별 낮·밤도 같은 크기·스크롤 위치에서 섞어 길이 이어지게 한다.
-        self.background_stages = tuple(
-            load_image(filename, size=BACKGROUND_SIZE).convert() for filename in BACKGROUND_FILES
-        )
+        game_assets = load_game_assets()
+        self.start_image = game_assets.start_image
+        self.background_stages = game_assets.background_stages
+        self.player_image = game_assets.player_image
+        self.run_frames = game_assets.run_frames
+        self.obstacle_images = game_assets.obstacle_images
+        self.obstacle_frames = game_assets.obstacle_frames
+        self.player_masks = game_assets.player_masks
+        self.obstacle_masks = game_assets.obstacle_masks
+        self.obstacle_frame_masks = game_assets.obstacle_frame_masks
+        # 배경 혼합·스크롤용 사본은 화면 담당이 따로 보관한다.
         self.startup_background = self.background_stages[0].copy()
         self.background_overlay = self.background_stages[0].copy()
         self.stage = self.background_stages[0].copy()
         self.background_width = self.stage.get_width()
-        self.player_image = load_image('bugi.png', height=CHARACTER_HEIGHT)
-        self.run_frames = load_run_frames(self.player_image)
-        # 자원을 한 번만 로딩하고 재등장 시 선택과 위치 초기화만 한다.
-        self.obstacle_images = {
-            name: load_image(name, height=OBSTACLE_HEIGHTS[name]) for name in OBSTACLE_FILES
-            if name != 'sj.png' and name not in WAVE_IMAGE_FILES
-        }
-        sj_wave_frames = load_sj_wave_frames(OBSTACLE_HEIGHTS['sj.png'])
-        self.obstacle_images['sj.png'] = sj_wave_frames[0]
-        self.obstacle_frames = {name: [image] for name, image in self.obstacle_images.items()}
-        self.obstacle_frames['sj.png'] = sj_wave_frames
-        for name, filename in WAVE_IMAGE_FILES.items():
-            frames = load_greeting_frames(filename, OBSTACLE_HEIGHTS[name])
-            self.obstacle_frames[name] = frames
-            self.obstacle_images[name] = frames[0]
-        for name in HSUCAT_TYPES:
-            if name == 'hsucat_run.png':
-                self.obstacle_frames[name] = load_hsucat_run_obstacle_frames(OBSTACLE_HEIGHTS[name])
-            elif name == 'hsucat_crouch.png':
-                self.obstacle_frames[name] = load_hsucat_giant_frames(HSUCAT_GIANT_SIZE)
-            else:
-                self.obstacle_frames[name] = load_hsucat_book_frames(OBSTACLE_HEIGHTS[name])
-            self.obstacle_images[name] = self.obstacle_frames[name][0]
-        chicken_sheet = load_image('chicken_flap.png')
-        for name in CHICKEN_TYPES:
-            self.obstacle_frames[name] = load_chicken_frames(
-                0 if 'white' in name else 1, OBSTACLE_HEIGHTS[name], chicken_sheet)
-            self.obstacle_images[name] = self.obstacle_frames[name][0]
-        sj_collision_frames = {}
-        for name, frames in load_sj_obstacles(
-                self.obstacle_images['sj.png'], height=OBSTACLE_HEIGHTS['sj_run.png'],
-                burrow_size=SJ_BURROW_SIZE, gap=SJ_CLUSTER_GAP,
-                reference_frames=sj_wave_frames, collision_frames=sj_collision_frames).items():
-            self.obstacle_frames[name] = frames
-            self.obstacle_images[name] = frames[0]
-        # 크기 조절 후 한 번만 생성하며 실제 표시 프레임과 같은 마스크를 쓴다.
-        self.player_masks = [collision_mask(frame) for frame in self.run_frames]
-        self.obstacle_masks = {
-            name: collision_mask(sj_collision_frames.get(name, [image])[0],
-                                 max(1, round(image.get_height() * OBSTACLE_MASK_INSET_RATIO)))
-            for name, image in self.obstacle_images.items()
-        }
-        self.obstacle_frame_masks = {
-            name: [collision_mask(frame, max(1, round(frame.get_height() * OBSTACLE_MASK_INSET_RATIO)))
-                   for frame in sj_collision_frames.get(name, frames)]
-            for name, frames in self.obstacle_frames.items() if len(frames) > 1
-        }
         self.score_font = pygame.font.SysFont(None, 30)
         self.game_over_text = pygame.font.SysFont(None, 80).render(
             'GAME OVER', True, (255, 0, 0)

@@ -1,14 +1,32 @@
-"""이미지 읽기와 모션 시트 분리."""
+"""이미지·모션 시트와 실제 게임에 사용할 자원 묶음을 준비한다."""
+from dataclasses import dataclass
 from math import ceil
 import pygame
 if __package__:
+    from . import config
     from .config import (IMAGE_DIR, COLLISION_ALPHA_THRESHOLD, SJ_BASE_IMAGE_FILE,
                          HSUCAT_GIANT_IMAGE_FILE, HSUCAT_BOOK_IMAGE_FILE, HSUCAT_FALL_IMAGE_FILE,
                          SJ_ESCAPE_IMAGE_FILE)
 else:
+    import config
     from config import (IMAGE_DIR, COLLISION_ALPHA_THRESHOLD, SJ_BASE_IMAGE_FILE,
                         HSUCAT_GIANT_IMAGE_FILE, HSUCAT_BOOK_IMAGE_FILE, HSUCAT_FALL_IMAGE_FILE,
                         SJ_ESCAPE_IMAGE_FILE)
+
+
+@dataclass
+class GameAssets:
+    """표시 프레임과 같은 크기·포즈의 충돌 마스크를 함께 보관한다."""
+    start_image: pygame.Surface
+    background_stages: tuple[pygame.Surface, ...]
+    player_image: pygame.Surface
+    run_frames: list[pygame.Surface]
+    obstacle_images: dict[str, pygame.Surface]
+    obstacle_frames: dict[str, list[pygame.Surface]]
+    player_masks: list[pygame.mask.Mask]
+    obstacle_masks: dict[str, pygame.mask.Mask]
+    obstacle_frame_masks: dict[str, list[pygame.mask.Mask]]
+
 
 def load_image(filename, *, size=None, height=None):
     """공통 이미지 로딩과 비율 유지 크기 조절."""
@@ -355,3 +373,71 @@ def load_run_frames(reference):
     return frames
 
 
+def load_game_assets():
+    """화면 초기화 뒤 호출해 게임의 이미지·프레임·마스크를 한 번 준비한다."""
+    start_image = load_image(config.START_IMAGE_FILE)
+    start_image = prepare_intro_cover(start_image, config.SCREEN_SIZE)
+    # 배경만 불투명하게 준비해 혼합·스크롤 중 알파가 중복되지 않게 한다.
+    background_stages = tuple(
+        load_image(filename, size=config.BACKGROUND_SIZE).convert()
+        for filename in config.BACKGROUND_FILES
+    )
+    player_image = load_image('bugi.png', height=config.CHARACTER_HEIGHT)
+    run_frames = load_run_frames(player_image)
+    # 자원을 한 번만 로딩하고 재등장 시 선택과 위치 초기화만 한다.
+    obstacle_images = {
+        name: load_image(name, height=config.OBSTACLE_HEIGHTS[name])
+        for name in config.OBSTACLE_FILES
+        if name != 'sj.png' and name not in config.WAVE_IMAGE_FILES
+    }
+    sj_wave_frames = load_sj_wave_frames(config.OBSTACLE_HEIGHTS['sj.png'])
+    obstacle_images['sj.png'] = sj_wave_frames[0]
+    obstacle_frames = {name: [image] for name, image in obstacle_images.items()}
+    obstacle_frames['sj.png'] = sj_wave_frames
+    for name, filename in config.WAVE_IMAGE_FILES.items():
+        frames = load_greeting_frames(filename, config.OBSTACLE_HEIGHTS[name])
+        obstacle_frames[name] = frames
+        obstacle_images[name] = frames[0]
+    for name in config.HSUCAT_TYPES:
+        if name == 'hsucat_run.png':
+            obstacle_frames[name] = load_hsucat_run_obstacle_frames(config.OBSTACLE_HEIGHTS[name])
+        elif name == 'hsucat_crouch.png':
+            obstacle_frames[name] = load_hsucat_giant_frames(config.HSUCAT_GIANT_SIZE)
+        else:
+            obstacle_frames[name] = load_hsucat_book_frames(config.OBSTACLE_HEIGHTS[name])
+        obstacle_images[name] = obstacle_frames[name][0]
+    chicken_sheet = load_image('chicken_flap.png')
+    for name in config.CHICKEN_TYPES:
+        obstacle_frames[name] = load_chicken_frames(
+            0 if 'white' in name else 1, config.OBSTACLE_HEIGHTS[name], chicken_sheet)
+        obstacle_images[name] = obstacle_frames[name][0]
+    sj_collision_frames = {}
+    for name, frames in load_sj_obstacles(
+            obstacle_images['sj.png'], height=config.OBSTACLE_HEIGHTS['sj_run.png'],
+            burrow_size=config.SJ_BURROW_SIZE, gap=config.SJ_CLUSTER_GAP,
+            reference_frames=sj_wave_frames, collision_frames=sj_collision_frames).items():
+        obstacle_frames[name] = frames
+        obstacle_images[name] = frames[0]
+    # 크기 조절 후 한 번만 생성하며 실제 표시 프레임과 같은 마스크를 쓴다.
+    player_masks = [collision_mask(frame) for frame in run_frames]
+    obstacle_masks = {
+        name: collision_mask(sj_collision_frames.get(name, [image])[0],
+                             max(1, round(image.get_height() * config.OBSTACLE_MASK_INSET_RATIO)))
+        for name, image in obstacle_images.items()
+    }
+    obstacle_frame_masks = {
+        name: [collision_mask(frame, max(1, round(frame.get_height() * config.OBSTACLE_MASK_INSET_RATIO)))
+               for frame in sj_collision_frames.get(name, frames)]
+        for name, frames in obstacle_frames.items() if len(frames) > 1
+    }
+    return GameAssets(
+        start_image=start_image,
+        background_stages=background_stages,
+        player_image=player_image,
+        run_frames=run_frames,
+        obstacle_images=obstacle_images,
+        obstacle_frames=obstacle_frames,
+        player_masks=player_masks,
+        obstacle_masks=obstacle_masks,
+        obstacle_frame_masks=obstacle_frame_masks,
+    )

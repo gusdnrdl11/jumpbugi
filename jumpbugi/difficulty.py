@@ -1,26 +1,12 @@
-"""슬롯 진행과 조절 가능한 난이도. 화면·파일·난수에 의존하지 않는다."""
+"""속도·접근 간격·패턴 확률. 화면·파일·난수에 의존하지 않는다."""
 from dataclasses import dataclass
-import math
 
 if __package__:
     from . import config
+    from .season import SeasonProgress  # 기존 import 경로도 유지한다.
 else:
     import config
-
-
-@dataclass(frozen=True)
-class SeasonProgress:
-    total_slots_passed: int
-    current_slot: int
-    season_cycle_count: int
-
-    @classmethod
-    def from_elapsed(cls, elapsed, interval):
-        if interval <= 0:
-            raise ValueError('슬롯 시간은 0보다 커야 합니다.')
-        total = math.floor((max(0.0, elapsed) + 1e-9) / interval)
-        return cls(total, total % config.SLOTS_PER_CYCLE,
-                   total // config.SLOTS_PER_CYCLE)
+    from season import SeasonProgress
 
 
 @dataclass(frozen=True)

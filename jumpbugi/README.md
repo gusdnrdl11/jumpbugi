@@ -6,12 +6,22 @@
 
 GitHub 저장소는 [개인 jumpbugi](https://github.com/gusdnrdl11/jumpbugi)와 [튜터링 jumpbugi](https://github.com/hansung-tutoring/jumpbugi)이며, 두 저장소의 기본 브랜치는 `main`입니다.
 
-## 문서 구조
+## 프로젝트 구조
 
 ```text
 jumpbugi/
 ├─ README.md                실행 안내와 문서 목차
 ├─ AGENTS.md                AI 참조 범위 안내
+├─ main.py                  입력과 전체 게임 루프
+├─ backend.py               GameState와 물리·충돌·득점 갱신
+├─ patterns.py              장애물 패턴 풀·해금·대기열 선택
+├─ obstacles.py             장애물 점프 궤적·포즈·상찌 무리 좌표
+├─ season.py                계절 슬롯·사이클·배경 전환값
+├─ difficulty.py            속도·접근 간격·패턴 난이도 확률
+├─ frontend.py              화면·UI 렌더링
+├─ assets.py                이미지·애니메이션·마스크 자원 조립
+├─ config.py                조절 가능한 설정과 경로
+├─ storage.py               최고점수 읽기·저장
 ├─ docs/
 │  ├─ TODO.md               다음에 할 일
 │  ├─ CHANGELOG.md          완료한 작업과 검증 기록
@@ -45,6 +55,8 @@ jumpbugi/
 ```
 
 ## 읽는 순서
+
+기능별 코드 위치는 [ARCHITECTURE의 역할과 연결](docs/ARCHITECTURE.md#역할과-연결)을 참고합니다. 플레이어 점프·충돌·득점은 `backend.py`, 패턴 선택은 `patterns.py`, 장애물 점프·포즈는 `obstacles.py`, 계절 전환은 `season.py`, 난이도는 `difficulty.py`, 이미지 준비는 `assets.py`에서 수정합니다. 독립 계산 모듈은 화면을 만들지 않으며 기존 직접 실행·패키지 import 경로는 유지합니다.
 
 | 문서 | 담는 내용 |
 | --- | --- |
