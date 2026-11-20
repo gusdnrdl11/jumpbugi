@@ -1,4 +1,4 @@
-"""달리는 한성캣의 달리기·넘어짐·높은 점프와 아래 통과 득점을 검사한다."""
+"""달리는 한성캣의 지상 동작·두 점프 패턴과 회피·득점을 검사한다."""
 import os
 import tempfile
 import unittest
@@ -29,9 +29,10 @@ class RunningHsucatTests(unittest.TestCase):
         self.app.reset()
         pygame.event.clear()
 
-    def spawn_mode(self, mode, seconds=120):
+    def spawn_mode(self, mode, seconds=None):
         state = self.app.state
-        state.background_elapsed = seconds
+        state.background_elapsed = (config.WAVE_JUMP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL
+                                    if seconds is None else seconds)
         roll = (config.HSUCAT_RUN_MODES.index(mode) + 0.5) / len(config.HSUCAT_RUN_MODES)
         with patch.object(backend.random, 'random', return_value=roll):
             state.spawn_obstacle('hsucat_run.png')
@@ -65,17 +66,18 @@ class RunningHsucatTests(unittest.TestCase):
             self.assertEqual(bounds.bottom, 120)
             self.assertEqual(state.obstacle_y + bounds.bottom, 358)
 
-    def test_each_mode_is_selected_once_with_equal_probability_and_existing_autumn_unlock(self):
+    def test_each_mode_is_selected_once_with_equal_probability_after_first_cycle(self):
         state = self.app.state
-        for roll, mode in ((0.0, 'fall'), (0.333332, 'fall'), (1 / 3, 'high'),
-                           (0.666665, 'high'), (2 / 3, 'run'), (1.0, 'run')):
+        for roll, mode in ((0.0, 'fall'), (0.249999, 'fall'), (0.25, 'high'),
+                           (0.499999, 'high'), (0.5, 'low'), (0.749999, 'low'),
+                           (0.75, 'run'), (1.0, 'run')):
             with self.subTest(roll=roll):
-                state.background_elapsed = 120
+                state.background_elapsed = config.WAVE_JUMP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL
                 with patch.object(backend.random, 'random', return_value=roll) as choose:
                     state.spawn_obstacle('hsucat_run.png')
                 self.assertEqual(choose.call_count, 1)
                 self.assertEqual(state.hsucat_run_mode, mode)
-                self.assertEqual(state.wave_jump is not None, mode == 'high')
+                self.assertEqual(state.wave_jump is not None, mode in ('high', 'low'))
                 self.assertEqual(state.obstacle_requires_jump, mode != 'high')
                 self.assertTrue(state.hsucat_obstacles_enabled)
                 state.player_y = -1000
@@ -111,10 +113,12 @@ class RunningHsucatTests(unittest.TestCase):
         state.update_step(0)
         self.assertTrue(state.game_over)
 
-    def test_high_jump_stays_above_grounded_bugi_and_underpass_scores_once(self):
+    def test_high_jump_leaves_screen_and_underpass_scores_once(self):
         state = self.spawn_mode('high')
         plan = state.wave_jump
-        self.assertGreaterEqual(plan.height, 228)
+        state.obstacle_x = plan.center_x
+        state.update_step(0)
+        self.assertLessEqual(state.obstacle_y + state.obstacle_size[1], 0)
         for x in range(state.player_size[0] - 1, -state.obstacle_size[0], -3):
             with self.subTest(x=x):
                 state.obstacle_x = x
@@ -129,6 +133,28 @@ class RunningHsucatTests(unittest.TestCase):
         self.assertTrue(state.passed)
         state.update_step(0)
         self.assertEqual(state.score, 10)
+
+    def test_low_jump_stays_visible_and_requires_bugi_to_jump(self):
+        state = self.spawn_mode('low')
+        plan = state.wave_jump
+        self.assertEqual(plan.pattern, 'low')
+        self.assertTrue(state.obstacle_requires_jump)
+        state.obstacle_x = plan.center_x
+        state.player_y = -1000
+        state.obstacle_animation_tick = 3 * config.OBSTACLE_FRAME_TICKS
+        state.update_step(0)
+        self.assertLess(state.obstacle_y, state.obstacle_ground_y)
+        self.assertGreater(state.obstacle_y, 0)
+        self.assertTrue(state.wave_jump_active)
+        self.assertEqual(state.obstacle_frame_index, 0)
+        state.player_y = state.ground_y
+        self.assertTrue(state.collides_with_obstacle())
+        state.obstacle_x = plan.center_x - plan.half_distance - 1
+        with patch.object(state, 'spawn_obstacle'):
+            state.update_step(0)
+        self.assertFalse(state.wave_jump_active)
+        self.assertEqual(state.obstacle_y, state.obstacle_ground_y)
+        self.assertEqual(state.obstacle_frame_index, 3)
 
     def test_pause_game_over_new_spawn_and_reset_keep_mode_state_and_cached_images(self):
         frames = self.app.view.obstacle_frames['hsucat_run.png']
@@ -154,9 +180,9 @@ class RunningHsucatTests(unittest.TestCase):
             self.assertEqual(state.background_elapsed, 0)
             self.assertIs(self.app.view.obstacle_frames['hsucat_run.png'], frames)
 
-    def test_all_three_modes_are_clearable_and_award_ten_at_four_speeds_and_three_fps(self):
+    def test_all_four_modes_are_clearable_and_award_ten_at_four_speeds_and_three_fps(self):
         for mode in config.HSUCAT_RUN_MODES:
-            for seconds in (120, 180, 300, 600):
+            for seconds in (slot * config.DAY_NIGHT_INTERVAL for slot in (8, 10, 16, 24)):
                 for hz in (30, 60, 120):
                     with self.subTest(mode=mode, seconds=seconds, hz=hz):
                         self.app.reset()

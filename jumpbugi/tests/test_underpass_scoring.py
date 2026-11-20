@@ -32,7 +32,7 @@ class UnderpassScoringTests(unittest.TestCase):
 
     def spawn_sj(self, name, patterns, seconds=None):
         state = self.app.state
-        state.background_elapsed = config.SJ_JUMP_UNLOCK_SECONDS if seconds is None else seconds
+        state.background_elapsed = (config.SJ_JUMP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL) if seconds is None else seconds
         rolls = [0.0 if pattern == 'high' else config.SJ_HOP_PROBABILITY * 0.75
                  if pattern == 'low' else 1.0 for pattern in patterns]
         with patch.object(backend.random, 'random', side_effect=rolls), \
@@ -142,7 +142,7 @@ class UnderpassScoringTests(unittest.TestCase):
     def test_single_underpasses_and_jump_overs_each_award_ten_points(self):
         state = self.app.state
         cases = self.single_cases()
-        self.assertEqual(len(cases), 31)
+        self.assertEqual(len(cases), 32)
         self.assertEqual({name for name, _, _ in cases},
                          set(self.app.view.obstacle_images) - set(config.SJ_CLUSTER_TYPES))
         for name, pattern, should_jump in cases:

@@ -49,20 +49,26 @@ class StartupTests(unittest.TestCase):
         self.assertEqual(self.app.phase, 'splash')
         self.assertEqual(pygame.display.get_caption()[0], config.GAME_TITLE)
         self.assertTrue((config.IMAGE_DIR / config.START_IMAGE_FILE).is_file())
+        source_bytes = (config.IMAGE_DIR / config.START_IMAGE_FILE).read_bytes()
         source = pygame.image.load(str(config.IMAGE_DIR / config.START_IMAGE_FILE)).convert_alpha()
         image = self.app.view.start_image
+        prepared_pixels = pygame.image.tobytes(image, 'RGBA')
         self.assertEqual(self.app.view.screen.get_size(), config.SCREEN_SIZE)
         self.assertEqual(image.get_size(), config.SCREEN_SIZE)
         source_content = intro_content_rect(source)
         self.assertTrue(source.get_rect().contains(source_content))
         self.assertLess(source_content.width, source.get_width())
         self.assertLess(source_content.height, source.get_height())
-        # 제목을 덧그리지 않고 화면 전체가 준비한 이미지여야 한다. 작은 이미지 주위의
-        # 흰 밴드나 이전 프레임이 보이는 contain 배치는 허용하지 않는다.
+        # 제목이 포함된 시작 그림에 별도 텍스트를 겹치지 않는다.
+        # 원본과 준비한 cover 표면은 보존하고 이전 프레임은 모두 덮는다.
         self.app.view.screen.fill((255, 0, 255))
         self.app.draw()
         self.assertEqual(pygame.image.tobytes(self.app.view.screen, 'RGB'),
                          pygame.image.tobytes(image, 'RGB'))
+        self.assertEqual(pygame.image.tobytes(image, 'RGBA'), prepared_pixels)
+        self.assertEqual((config.IMAGE_DIR / config.START_IMAGE_FILE).read_bytes(), source_bytes)
+        for x, y in ((0, 0), (479, 0), (0, 359), (479, 359), (240, 240)):
+            self.assertEqual(self.app.view.screen.get_at((x, y)), image.get_at((x, y)))
         edges = ([(x, 0) for x in range(image.get_width())]
                  + [(x, image.get_height() - 1) for x in range(image.get_width())]
                  + [(0, y) for y in range(image.get_height())]
@@ -78,6 +84,28 @@ class StartupTests(unittest.TestCase):
         self.assertLess(visible_content.bottom, image.get_height())
         self.assertGreater(visible_content.width, image.get_width() * 0.9)
         self.assertGreater(visible_content.height, image.get_height() * 0.8)
+
+    def test_ready_keeps_only_start_and_control_prompts_above_player(self):
+        view = self.app.view
+        self.app.draw()
+        splash = pygame.image.tobytes(view.screen, 'RGB')
+        self.ready()
+        self.app.draw()
+        self.assertNotEqual(pygame.image.tobytes(view.screen, 'RGB'), splash)
+        # 입력 대기 화면 상부에는 시작 안내·조작 안내만 표시한다.
+        expected = pygame.Surface(config.SCREEN_SIZE)
+        expected.fill((255, 255, 255))
+        center_x = config.SCREEN_SIZE[0] // 2
+        for text, y in ((view.start_text, 160), (view.controls_text, 200)):
+            expected.blit(text, text.get_rect(center=(center_x, y)))
+        upper = pygame.Rect(0, 0, config.SCREEN_SIZE[0], 220)
+        self.assertEqual(pygame.image.tobytes(view.screen.subsurface(upper), 'RGB'),
+                         pygame.image.tobytes(expected.subsurface(upper), 'RGB'))
+        old_title_area = pygame.Rect(0, 65, config.SCREEN_SIZE[0], 50)
+        self.assertEqual(pygame.mask.from_surface(view.startup_labels.subsurface(old_title_area)).count(), 0)
+        view.draw_startup('transition', 0, 0, background_x=-137)
+        self.assertEqual(pygame.image.tobytes(view.screen.subsurface(upper), 'RGB'),
+                         pygame.image.tobytes(expected.subsurface(upper), 'RGB'))
 
     def test_intro_content_bounds_ignore_transparent_faint_and_near_white_padding(self):
         source = pygame.Surface((240, 180), pygame.SRCALPHA)

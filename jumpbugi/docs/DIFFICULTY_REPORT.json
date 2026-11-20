@@ -1,1896 +1,3833 @@
 {
+  "prototype": "HansungRun Pygame Prototype 1.0",
+  "report_date": "2026-11-21",
+  "slot_seconds": 5,
+  "screen_size": [
+    480,
+    360
+  ],
   "mask_inset_ratio": 0.06,
-  "method": "120Hz single jumps, 2px search; seeded continuous bot at 30/60/120Hz",
+  "configuration": {
+    "obstacle_speed": 7,
+    "background_speed": 6,
+    "physics_hz": 60,
+    "jump_speed": -15,
+    "gravity": 0.68,
+    "collision_alpha_threshold": 130,
+    "early_speed_increase": 0.07,
+    "mid_speed_increase": 0.002,
+    "max_speed_multiplier": 1.75,
+    "cycle_recovery_seconds": [
+      1.2,
+      1.05,
+      0.9
+    ],
+    "min_recovery_time": 0.18,
+    "hard_pattern_probabilities": [
+      0.15,
+      0.45,
+      0.75
+    ],
+    "pattern_chain_probabilities": [
+      0.25,
+      0.65,
+      0.9
+    ]
+  },
+  "method": "120 Hz 4px deterministic per-plan search; actual event bot at 30/60/120 Hz; jitter fixed at 12.5 px",
+  "limits": [
+    "이론적 자동 회피이며 사람의 반응 속도·재미를 입증하지 않음",
+    "안전 구간은 검사한 이산 입력과 현재 설정에 해당함",
+    "상찌 출발 시점의 무작위 흔들림은 중앙값으로 고정함"
+  ],
   "stages": [
     {
+      "total_slots_passed": 0,
+      "current_slot": 0,
+      "season_cycle_count": 0,
       "seconds": 0,
-      "multiplier": 1.0,
-      "obstacles": {
-        "hansungcat.png": {
+      "plans": {
+        "chicken.png:ground": {
           "action": "jump",
-          "min_x": 116,
-          "max_x": 206,
-          "window_ms": 250
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              116,
+              160
+            ]
+          ],
+          "longest_window_ms": 105
         },
-        "ggoggoandgguggu.png": {
+        "hsucat.png:ground": {
           "action": "jump",
-          "min_x": 106,
-          "max_x": 196,
-          "window_ms": 250
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              196
+            ]
+          ],
+          "longest_window_ms": 114
         },
-        "sangjji.png": {
+        "sj.png:ground": {
           "action": "jump",
-          "min_x": 98,
-          "max_x": 278,
-          "window_ms": 500
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              100,
+              280
+            ]
+          ],
+          "longest_window_ms": 429
+        }
+      },
+      "multiplier": 1.0
+    },
+    {
+      "total_slots_passed": 2,
+      "current_slot": 2,
+      "season_cycle_count": 0,
+      "seconds": 10,
+      "plans": {
+        "chicken.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              124,
+              196
+            ]
+          ],
+          "longest_window_ms": 150
         },
-        "hansungcat_2.png": {
+        "hsucat.png:ground": {
           "action": "jump",
-          "min_x": 124,
-          "max_x": 214,
-          "window_ms": 250
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              156,
+              228
+            ]
+          ],
+          "longest_window_ms": 150
         },
-        "hansungcat_3.png": {
+        "sj.png:ground": {
           "action": "jump",
-          "min_x": 106,
-          "max_x": 120,
-          "window_ms": 39
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              104,
+              320
+            ]
+          ],
+          "longest_window_ms": 449
         },
-        "hansungcat_4.png": {
+        "chicken_white_flying:low": {
           "action": "jump",
-          "min_x": 114,
-          "max_x": 194,
-          "window_ms": 222
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              136,
+              260
+            ]
+          ],
+          "longest_window_ms": 258
+        },
+        "chicken_white_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 665
+        },
+        "chicken_white_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 665
+        },
+        "chicken_brown_flying:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              140,
+              260
+            ]
+          ],
+          "longest_window_ms": 250
+        },
+        "chicken_brown_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 665
+        },
+        "chicken_brown_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 665
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 112,
-          "max_x": 224,
-          "window_ms": 311
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              124,
+              256
+            ]
+          ],
+          "longest_window_ms": 275
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 112,
-          "max_x": 224,
-          "window_ms": 311
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 889
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 889
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 104,
-          "max_x": 278,
-          "window_ms": 483
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 98,
-          "max_x": 236,
-          "window_ms": 383
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 98,
-          "max_x": 194,
-          "window_ms": 267
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 96,
-          "max_x": 212,
-          "window_ms": 322
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              128,
+              256
+            ]
+          ],
+          "longest_window_ms": 266
         }
-      }
+      },
+      "multiplier": 1.1449
     },
     {
+      "total_slots_passed": 4,
+      "current_slot": 4,
+      "season_cycle_count": 0,
+      "seconds": 20,
+      "plans": {
+        "chicken.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              132,
+              240
+            ]
+          ],
+          "longest_window_ms": 196
+        },
+        "hsucat.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              168,
+              268
+            ]
+          ],
+          "longest_window_ms": 182
+        },
+        "sj.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              108,
+              368
+            ]
+          ],
+          "longest_window_ms": 472
+        },
+        "chicken_white_flying:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              144,
+              300
+            ]
+          ],
+          "longest_window_ms": 283
+        },
+        "chicken_white_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 581
+        },
+        "chicken_white_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 581
+        },
+        "chicken_brown_flying:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              300
+            ]
+          ],
+          "longest_window_ms": 276
+        },
+        "chicken_brown_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 581
+        },
+        "chicken_brown_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 581
+        },
+        "chicken_white_ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              132,
+              300
+            ]
+          ],
+          "longest_window_ms": 305
+        },
+        "chicken_brown_ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              132,
+              300
+            ]
+          ],
+          "longest_window_ms": 305
+        },
+        "hsucat_run.png:fall": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              120,
+              304
+            ]
+          ],
+          "longest_window_ms": 334
+        },
+        "hsucat_run.png:run": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              156,
+              272
+            ]
+          ],
+          "longest_window_ms": 211
+        },
+        "hsucat_crouch.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              124,
+              212
+            ]
+          ],
+          "longest_window_ms": 160
+        },
+        "hsucat_book.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              128,
+              280
+            ]
+          ],
+          "longest_window_ms": 276
+        }
+      },
+      "multiplier": 1.310796
+    },
+    {
+      "total_slots_passed": 6,
+      "current_slot": 6,
+      "season_cycle_count": 0,
       "seconds": 30,
-      "multiplier": 1.05,
-      "obstacles": {
-        "hansungcat.png": {
+      "plans": {
+        "chicken.png:ground": {
           "action": "jump",
-          "min_x": 118,
-          "max_x": 218,
-          "window_ms": 265
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              140,
+              292
+            ]
+          ],
+          "longest_window_ms": 241
         },
-        "ggoggoandgguggu.png": {
+        "hsucat.png:ground": {
           "action": "jump",
-          "min_x": 108,
-          "max_x": 208,
-          "window_ms": 265
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              180,
+              312
+            ]
+          ],
+          "longest_window_ms": 209
         },
-        "sangjji.png": {
+        "sj.png:ground": {
           "action": "jump",
-          "min_x": 100,
-          "max_x": 292,
-          "window_ms": 508
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              108,
+              400
+            ]
+          ],
+          "longest_window_ms": 463
         },
-        "hansungcat_2.png": {
+        "sj_run.png:ground": {
           "action": "jump",
-          "min_x": 126,
-          "max_x": 226,
-          "window_ms": 265
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              116,
+              400
+            ]
+          ],
+          "longest_window_ms": 451
         },
-        "hansungcat_3.png": {
+        "chicken_white_flying:low": {
           "action": "jump",
-          "min_x": 108,
-          "max_x": 134,
-          "window_ms": 69
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              152,
+              348
+            ]
+          ],
+          "longest_window_ms": 311
         },
-        "hansungcat_4.png": {
+        "chicken_white_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 508
+        },
+        "chicken_white_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 508
+        },
+        "chicken_brown_flying:low": {
           "action": "jump",
-          "min_x": 116,
-          "max_x": 208,
-          "window_ms": 243
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              156,
+              348
+            ]
+          ],
+          "longest_window_ms": 305
+        },
+        "chicken_brown_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 508
+        },
+        "chicken_brown_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 508
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 114,
-          "max_x": 236,
-          "window_ms": 323
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              140,
+              348
+            ]
+          ],
+          "longest_window_ms": 330
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 114,
-          "max_x": 236,
-          "window_ms": 323
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              144,
+              348
+            ]
+          ],
+          "longest_window_ms": 324
         },
-        "chicken_white_flying": {
+        "hsucat_run.png:fall": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              124,
+              360
+            ]
+          ],
+          "longest_window_ms": 374
+        },
+        "hsucat_run.png:run": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              168,
+              320
+            ]
+          ],
+          "longest_window_ms": 241
+        },
+        "hsucat_crouch.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              132,
+              260
+            ]
+          ],
+          "longest_window_ms": 203
+        },
+        "hsucat_book.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              136,
+              328
+            ]
+          ],
+          "longest_window_ms": 305
+        },
+        "sj_burrow:fast": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 847
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 508
         },
-        "chicken_brown_flying": {
+        "sj_burrow:slow": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 847
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 104,
-          "max_x": 292,
-          "window_ms": 497
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 250,
-          "window_ms": 397
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 208,
-          "window_ms": 286
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 96,
-          "max_x": 226,
-          "window_ms": 344
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 508
         }
-      }
+      },
+      "multiplier": 1.50073
     },
     {
-      "seconds": 60,
-      "multiplier": 1.1025,
-      "obstacles": {
-        "hansungcat.png": {
+      "total_slots_passed": 7,
+      "current_slot": 7,
+      "season_cycle_count": 0,
+      "seconds": 35,
+      "plans": {
+        "chicken.png:ground": {
           "action": "jump",
-          "min_x": 120,
-          "max_x": 230,
-          "window_ms": 277
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              316
+            ]
+          ],
+          "longest_window_ms": 249
         },
-        "ggoggoandgguggu.png": {
+        "hsucat.png:ground": {
           "action": "jump",
-          "min_x": 108,
-          "max_x": 222,
-          "window_ms": 287
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              188,
+              336
+            ]
+          ],
+          "longest_window_ms": 219
         },
-        "sangjji.png": {
+        "sj.png:ground": {
           "action": "jump",
-          "min_x": 100,
-          "max_x": 306,
-          "window_ms": 519
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 427
         },
-        "hansungcat_2.png": {
+        "sj_run.png:ground": {
           "action": "jump",
-          "min_x": 128,
-          "max_x": 238,
-          "window_ms": 277
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              116,
+              400
+            ]
+          ],
+          "longest_window_ms": 421
         },
-        "hansungcat_3.png": {
+        "chicken_white_flying:low": {
           "action": "jump",
-          "min_x": 110,
-          "max_x": 148,
-          "window_ms": 96
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              160,
+              376
+            ]
+          ],
+          "longest_window_ms": 320
         },
-        "hansungcat_4.png": {
+        "chicken_white_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "chicken_white_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "chicken_brown_flying:low": {
           "action": "jump",
-          "min_x": 118,
-          "max_x": 224,
-          "window_ms": 267
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              160,
+              376
+            ]
+          ],
+          "longest_window_ms": 320
+        },
+        "chicken_brown_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "chicken_brown_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 114,
-          "max_x": 250,
-          "window_ms": 343
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              144,
+              376
+            ]
+          ],
+          "longest_window_ms": 344
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 116,
-          "max_x": 250,
-          "window_ms": 338
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              376
+            ]
+          ],
+          "longest_window_ms": 338
         },
-        "chicken_white_flying": {
+        "hsucat_run.png:fall": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              128,
+              392
+            ]
+          ],
+          "longest_window_ms": 391
+        },
+        "hsucat_run.png:run": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              176,
+              344
+            ]
+          ],
+          "longest_window_ms": 249
+        },
+        "hsucat_crouch.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              136,
+              288
+            ]
+          ],
+          "longest_window_ms": 225
+        },
+        "hsucat_book.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              140,
+              356
+            ]
+          ],
+          "longest_window_ms": 320
+        },
+        "sj_burrow:fast": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 806
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         },
-        "chicken_brown_flying": {
+        "sj_burrow:slow": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 806
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 106,
-          "max_x": 306,
-          "window_ms": 504
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 264,
-          "window_ms": 413
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 222,
-          "window_ms": 307
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 96,
-          "max_x": 242,
-          "window_ms": 368
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         }
-      }
+      },
+      "multiplier": 1.605781
     },
     {
-      "seconds": 90,
-      "multiplier": 1.1576,
-      "obstacles": {
-        "hansungcat.png": {
+      "total_slots_passed": 8,
+      "current_slot": 0,
+      "season_cycle_count": 1,
+      "seconds": 40,
+      "plans": {
+        "chicken.png:ground": {
           "action": "jump",
-          "min_x": 122,
-          "max_x": 244,
-          "window_ms": 293
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              316
+            ]
+          ],
+          "longest_window_ms": 249
         },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 110,
-          "max_x": 236,
-          "window_ms": 302
+        "chicken.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 322,
-          "window_ms": 533
+        "chicken.png:near": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         },
-        "hansungcat_2.png": {
+        "chicken.png:low": {
           "action": "jump",
-          "min_x": 130,
-          "max_x": 252,
-          "window_ms": 293
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              160,
+              296
+            ]
+          ],
+          "longest_window_ms": 201
         },
-        "hansungcat_3.png": {
+        "hsucat.png:ground": {
           "action": "jump",
-          "min_x": 112,
-          "max_x": 162,
-          "window_ms": 120
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              188,
+              336
+            ]
+          ],
+          "longest_window_ms": 219
         },
-        "hansungcat_4.png": {
+        "hsucat.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "hsucat.png:near": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "hsucat.png:low": {
           "action": "jump",
-          "min_x": 120,
-          "max_x": 240,
-          "window_ms": 288
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              204,
+              320
+            ]
+          ],
+          "longest_window_ms": 172
+        },
+        "sj.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 426
+        },
+        "sj.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "sj.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 408
+        },
+        "sj_run.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              116,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_run.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "sj_run.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              132,
+              400
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "chicken_white_flying:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              160,
+              376
+            ]
+          ],
+          "longest_window_ms": 320
+        },
+        "chicken_white_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "chicken_white_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "chicken_brown_flying:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              160,
+              376
+            ]
+          ],
+          "longest_window_ms": 320
+        },
+        "chicken_brown_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "chicken_brown_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 116,
-          "max_x": 266,
-          "window_ms": 360
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              144,
+              376
+            ]
+          ],
+          "longest_window_ms": 343
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 118,
-          "max_x": 266,
-          "window_ms": 355
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              376
+            ]
+          ],
+          "longest_window_ms": 337
         },
-        "chicken_white_flying": {
+        "hsucat_run.png:fall": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              128,
+              392
+            ]
+          ],
+          "longest_window_ms": 391
+        },
+        "hsucat_run.png:high": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 768
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         },
-        "chicken_brown_flying": {
+        "hsucat_run.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              208,
+              312
+            ]
+          ],
+          "longest_window_ms": 154
+        },
+        "hsucat_run.png:run": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              176,
+              344
+            ]
+          ],
+          "longest_window_ms": 249
+        },
+        "hsucat_crouch.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              136,
+              292
+            ]
+          ],
+          "longest_window_ms": 231
+        },
+        "hsucat_book.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              140,
+              356
+            ]
+          ],
+          "longest_window_ms": 320
+        },
+        "sj_burrow:fast": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 768
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 106,
-          "max_x": 322,
-          "window_ms": 518
+        "sj_burrow:slow": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         },
-        "sangjji_pair": {
+        "sj_escape:fast": {
           "action": "jump",
-          "min_x": 100,
-          "max_x": 280,
-          "window_ms": 432
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         },
-        "sangjji_triple": {
+        "sj_escape:slow": {
           "action": "jump",
-          "min_x": 100,
-          "max_x": 238,
-          "window_ms": 331
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         },
-        "sangjji_burrow": {
+        "sj_pair:ground,ground": {
           "action": "jump",
-          "min_x": 96,
-          "max_x": 258,
-          "window_ms": 389
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 426
+        },
+        "sj_pair:ground,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              392
+            ]
+          ],
+          "longest_window_ms": 414
+        },
+        "sj_pair:ground,high": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 426
+        },
+        "sj_pair:low,ground": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 408
+        },
+        "sj_pair:low,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              392
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_pair:low,high": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 408
+        },
+        "sj_pair:high,ground": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "sj_pair:high,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              392
+            ]
+          ],
+          "longest_window_ms": 462
+        },
+        "sj_pair:high,high": {
+          "action": "stay_grounded",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "sj_triple:ground,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              364
+            ]
+          ],
+          "longest_window_ms": 373
+        },
+        "sj_triple:ground,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              348
+            ]
+          ],
+          "longest_window_ms": 349
+        },
+        "sj_triple:ground,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 426
+        },
+        "sj_triple:ground,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              364
+            ]
+          ],
+          "longest_window_ms": 373
+        },
+        "sj_triple:ground,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              348
+            ]
+          ],
+          "longest_window_ms": 349
+        },
+        "sj_triple:ground,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              392
+            ]
+          ],
+          "longest_window_ms": 414
+        },
+        "sj_triple:ground,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              364
+            ]
+          ],
+          "longest_window_ms": 373
+        },
+        "sj_triple:ground,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              348
+            ]
+          ],
+          "longest_window_ms": 349
+        },
+        "sj_triple:ground,high,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 426
+        },
+        "sj_triple:low,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              364
+            ]
+          ],
+          "longest_window_ms": 355
+        },
+        "sj_triple:low,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              348
+            ]
+          ],
+          "longest_window_ms": 331
+        },
+        "sj_triple:low,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 408
+        },
+        "sj_triple:low,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              364
+            ]
+          ],
+          "longest_window_ms": 355
+        },
+        "sj_triple:low,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              348
+            ]
+          ],
+          "longest_window_ms": 331
+        },
+        "sj_triple:low,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              392
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:low,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              364
+            ]
+          ],
+          "longest_window_ms": 355
+        },
+        "sj_triple:low,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              348
+            ]
+          ],
+          "longest_window_ms": 331
+        },
+        "sj_triple:low,high,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 408
+        },
+        "sj_triple:high,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              364
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              348
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
+        },
+        "sj_triple:high,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              364
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              348
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              392
+            ]
+          ],
+          "longest_window_ms": 462
+        },
+        "sj_triple:high,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              364
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              348
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,high,high": {
+          "action": "stay_grounded",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 474
         }
-      }
+      },
+      "multiplier": 1.608993
     },
     {
-      "seconds": 120,
-      "multiplier": 1.2155,
-      "obstacles": {
-        "hansungcat.png": {
+      "total_slots_passed": 15,
+      "current_slot": 7,
+      "season_cycle_count": 1,
+      "seconds": 75,
+      "plans": {
+        "chicken.png:ground": {
           "action": "jump",
-          "min_x": 124,
-          "max_x": 260,
-          "window_ms": 311
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              324
+            ]
+          ],
+          "longest_window_ms": 257
         },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 110,
-          "max_x": 250,
-          "window_ms": 320
+        "chicken.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 338,
-          "window_ms": 544
+        "chicken.png:near": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "hansungcat_2.png": {
+        "chicken.png:low": {
           "action": "jump",
-          "min_x": 134,
-          "max_x": 266,
-          "window_ms": 302
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              160,
+              300
+            ]
+          ],
+          "longest_window_ms": 204
         },
-        "hansungcat_3.png": {
+        "hsucat.png:ground": {
           "action": "jump",
-          "min_x": 114,
-          "max_x": 178,
-          "window_ms": 146
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              188,
+              344
+            ]
+          ],
+          "longest_window_ms": 228
         },
-        "hansungcat_4.png": {
+        "hsucat.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "hsucat.png:near": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "hsucat.png:low": {
           "action": "jump",
-          "min_x": 122,
-          "max_x": 256,
-          "window_ms": 306
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              204,
+              324
+            ]
+          ],
+          "longest_window_ms": 175
+        },
+        "sj.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_run.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              116,
+              400
+            ]
+          ],
+          "longest_window_ms": 414
+        },
+        "sj_run.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_run.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              132,
+              400
+            ]
+          ],
+          "longest_window_ms": 391
+        },
+        "chicken_white_flying:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              160,
+              384
+            ]
+          ],
+          "longest_window_ms": 327
+        },
+        "chicken_white_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "chicken_white_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "chicken_brown_flying:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              164,
+              384
+            ]
+          ],
+          "longest_window_ms": 321
+        },
+        "chicken_brown_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "chicken_brown_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 118,
-          "max_x": 282,
-          "window_ms": 375
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              144,
+              384
+            ]
+          ],
+          "longest_window_ms": 350
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 120,
-          "max_x": 282,
-          "window_ms": 370
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              384
+            ]
+          ],
+          "longest_window_ms": 344
         },
-        "chicken_white_flying": {
+        "hsucat_run.png:fall": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              128,
+              400
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "hsucat_run.png:high": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 731
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "chicken_brown_flying": {
+        "hsucat_run.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              212,
+              316
+            ]
+          ],
+          "longest_window_ms": 152
+        },
+        "hsucat_run.png:run": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              176,
+              348
+            ]
+          ],
+          "longest_window_ms": 251
+        },
+        "hsucat_crouch.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              136,
+              296
+            ]
+          ],
+          "longest_window_ms": 233
+        },
+        "hsucat_book.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              140,
+              364
+            ]
+          ],
+          "longest_window_ms": 327
+        },
+        "sj_burrow:fast": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 731
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 106,
-          "max_x": 340,
-          "window_ms": 535
+        "sj_burrow:slow": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_pair": {
+        "sj_escape:fast": {
           "action": "jump",
-          "min_x": 100,
-          "max_x": 296,
-          "window_ms": 448
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_triple": {
+        "sj_escape:slow": {
           "action": "jump",
-          "min_x": 100,
-          "max_x": 254,
-          "window_ms": 352
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_burrow": {
+        "sj_pair:ground,ground": {
           "action": "jump",
-          "min_x": 96,
-          "max_x": 274,
-          "window_ms": 407
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_pair:ground,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              396
+            ]
+          ],
+          "longest_window_ms": 414
+        },
+        "sj_pair:ground,high": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_pair:low,ground": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_pair:low,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              396
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_pair:low,high": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_pair:high,ground": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_pair:high,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              396
+            ]
+          ],
+          "longest_window_ms": 461
+        },
+        "sj_pair:high,high": {
+          "action": "stay_grounded",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_triple:ground,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              368
+            ]
+          ],
+          "longest_window_ms": 374
+        },
+        "sj_triple:ground,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              352
+            ]
+          ],
+          "longest_window_ms": 350
+        },
+        "sj_triple:ground,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:ground,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              368
+            ]
+          ],
+          "longest_window_ms": 374
+        },
+        "sj_triple:ground,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              352
+            ]
+          ],
+          "longest_window_ms": 350
+        },
+        "sj_triple:ground,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              396
+            ]
+          ],
+          "longest_window_ms": 414
+        },
+        "sj_triple:ground,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              368
+            ]
+          ],
+          "longest_window_ms": 374
+        },
+        "sj_triple:ground,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              352
+            ]
+          ],
+          "longest_window_ms": 350
+        },
+        "sj_triple:ground,high,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:low,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              368
+            ]
+          ],
+          "longest_window_ms": 356
+        },
+        "sj_triple:low,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              352
+            ]
+          ],
+          "longest_window_ms": 333
+        },
+        "sj_triple:low,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_triple:low,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              368
+            ]
+          ],
+          "longest_window_ms": 356
+        },
+        "sj_triple:low,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              352
+            ]
+          ],
+          "longest_window_ms": 333
+        },
+        "sj_triple:low,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              396
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:low,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              368
+            ]
+          ],
+          "longest_window_ms": 356
+        },
+        "sj_triple:low,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              352
+            ]
+          ],
+          "longest_window_ms": 333
+        },
+        "sj_triple:low,high,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_triple:high,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              368
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              352
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_triple:high,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              368
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              352
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              396
+            ]
+          ],
+          "longest_window_ms": 461
+        },
+        "sj_triple:high,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              368
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              352
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,high,high": {
+          "action": "stay_grounded",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         }
-      }
+      },
+      "multiplier": 1.631655
     },
     {
-      "seconds": 150,
-      "multiplier": 1.2763,
-      "obstacles": {
-        "hansungcat.png": {
+      "total_slots_passed": 16,
+      "current_slot": 0,
+      "season_cycle_count": 2,
+      "seconds": 80,
+      "plans": {
+        "chicken.png:ground": {
           "action": "jump",
-          "min_x": 126,
-          "max_x": 274,
-          "window_ms": 322
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              324
+            ]
+          ],
+          "longest_window_ms": 257
         },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 112,
-          "max_x": 266,
-          "window_ms": 335
+        "chicken.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 356,
-          "window_ms": 557
+        "chicken.png:near": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "hansungcat_2.png": {
+        "chicken.png:low": {
           "action": "jump",
-          "min_x": 136,
-          "max_x": 282,
-          "window_ms": 318
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              160,
+              300
+            ]
+          ],
+          "longest_window_ms": 204
         },
-        "hansungcat_3.png": {
+        "hsucat.png:ground": {
           "action": "jump",
-          "min_x": 116,
-          "max_x": 194,
-          "window_ms": 170
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              188,
+              344
+            ]
+          ],
+          "longest_window_ms": 228
         },
-        "hansungcat_4.png": {
+        "hsucat.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "hsucat.png:near": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "hsucat.png:low": {
           "action": "jump",
-          "min_x": 124,
-          "max_x": 274,
-          "window_ms": 326
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              204,
+              324
+            ]
+          ],
+          "longest_window_ms": 175
+        },
+        "sj.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_run.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              116,
+              400
+            ]
+          ],
+          "longest_window_ms": 414
+        },
+        "sj_run.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_run.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              132,
+              400
+            ]
+          ],
+          "longest_window_ms": 391
+        },
+        "chicken_white_flying:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              160,
+              384
+            ]
+          ],
+          "longest_window_ms": 327
+        },
+        "chicken_white_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "chicken_white_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "chicken_brown_flying:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              164,
+              384
+            ]
+          ],
+          "longest_window_ms": 321
+        },
+        "chicken_brown_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "chicken_brown_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 120,
-          "max_x": 298,
-          "window_ms": 387
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              144,
+              384
+            ]
+          ],
+          "longest_window_ms": 350
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 122,
-          "max_x": 298,
-          "window_ms": 383
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              384
+            ]
+          ],
+          "longest_window_ms": 344
         },
-        "chicken_white_flying": {
+        "hsucat_run.png:fall": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              128,
+              400
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "hsucat_run.png:high": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 696
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "chicken_brown_flying": {
+        "hsucat_run.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              212,
+              316
+            ]
+          ],
+          "longest_window_ms": 152
+        },
+        "hsucat_run.png:run": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              176,
+              348
+            ]
+          ],
+          "longest_window_ms": 251
+        },
+        "hsucat_crouch.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              136,
+              296
+            ]
+          ],
+          "longest_window_ms": 233
+        },
+        "hsucat_book.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              140,
+              364
+            ]
+          ],
+          "longest_window_ms": 327
+        },
+        "sj_burrow:fast": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 696
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 108,
-          "max_x": 358,
-          "window_ms": 544
+        "sj_burrow:slow": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_pair": {
+        "sj_escape:fast": {
           "action": "jump",
-          "min_x": 100,
-          "max_x": 314,
-          "window_ms": 466
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_triple": {
+        "sj_escape:slow": {
           "action": "jump",
-          "min_x": 100,
-          "max_x": 272,
-          "window_ms": 374
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_burrow": {
+        "sj_pair:ground,ground": {
           "action": "jump",
-          "min_x": 96,
-          "max_x": 292,
-          "window_ms": 427
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_pair:ground,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              396
+            ]
+          ],
+          "longest_window_ms": 414
+        },
+        "sj_pair:ground,high": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_pair:low,ground": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_pair:low,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              396
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_pair:low,high": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_pair:high,ground": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_pair:high,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              396
+            ]
+          ],
+          "longest_window_ms": 461
+        },
+        "sj_pair:high,high": {
+          "action": "stay_grounded",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_triple:ground,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              368
+            ]
+          ],
+          "longest_window_ms": 374
+        },
+        "sj_triple:ground,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              352
+            ]
+          ],
+          "longest_window_ms": 350
+        },
+        "sj_triple:ground,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:ground,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              368
+            ]
+          ],
+          "longest_window_ms": 374
+        },
+        "sj_triple:ground,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              352
+            ]
+          ],
+          "longest_window_ms": 350
+        },
+        "sj_triple:ground,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              396
+            ]
+          ],
+          "longest_window_ms": 414
+        },
+        "sj_triple:ground,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              368
+            ]
+          ],
+          "longest_window_ms": 374
+        },
+        "sj_triple:ground,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              352
+            ]
+          ],
+          "longest_window_ms": 350
+        },
+        "sj_triple:ground,high,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:low,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              368
+            ]
+          ],
+          "longest_window_ms": 356
+        },
+        "sj_triple:low,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              352
+            ]
+          ],
+          "longest_window_ms": 333
+        },
+        "sj_triple:low,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_triple:low,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              368
+            ]
+          ],
+          "longest_window_ms": 356
+        },
+        "sj_triple:low,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              352
+            ]
+          ],
+          "longest_window_ms": 333
+        },
+        "sj_triple:low,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              396
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:low,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              368
+            ]
+          ],
+          "longest_window_ms": 356
+        },
+        "sj_triple:low,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              352
+            ]
+          ],
+          "longest_window_ms": 333
+        },
+        "sj_triple:low,high,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_triple:high,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              368
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              352
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_triple:high,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              368
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              352
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              396
+            ]
+          ],
+          "longest_window_ms": 461
+        },
+        "sj_triple:high,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              368
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              352
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,high,high": {
+          "action": "stay_grounded",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         }
-      }
+      },
+      "multiplier": 1.631655
     },
     {
-      "seconds": 180,
-      "multiplier": 1.3401,
-      "obstacles": {
-        "hansungcat.png": {
+      "total_slots_passed": 64,
+      "current_slot": 0,
+      "season_cycle_count": 8,
+      "seconds": 320,
+      "plans": {
+        "chicken.png:ground": {
           "action": "jump",
-          "min_x": 130,
-          "max_x": 290,
-          "window_ms": 332
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              324
+            ]
+          ],
+          "longest_window_ms": 257
         },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 114,
-          "max_x": 282,
-          "window_ms": 348
+        "chicken.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 102,
-          "max_x": 374,
-          "window_ms": 564
+        "chicken.png:near": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "hansungcat_2.png": {
+        "chicken.png:low": {
           "action": "jump",
-          "min_x": 138,
-          "max_x": 298,
-          "window_ms": 332
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              160,
+              300
+            ]
+          ],
+          "longest_window_ms": 204
         },
-        "hansungcat_3.png": {
+        "hsucat.png:ground": {
           "action": "jump",
-          "min_x": 118,
-          "max_x": 210,
-          "window_ms": 191
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              188,
+              344
+            ]
+          ],
+          "longest_window_ms": 228
         },
-        "hansungcat_4.png": {
+        "hsucat.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "hsucat.png:near": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "hsucat.png:low": {
           "action": "jump",
-          "min_x": 128,
-          "max_x": 292,
-          "window_ms": 340
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              204,
+              324
+            ]
+          ],
+          "longest_window_ms": 175
+        },
+        "sj.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_run.png:ground": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              116,
+              400
+            ]
+          ],
+          "longest_window_ms": 414
+        },
+        "sj_run.png:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_run.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              132,
+              400
+            ]
+          ],
+          "longest_window_ms": 391
+        },
+        "chicken_white_flying:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              160,
+              384
+            ]
+          ],
+          "longest_window_ms": 327
+        },
+        "chicken_white_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "chicken_white_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "chicken_brown_flying:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              164,
+              384
+            ]
+          ],
+          "longest_window_ms": 321
+        },
+        "chicken_brown_flying:middle": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "chicken_brown_flying:high": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
         "chicken_white_ground": {
           "action": "jump",
-          "min_x": 122,
-          "max_x": 316,
-          "window_ms": 402
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              144,
+              384
+            ]
+          ],
+          "longest_window_ms": 350
         },
         "chicken_brown_ground": {
           "action": "jump",
-          "min_x": 124,
-          "max_x": 316,
-          "window_ms": 398
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              148,
+              384
+            ]
+          ],
+          "longest_window_ms": 344
         },
-        "chicken_white_flying": {
+        "hsucat_run.png:fall": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              128,
+              400
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "hsucat_run.png:high": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 663
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "chicken_brown_flying": {
+        "hsucat_run.png:low": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              212,
+              316
+            ]
+          ],
+          "longest_window_ms": 152
+        },
+        "hsucat_run.png:run": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              176,
+              348
+            ]
+          ],
+          "longest_window_ms": 251
+        },
+        "hsucat_crouch.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              136,
+              296
+            ]
+          ],
+          "longest_window_ms": 233
+        },
+        "hsucat_book.png": {
+          "action": "jump",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              140,
+              364
+            ]
+          ],
+          "longest_window_ms": 327
+        },
+        "sj_burrow:fast": {
           "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 663
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 108,
-          "max_x": 376,
-          "window_ms": 556
+        "sj_burrow:slow": {
+          "action": "stay_grounded",
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_pair": {
+        "sj_escape:fast": {
           "action": "jump",
-          "min_x": 102,
-          "max_x": 330,
-          "window_ms": 473
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_triple": {
+        "sj_escape:slow": {
           "action": "jump",
-          "min_x": 102,
-          "max_x": 288,
-          "window_ms": 386
+          "pass_points": 10,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         },
-        "sangjji_burrow": {
+        "sj_pair:ground,ground": {
           "action": "jump",
-          "min_x": 98,
-          "max_x": 310,
-          "window_ms": 439
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_pair:ground,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              396
+            ]
+          ],
+          "longest_window_ms": 414
+        },
+        "sj_pair:ground,high": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_pair:low,ground": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_pair:low,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              396
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_pair:low,high": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_pair:high,ground": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_pair:high,low": {
+          "action": "jump",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              396
+            ]
+          ],
+          "longest_window_ms": 461
+        },
+        "sj_pair:high,high": {
+          "action": "stay_grounded",
+          "pass_points": 20,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_triple:ground,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              368
+            ]
+          ],
+          "longest_window_ms": 374
+        },
+        "sj_triple:ground,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              352
+            ]
+          ],
+          "longest_window_ms": 350
+        },
+        "sj_triple:ground,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:ground,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              368
+            ]
+          ],
+          "longest_window_ms": 374
+        },
+        "sj_triple:ground,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              352
+            ]
+          ],
+          "longest_window_ms": 350
+        },
+        "sj_triple:ground,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              396
+            ]
+          ],
+          "longest_window_ms": 414
+        },
+        "sj_triple:ground,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              368
+            ]
+          ],
+          "longest_window_ms": 374
+        },
+        "sj_triple:ground,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              352
+            ]
+          ],
+          "longest_window_ms": 350
+        },
+        "sj_triple:ground,high,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              112,
+              400
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:low,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              368
+            ]
+          ],
+          "longest_window_ms": 356
+        },
+        "sj_triple:low,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              352
+            ]
+          ],
+          "longest_window_ms": 333
+        },
+        "sj_triple:low,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_triple:low,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              368
+            ]
+          ],
+          "longest_window_ms": 356
+        },
+        "sj_triple:low,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              352
+            ]
+          ],
+          "longest_window_ms": 333
+        },
+        "sj_triple:low,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              396
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:low,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              368
+            ]
+          ],
+          "longest_window_ms": 356
+        },
+        "sj_triple:low,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              352
+            ]
+          ],
+          "longest_window_ms": 333
+        },
+        "sj_triple:low,high,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              124,
+              400
+            ]
+          ],
+          "longest_window_ms": 403
+        },
+        "sj_triple:high,ground,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              368
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,ground,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              352
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,ground,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
+        },
+        "sj_triple:high,low,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              368
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,low,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              352
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,low,high": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              396
+            ]
+          ],
+          "longest_window_ms": 461
+        },
+        "sj_triple:high,high,ground": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              368
+            ]
+          ],
+          "longest_window_ms": 420
+        },
+        "sj_triple:high,high,low": {
+          "action": "jump",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              352
+            ]
+          ],
+          "longest_window_ms": 397
+        },
+        "sj_triple:high,high,high": {
+          "action": "stay_grounded",
+          "pass_points": 30,
+          "safe_x_runs": [
+            [
+              80,
+              400
+            ]
+          ],
+          "longest_window_ms": 467
         }
-      }
-    },
-    {
-      "seconds": 210,
-      "multiplier": 1.4071,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 132,
-          "max_x": 308,
-          "window_ms": 347
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 114,
-          "max_x": 300,
-          "window_ms": 367
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 102,
-          "max_x": 392,
-          "window_ms": 572
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 142,
-          "max_x": 314,
-          "window_ms": 340
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 120,
-          "max_x": 228,
-          "window_ms": 213
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 130,
-          "max_x": 312,
-          "window_ms": 359
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 124,
-          "max_x": 334,
-          "window_ms": 415
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 126,
-          "max_x": 334,
-          "window_ms": 411
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 632
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 632
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 108,
-          "max_x": 396,
-          "window_ms": 569
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 102,
-          "max_x": 350,
-          "window_ms": 490
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 102,
-          "max_x": 308,
-          "window_ms": 407
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 98,
-          "max_x": 330,
-          "window_ms": 458
-        }
-      }
-    },
-    {
-      "seconds": 240,
-      "multiplier": 1.4775,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 134,
-          "max_x": 326,
-          "window_ms": 361
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 116,
-          "max_x": 318,
-          "window_ms": 380
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 102,
-          "max_x": 400,
-          "window_ms": 560
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 144,
-          "max_x": 332,
-          "window_ms": 353
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 124,
-          "max_x": 248,
-          "window_ms": 233
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 132,
-          "max_x": 332,
-          "window_ms": 376
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 126,
-          "max_x": 352,
-          "window_ms": 425
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 130,
-          "max_x": 352,
-          "window_ms": 417
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 602
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 602
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 110,
-          "max_x": 400,
-          "window_ms": 545
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 102,
-          "max_x": 370,
-          "window_ms": 504
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 102,
-          "max_x": 328,
-          "window_ms": 425
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 98,
-          "max_x": 350,
-          "window_ms": 474
-        }
-      }
-    },
-    {
-      "seconds": 270,
-      "multiplier": 1.5513,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 138,
-          "max_x": 344,
-          "window_ms": 369
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 116,
-          "max_x": 336,
-          "window_ms": 394
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 104,
-          "max_x": 400,
-          "window_ms": 530
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 148,
-          "max_x": 350,
-          "window_ms": 362
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 126,
-          "max_x": 268,
-          "window_ms": 254
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 136,
-          "max_x": 350,
-          "window_ms": 383
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 128,
-          "max_x": 372,
-          "window_ms": 437
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 132,
-          "max_x": 372,
-          "window_ms": 430
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 573
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 573
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 110,
-          "max_x": 400,
-          "window_ms": 519
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 104,
-          "max_x": 390,
-          "window_ms": 512
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 104,
-          "max_x": 348,
-          "window_ms": 437
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 98,
-          "max_x": 372,
-          "window_ms": 491
-        }
-      }
-    },
-    {
-      "seconds": 300,
-      "multiplier": 1.6289,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 140,
-          "max_x": 364,
-          "window_ms": 382
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 118,
-          "max_x": 356,
-          "window_ms": 406
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 104,
-          "max_x": 400,
-          "window_ms": 505
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 150,
-          "max_x": 370,
-          "window_ms": 375
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 128,
-          "max_x": 288,
-          "window_ms": 273
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 138,
-          "max_x": 370,
-          "window_ms": 396
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 130,
-          "max_x": 394,
-          "window_ms": 450
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 134,
-          "max_x": 394,
-          "window_ms": 443
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 546
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 546
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 112,
-          "max_x": 400,
-          "window_ms": 491
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 104,
-          "max_x": 400,
-          "window_ms": 505
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 104,
-          "max_x": 370,
-          "window_ms": 454
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 98,
-          "max_x": 394,
-          "window_ms": 505
-        }
-      }
-    },
-    {
-      "seconds": 330,
-      "multiplier": 1.7103,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 144,
-          "max_x": 384,
-          "window_ms": 390
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 120,
-          "max_x": 378,
-          "window_ms": 419
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 106,
-          "max_x": 400,
-          "window_ms": 477
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 154,
-          "max_x": 390,
-          "window_ms": 383
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 132,
-          "max_x": 310,
-          "window_ms": 289
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 142,
-          "max_x": 392,
-          "window_ms": 406
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 134,
-          "max_x": 400,
-          "window_ms": 432
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 138,
-          "max_x": 400,
-          "window_ms": 426
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 520
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 520
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 112,
-          "max_x": 400,
-          "window_ms": 468
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 106,
-          "max_x": 400,
-          "window_ms": 477
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 106,
-          "max_x": 392,
-          "window_ms": 464
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 98,
-          "max_x": 400,
-          "window_ms": 490
-        }
-      }
-    },
-    {
-      "seconds": 360,
-      "multiplier": 1.7959,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 148,
-          "max_x": 400,
-          "window_ms": 390
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 122,
-          "max_x": 398,
-          "window_ms": 427
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 106,
-          "max_x": 400,
-          "window_ms": 455
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 158,
-          "max_x": 400,
-          "window_ms": 374
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 134,
-          "max_x": 332,
-          "window_ms": 306
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 146,
-          "max_x": 400,
-          "window_ms": 393
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 138,
-          "max_x": 400,
-          "window_ms": 405
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 140,
-          "max_x": 400,
-          "window_ms": 402
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 495
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 495
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 114,
-          "max_x": 400,
-          "window_ms": 442
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 106,
-          "max_x": 400,
-          "window_ms": 455
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 106,
-          "max_x": 400,
-          "window_ms": 455
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 98,
-          "max_x": 400,
-          "window_ms": 467
-        }
-      }
-    },
-    {
-      "seconds": 390,
-      "multiplier": 1.8856,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 150,
-          "max_x": 400,
-          "window_ms": 368
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 124,
-          "max_x": 400,
-          "window_ms": 407
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 108,
-          "max_x": 400,
-          "window_ms": 430
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 162,
-          "max_x": 400,
-          "window_ms": 351
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 138,
-          "max_x": 356,
-          "window_ms": 321
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 148,
-          "max_x": 400,
-          "window_ms": 371
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 140,
-          "max_x": 400,
-          "window_ms": 383
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 144,
-          "max_x": 400,
-          "window_ms": 377
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 471
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 471
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 114,
-          "max_x": 400,
-          "window_ms": 421
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 108,
-          "max_x": 400,
-          "window_ms": 430
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 108,
-          "max_x": 400,
-          "window_ms": 430
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 98,
-          "max_x": 400,
-          "window_ms": 445
-        }
-      }
-    },
-    {
-      "seconds": 420,
-      "multiplier": 1.9799,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 154,
-          "max_x": 400,
-          "window_ms": 345
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 126,
-          "max_x": 400,
-          "window_ms": 384
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 108,
-          "max_x": 400,
-          "window_ms": 410
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 166,
-          "max_x": 400,
-          "window_ms": 328
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 142,
-          "max_x": 382,
-          "window_ms": 337
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 152,
-          "max_x": 400,
-          "window_ms": 348
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 144,
-          "max_x": 400,
-          "window_ms": 359
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 148,
-          "max_x": 400,
-          "window_ms": 354
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 449
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 449
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 116,
-          "max_x": 400,
-          "window_ms": 398
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 108,
-          "max_x": 400,
-          "window_ms": 410
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 108,
-          "max_x": 400,
-          "window_ms": 410
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 98,
-          "max_x": 400,
-          "window_ms": 424
-        }
-      }
-    },
-    {
-      "seconds": 450,
-      "multiplier": 2.0789,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 158,
-          "max_x": 400,
-          "window_ms": 323
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 128,
-          "max_x": 400,
-          "window_ms": 363
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 110,
-          "max_x": 400,
-          "window_ms": 387
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 170,
-          "max_x": 400,
-          "window_ms": 307
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 146,
-          "max_x": 400,
-          "window_ms": 339
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 156,
-          "max_x": 400,
-          "window_ms": 326
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 148,
-          "max_x": 400,
-          "window_ms": 337
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 152,
-          "max_x": 400,
-          "window_ms": 331
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 428
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 428
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 118,
-          "max_x": 400,
-          "window_ms": 377
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 110,
-          "max_x": 400,
-          "window_ms": 387
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 110,
-          "max_x": 400,
-          "window_ms": 387
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 400,
-          "window_ms": 401
-        }
-      }
-    },
-    {
-      "seconds": 480,
-      "multiplier": 2.1829,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 164,
-          "max_x": 400,
-          "window_ms": 300
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 132,
-          "max_x": 400,
-          "window_ms": 341
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 112,
-          "max_x": 400,
-          "window_ms": 366
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 174,
-          "max_x": 400,
-          "window_ms": 288
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 150,
-          "max_x": 400,
-          "window_ms": 318
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 160,
-          "max_x": 400,
-          "window_ms": 305
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 152,
-          "max_x": 400,
-          "window_ms": 316
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 156,
-          "max_x": 400,
-          "window_ms": 310
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 407
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 407
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 118,
-          "max_x": 400,
-          "window_ms": 359
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 112,
-          "max_x": 400,
-          "window_ms": 366
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 112,
-          "max_x": 400,
-          "window_ms": 366
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 400,
-          "window_ms": 382
-        }
-      }
-    },
-    {
-      "seconds": 510,
-      "multiplier": 2.292,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 168,
-          "max_x": 400,
-          "window_ms": 281
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 134,
-          "max_x": 400,
-          "window_ms": 322
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 112,
-          "max_x": 400,
-          "window_ms": 349
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 180,
-          "max_x": 400,
-          "window_ms": 267
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 154,
-          "max_x": 400,
-          "window_ms": 298
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 164,
-          "max_x": 400,
-          "window_ms": 286
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 156,
-          "max_x": 400,
-          "window_ms": 296
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 160,
-          "max_x": 400,
-          "window_ms": 291
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 388
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 388
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 120,
-          "max_x": 400,
-          "window_ms": 339
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 112,
-          "max_x": 400,
-          "window_ms": 349
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 112,
-          "max_x": 400,
-          "window_ms": 349
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 400,
-          "window_ms": 364
-        }
-      }
-    },
-    {
-      "seconds": 540,
-      "multiplier": 2.4066,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 172,
-          "max_x": 400,
-          "window_ms": 263
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 138,
-          "max_x": 400,
-          "window_ms": 302
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 114,
-          "max_x": 400,
-          "window_ms": 330
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 184,
-          "max_x": 400,
-          "window_ms": 249
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 158,
-          "max_x": 400,
-          "window_ms": 279
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 170,
-          "max_x": 400,
-          "window_ms": 265
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 162,
-          "max_x": 400,
-          "window_ms": 275
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 164,
-          "max_x": 400,
-          "window_ms": 272
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 369
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 369
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 122,
-          "max_x": 400,
-          "window_ms": 321
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 114,
-          "max_x": 400,
-          "window_ms": 330
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 114,
-          "max_x": 400,
-          "window_ms": 330
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 400,
-          "window_ms": 346
-        }
-      }
-    },
-    {
-      "seconds": 570,
-      "multiplier": 2.527,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 178,
-          "max_x": 400,
-          "window_ms": 244
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 142,
-          "max_x": 400,
-          "window_ms": 284
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 116,
-          "max_x": 400,
-          "window_ms": 312
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 190,
-          "max_x": 400,
-          "window_ms": 231
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 162,
-          "max_x": 400,
-          "window_ms": 262
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 174,
-          "max_x": 400,
-          "window_ms": 248
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 166,
-          "max_x": 400,
-          "window_ms": 257
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 168,
-          "max_x": 400,
-          "window_ms": 255
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 352
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 352
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 124,
-          "max_x": 400,
-          "window_ms": 303
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 116,
-          "max_x": 400,
-          "window_ms": 312
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 116,
-          "max_x": 400,
-          "window_ms": 312
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 400,
-          "window_ms": 330
-        }
-      }
-    },
-    {
-      "seconds": 600,
-      "multiplier": 2.6533,
-      "obstacles": {
-        "hansungcat.png": {
-          "action": "jump",
-          "min_x": 184,
-          "max_x": 400,
-          "window_ms": 226
-        },
-        "ggoggoandgguggu.png": {
-          "action": "jump",
-          "min_x": 148,
-          "max_x": 400,
-          "window_ms": 264
-        },
-        "sangjji.png": {
-          "action": "jump",
-          "min_x": 118,
-          "max_x": 400,
-          "window_ms": 295
-        },
-        "hansungcat_2.png": {
-          "action": "jump",
-          "min_x": 196,
-          "max_x": 400,
-          "window_ms": 214
-        },
-        "hansungcat_3.png": {
-          "action": "jump",
-          "min_x": 168,
-          "max_x": 400,
-          "window_ms": 243
-        },
-        "hansungcat_4.png": {
-          "action": "jump",
-          "min_x": 180,
-          "max_x": 400,
-          "window_ms": 230
-        },
-        "chicken_white_ground": {
-          "action": "jump",
-          "min_x": 170,
-          "max_x": 400,
-          "window_ms": 241
-        },
-        "chicken_brown_ground": {
-          "action": "jump",
-          "min_x": 174,
-          "max_x": 400,
-          "window_ms": 237
-        },
-        "chicken_white_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 335
-        },
-        "chicken_brown_flying": {
-          "action": "stay_grounded",
-          "min_x": 80,
-          "max_x": 400,
-          "window_ms": 335
-        },
-        "sangjji_2.png": {
-          "action": "jump",
-          "min_x": 126,
-          "max_x": 400,
-          "window_ms": 287
-        },
-        "sangjji_pair": {
-          "action": "jump",
-          "min_x": 118,
-          "max_x": 400,
-          "window_ms": 295
-        },
-        "sangjji_triple": {
-          "action": "jump",
-          "min_x": 118,
-          "max_x": 400,
-          "window_ms": 295
-        },
-        "sangjji_burrow": {
-          "action": "jump",
-          "min_x": 100,
-          "max_x": 400,
-          "window_ms": 314
-        }
-      }
+      },
+      "multiplier": 1.631655
     }
   ],
   "continuous_play": [
@@ -1898,25 +3835,405 @@
       "hz": 30,
       "survived_seconds": 600.0,
       "game_over": false,
-      "jumps": 293,
-      "score": 4230,
-      "obstacle": "chicken_white_flying"
+      "jumps": 337,
+      "landings": 337,
+      "encounters_passed": 475,
+      "score": 7490,
+      "pass_bonus": 6890,
+      "obstacle": "chicken_brown_flying",
+      "slots_seen": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "final_multiplier": 1.6316545488189085
     },
     {
       "hz": 60,
       "survived_seconds": 600.0,
       "game_over": false,
-      "jumps": 294,
-      "score": 4230,
-      "obstacle": "chicken_white_flying"
+      "jumps": 337,
+      "landings": 337,
+      "encounters_passed": 475,
+      "score": 7490,
+      "pass_bonus": 6890,
+      "obstacle": "chicken_brown_flying",
+      "slots_seen": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "final_multiplier": 1.6316545488189085
     },
     {
       "hz": 120,
       "survived_seconds": 600.0,
       "game_over": false,
-      "jumps": 296,
-      "score": 4230,
-      "obstacle": "chicken_white_flying"
+      "jumps": 343,
+      "landings": 343,
+      "encounters_passed": 476,
+      "score": 7440,
+      "pass_bonus": 6840,
+      "obstacle": "chicken_brown_flying",
+      "slots_seen": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "final_multiplier": 1.6316545488189085
     }
-  ]
+  ],
+  "failures": [],
+  "passed": true
 }

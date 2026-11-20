@@ -54,7 +54,7 @@ class SjHoleTests(unittest.TestCase):
                                  (0.5, 'slow'), (1.0, 'slow')):
                 with self.subTest(name=name, roll=roll):
                     self.app.reset()
-                    state.background_elapsed = config.SJ_ESCAPE_UNLOCK_SECONDS
+                    state.background_elapsed = (config.SJ_ESCAPE_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL)
                     with patch.object(backend.random, 'random', return_value=roll) as choose:
                         state.spawn_obstacle(name)
                     self.assertEqual(choose.call_count, 1)
@@ -101,7 +101,7 @@ class SjHoleTests(unittest.TestCase):
         mask = self.app.view.obstacle_frame_masks['sj_escape'][-1]
         # 연노란 배도 실제 몸체다. 초록 머리만 남는 불완전한 판정을 막는다.
         self.assertTrue(mask.get_at((50, 40)))
-        self.assertTrue(mask.get_at((48, 50)))
+        self.assertTrue(mask.get_at((55, 47)))
         checked = 0
         for x in tuple(range(20)) + tuple(range(92, 112)):
             for y in range(64):

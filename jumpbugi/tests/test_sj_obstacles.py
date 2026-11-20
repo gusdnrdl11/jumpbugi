@@ -40,14 +40,14 @@ class SjObstacleTests(unittest.TestCase):
                 state.pattern_queue = []
                 with patch.object(backend.random, 'choice', side_effect=lambda pool: pool[0]) as choose:
                     state.spawn_obstacle()
-                pool = choose.call_args_list[0].args[0]
+                pool = state.available_patterns
                 available = {kind for pattern in pool for kind in pattern}
                 self.assertEqual(state.sj_obstacles_enabled, enabled)
-                self.assertEqual(state.sj_groups_enabled, elapsed >= config.SJ_GROUP_UNLOCK_SECONDS)
-                self.assertEqual(state.sj_escape_enabled, elapsed >= config.SJ_ESCAPE_UNLOCK_SECONDS)
+                self.assertEqual(state.sj_groups_enabled, elapsed >= (config.SJ_GROUP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL))
+                self.assertEqual(state.sj_escape_enabled, elapsed >= (config.SJ_ESCAPE_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL))
                 expected = {kind for kind in config.SJ_TYPES
-                            if (kind not in config.SJ_CLUSTER_TYPES or elapsed >= config.SJ_GROUP_UNLOCK_SECONDS)
-                            and (kind != 'sj_escape' or elapsed >= config.SJ_ESCAPE_UNLOCK_SECONDS)}
+                            if (kind not in config.SJ_CLUSTER_TYPES or elapsed >= (config.SJ_GROUP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL))
+                            and (kind != 'sj_escape' or elapsed >= (config.SJ_ESCAPE_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL))}
                 self.assertEqual(available.intersection(config.SJ_TYPES),
                                  expected if enabled else set())
 
@@ -69,7 +69,7 @@ class SjObstacleTests(unittest.TestCase):
                 self.assertEqual(state.obstacle_name, 'sj_run.png')
                 self.assertIsNone(state.wave_jump)
                 self.assertEqual(state.pattern_queue, [])
-        state.background_elapsed = config.SJ_GROUP_UNLOCK_SECONDS
+        state.background_elapsed = (config.SJ_GROUP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL)
         state.pattern_queue = list(config.SJ_TYPES)
         for name in config.SJ_TYPES:
             state.spawn_obstacle()
@@ -110,11 +110,12 @@ class SjObstacleTests(unittest.TestCase):
         pattern = ('sj.png', 'chicken.png', 'hsucat.png')
         self.assertIn(pattern, config.GROUND_PATTERNS)
         for name in config.SJ_CLUSTER_TYPES:
-            state.background_elapsed = config.SJ_GROUP_UNLOCK_SECONDS
+            state.background_elapsed = (config.SJ_GROUP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL)
             state.pattern_queue = []
             def select(pool):
                 return pattern if pattern in pool else name
-            with patch.object(backend.random, 'choice', side_effect=select):
+            with patch.object(backend.random, 'choice', side_effect=select), \
+                 patch.object(backend.random, 'random', side_effect=[1.0, 0.0] + [1.0] * 20):
                 state.spawn_obstacle()
             self.assertEqual(state.current_pattern, pattern)
             self.assertEqual(state.obstacle_name, name)
@@ -129,14 +130,15 @@ class SjObstacleTests(unittest.TestCase):
 
     def test_second_spring_random_patterns_make_every_new_type_reachable(self):
         state = self.app.state
-        state.background_elapsed = config.SJ_GROUP_UNLOCK_SECONDS
+        state.background_elapsed = (config.SJ_GROUP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL)
         seen = set()
         for pattern in config.SJ_PATTERNS:
             with self.subTest(pattern=pattern):
                 state.pattern_queue = []
                 def select(pool):
                     return pattern if pattern in pool else pool[0]
-                with patch.object(backend.random, 'choice', side_effect=select) as choose:
+                with patch.object(backend.random, 'choice', side_effect=select) as choose, \
+                     patch.object(backend.random, 'random', side_effect=[1.0, 0.0] + [1.0] * 20):
                     state.spawn_obstacle()
                     self.assertIn(pattern, choose.call_args_list[0].args[0])
                     seen.add(state.obstacle_name)

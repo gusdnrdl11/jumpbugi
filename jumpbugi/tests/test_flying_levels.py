@@ -30,9 +30,10 @@ class FlyingLevelTests(unittest.TestCase):
         pygame.event.clear()
         self.names = tuple(name for name in config.CHICKEN_TYPES if name.endswith('_flying'))
 
-    def spawn_level(self, name, level, seconds=60):
+    def spawn_level(self, name, level, seconds=None):
         state = self.app.state
-        state.background_elapsed = seconds
+        state.background_elapsed = (config.CHICKEN_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL
+                                    if seconds is None else seconds)
         roll = (config.FLYING_LEVELS.index(level) + 0.5) / len(config.FLYING_LEVELS)
         with patch.object(backend.random, 'random', return_value=roll):
             state.spawn_obstacle(name)
@@ -50,7 +51,7 @@ class FlyingLevelTests(unittest.TestCase):
         for name in self.names:
             for roll, level in choices:
                 with self.subTest(name=name, roll=roll):
-                    state.background_elapsed = 60
+                    state.background_elapsed = config.CHICKEN_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL
                     with patch.object(backend.random, 'random', return_value=roll) as choose:
                         state.spawn_obstacle(name)
                     self.assertEqual(choose.call_count, 1)
@@ -155,7 +156,7 @@ class FlyingLevelTests(unittest.TestCase):
     def test_both_birds_and_three_levels_clear_and_award_ten_at_four_speeds_and_three_fps(self):
         for name in self.names:
             for level in config.FLYING_LEVELS:
-                for seconds in (60, 120, 300, 600):
+                for seconds in (slot * config.DAY_NIGHT_INTERVAL for slot in (2, 4, 10, 20)):
                     for hz in (30, 60, 120):
                         with self.subTest(name=name, level=level, seconds=seconds, hz=hz):
                             self.app.reset()

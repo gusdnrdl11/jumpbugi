@@ -40,7 +40,7 @@ class HsucatObstacleTests(unittest.TestCase):
                 state.pattern_queue = []
                 with patch.object(backend.random, 'choice', side_effect=lambda pool: pool[0]) as choose:
                     state.spawn_obstacle()
-                available = {kind for pattern in choose.call_args.args[0] for kind in pattern}
+                available = {kind for pattern in state.available_patterns for kind in pattern}
                 self.assertEqual(state.hsucat_obstacles_enabled, enabled)
                 self.assertEqual(available.intersection(config.HSUCAT_TYPES),
                                  set(config.HSUCAT_TYPES) if enabled else set())
@@ -67,11 +67,12 @@ class HsucatObstacleTests(unittest.TestCase):
 
     def test_every_new_cat_is_reachable_by_random_pattern_choice(self):
         state = self.app.state
-        state.background_elapsed = config.HSUCAT_UNLOCK_SECONDS
+        state.background_elapsed = (config.HSUCAT_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL)
         for pattern in config.HSUCAT_PATTERNS:
             with self.subTest(pattern=pattern):
                 state.pattern_queue = []
-                with patch.object(backend.random, 'choice', return_value=pattern) as choose:
+                with patch.object(backend.random, 'choice', return_value=pattern) as choose, \
+                     patch.object(backend.random, 'random', side_effect=[1.0, 0.0] + [1.0] * 20):
                     state.spawn_obstacle()
                 self.assertIn(pattern, choose.call_args.args[0])
                 actual = [state.obstacle_name]

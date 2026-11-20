@@ -12,10 +12,12 @@ import pygame
 if __package__ and __package__.startswith('jumpbugi.'):
     from ..backend import GameState
     from ..main import JumpBugi
+    from ..difficulty import speed_multiplier_for_slot
     from .. import config
 else:
     from backend import GameState
     from main import JumpBugi
+    from difficulty import speed_multiplier_for_slot
     import config
 
 
@@ -58,7 +60,7 @@ class ScoringSpeedTests(unittest.TestCase):
         state.update(0.5)
         self.assertEqual(state.score, 30)
         stage = int((state.background_elapsed + 1e-9) // config.DAY_NIGHT_INTERVAL)
-        self.assertAlmostEqual(state.speed_multiplier, (1 + config.SPEED_INCREASE_RATIO) ** stage)
+        self.assertAlmostEqual(state.speed_multiplier, speed_multiplier_for_slot(stage))
         state.stop()
         self.assertEqual(self.record.read_text(), '30')
         state.reset()
@@ -67,11 +69,12 @@ class ScoringSpeedTests(unittest.TestCase):
     def test_speed_boundaries_and_configured_scroll_speeds(self):
         state = self.state
         interval = config.DAY_NIGHT_INTERVAL
-        increase = 1 + config.SPEED_INCREASE_RATIO
-        for seconds, factor in ((interval - 0.001, 1), (interval, increase),
-                                (2 * interval - 0.001, increase), (2 * interval, increase ** 2),
-                                (6 * interval, increase ** 6), (10 * interval, increase ** 10)):
+        for seconds, slot in ((interval - 0.001, 0), (interval, 1),
+                              (2 * interval - 0.001, 1), (2 * interval, 2),
+                              (6 * interval, 6), (10 * interval, 10),
+                              (16 * interval, 16), (1000 * interval, 1000)):
             with self.subTest(seconds=seconds):
+                factor = speed_multiplier_for_slot(slot)
                 state.background_elapsed = seconds
                 self.assertAlmostEqual(state.speed_multiplier, factor)
                 state.background_x = 0
@@ -90,7 +93,7 @@ class ScoringSpeedTests(unittest.TestCase):
                     self.state.update(1 / hz)
                 self.assertEqual(self.state.score, 61)
                 stage = int((self.state.background_elapsed + 1e-9) // config.DAY_NIGHT_INTERVAL)
-                self.assertAlmostEqual(self.state.speed_multiplier, (1 + config.SPEED_INCREASE_RATIO) ** stage)
+                self.assertAlmostEqual(self.state.speed_multiplier, speed_multiplier_for_slot(stage))
 
     def test_collision_saves_combined_score_and_then_stops_scoring(self):
         state = self.state

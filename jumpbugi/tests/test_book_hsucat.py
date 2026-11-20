@@ -29,9 +29,10 @@ class BookHsucatTests(unittest.TestCase):
         self.app.reset()
         pygame.event.clear()
 
-    def spawn_book(self, seconds=120):
+    def spawn_book(self, seconds=None):
         state = self.app.state
-        state.background_elapsed = seconds
+        state.background_elapsed = (config.HSUCAT_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL
+                                    if seconds is None else seconds)
         state.spawn_obstacle('hsucat_book.png')
         return state
 
@@ -107,7 +108,7 @@ class BookHsucatTests(unittest.TestCase):
             self.assertEqual(state.obstacle_frame_index, 0)
 
     def test_drop_animation_is_jumpable_and_scores_ten_at_four_speeds_and_three_fps(self):
-        for seconds in (120, 180, 300, 600):
+        for seconds in (slot * config.DAY_NIGHT_INTERVAL for slot in (4, 6, 10, 20)):
             for hz in (30, 60, 120):
                 with self.subTest(seconds=seconds, hz=hz):
                     self.app.reset()

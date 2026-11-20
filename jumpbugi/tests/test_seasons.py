@@ -14,10 +14,12 @@ if __package__ and __package__.startswith('jumpbugi.'):
     from .. import config
     from ..assets import load_image
     from ..main import JumpBugi
+    from ..difficulty import speed_multiplier_for_slot
 else:
     import config
     from assets import load_image
     from main import JumpBugi
+    from difficulty import speed_multiplier_for_slot
 
 
 class SeasonCycleTests(unittest.TestCase):
@@ -84,19 +86,20 @@ class SeasonCycleTests(unittest.TestCase):
                 self.assert_stage_pixels(self.app.view.background_stages[target])
 
     def test_winter_returns_to_spring_without_resetting_speed(self):
-        state = self.at(240)
+        cycle_seconds = config.SLOTS_PER_CYCLE * config.DAY_NIGHT_INTERVAL
+        state = self.at(cycle_seconds)
         self.assertEqual((state.background_from_index, state.background_to_index), (7, 0))
         self.assert_stage_pixels(self.app.view.background_stages[7])
-        self.assertAlmostEqual(state.speed_multiplier, (1 + config.SPEED_INCREASE_RATIO) ** 8)
+        self.assertAlmostEqual(state.speed_multiplier, speed_multiplier_for_slot(8))
         self.app.update_background(config.BACKGROUND_FADE_SECONDS)
         self.assert_stage_pixels(self.app.view.background_stages[0])
-        self.assertAlmostEqual(state.speed_multiplier, (1 + config.SPEED_INCREASE_RATIO) ** 8)
-        self.assertEqual(state.background_elapsed, 240 + config.BACKGROUND_FADE_SECONDS)
+        self.assertAlmostEqual(state.speed_multiplier, speed_multiplier_for_slot(8))
+        self.assertEqual(state.background_elapsed, cycle_seconds + config.BACKGROUND_FADE_SECONDS)
 
     def test_same_alpha_different_pairs_invalidates_render_cache(self):
         self.at(config.DAY_NIGHT_INTERVAL + config.BACKGROUND_FADE_SECONDS)
         first = pygame.image.tobytes(self.app.view.stage, 'RGB')
-        self.app.update_background(60)
+        self.app.update_background(2 * config.DAY_NIGHT_INTERVAL)
         state = self.app.state
         self.assertEqual((state.background_from_index, state.background_to_index,
                           state.background_alpha), (2, 3, 255))
@@ -130,7 +133,7 @@ class SeasonCycleTests(unittest.TestCase):
     def test_transitions_and_drawing_do_not_reload_images(self):
         with patch.object(pygame.image, 'load', side_effect=AssertionError('실행 중 이미지 재로딩')):
             for step in range(17):
-                self.app.update_background(30)
+                self.app.update_background(config.DAY_NIGHT_INTERVAL)
                 self.app.draw()
                 self.app.update_background(config.BACKGROUND_FADE_SECONDS / 2)
                 self.app.draw()
@@ -150,12 +153,12 @@ class BackgroundTransitionTests(unittest.TestCase):
     def test_spring_night_and_summer_day_boundaries(self):
         app = self.app
         app.state.player_y = -1000
-        # 실제 update 경로로 30초 전까지 진행한다.
-        for _ in range(299):
+        # 실제 update 경로로 첫 슬롯 경계 직전까지 진행한다.
+        for _ in range(round(config.DAY_NIGHT_INTERVAL * 10) - 1):
             app.update(0.1)
         self.assertEqual(app.state.night_alpha, 0)
         app.update(0.1)
-        self.assertAlmostEqual(app.state.background_elapsed, 30)
+        self.assertAlmostEqual(app.state.background_elapsed, config.DAY_NIGHT_INTERVAL)
         self.assertEqual(app.state.night_alpha, 0)
         app.update_background(config.BACKGROUND_FADE_SECONDS / 2)
         self.assertIn(app.state.night_alpha, (127, 128))
@@ -180,7 +183,7 @@ class BackgroundTransitionTests(unittest.TestCase):
         self.assertAlmostEqual(app.state.background_elapsed, midpoint)
         self.assertIn(app.state.night_alpha, (127, 128))
         self.assertAlmostEqual(app.state.background_x, -config.BACKGROUND_SPEED * config.PHYSICS_HZ
-                               * 0.1 * (1 + config.SPEED_INCREASE_RATIO))
+                               * 0.1 * (1 + config.EARLY_SPEED_INCREASE))
         frozen = (app.state.background_elapsed, app.state.night_alpha,
                   pygame.image.tobytes(app.view.stage, 'RGB'))
         for flag in ('paused', 'game_over'):
@@ -198,7 +201,7 @@ class BackgroundTransitionTests(unittest.TestCase):
         app = self.app
         app.state.player_y = -1000
         app.state.obstacle_y = -1000
-        app.update_background(30)
+        app.update_background(config.DAY_NIGHT_INTERVAL)
         values = []
         for _ in range(round(config.BACKGROUND_FADE_SECONDS * 10)):
             app.update_background(0.1)

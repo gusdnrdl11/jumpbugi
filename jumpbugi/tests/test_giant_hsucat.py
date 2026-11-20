@@ -31,7 +31,7 @@ class GiantHsucatTests(unittest.TestCase):
 
     def spawn_giant(self, seconds=None):
         state = self.app.state
-        state.background_elapsed = config.HSUCAT_UNLOCK_SECONDS if seconds is None else seconds
+        state.background_elapsed = (config.HSUCAT_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL) if seconds is None else seconds
         with patch.object(backend.random, 'random', side_effect=AssertionError('하품 이미지 무작위 선택')):
             state.spawn_obstacle('hsucat_crouch.png')
         return state
@@ -126,6 +126,21 @@ class GiantHsucatTests(unittest.TestCase):
         self.assertEqual(state.obstacle_frame_index, 3)
         state.update_step(0)
         self.assertTrue(state.game_over)
+
+    def test_yawn_opens_more_slowly_but_finishes_before_the_player_and_keeps_its_hold(self):
+        state = self.spawn_giant()
+        start = config.HSUCAT_GIANT_YAWN_START_X
+        end = config.HSUCAT_GIANT_YAWN_END_X
+        old_span = start - 220
+        self.assertGreater(start - end, old_span)
+        self.assertLessEqual(start - end, old_span * 1.5)
+        self.assertGreaterEqual(end, state.player_size[0])
+        # 예전에는 이미 다음 자세였던 같은 화면 위치에서 더 천천히 입을 벌린다.
+        for x, expected in ((300, 1), (200, 2), (end, 3), (0, 3), (-100, 3)):
+            with self.subTest(x=x):
+                state.obstacle_x = x
+                state.obstacle_animation_tick = 60000
+                self.assertEqual(state.obstacle_frame_index, expected)
 
     def at_x_collides(self, x):
         self.app.state.obstacle_x = x

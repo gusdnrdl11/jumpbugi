@@ -100,7 +100,7 @@ class GameBehaviorTests(unittest.TestCase):
             previous_background = app.state.background_x
             dt = 1 / config.PHYSICS_HZ
             stage = int((app.state.background_elapsed + dt + 1e-9) // config.DAY_NIGHT_INTERVAL)
-            factor = (1 + config.SPEED_INCREASE_RATIO) ** stage
+            factor = (1 + config.EARLY_SPEED_INCREASE) ** stage
             movement = config.OBSTACLE_SPEED * factor
             expected_background = -((-previous_background + config.BACKGROUND_SPEED * factor) % 960)
             app.update(dt)

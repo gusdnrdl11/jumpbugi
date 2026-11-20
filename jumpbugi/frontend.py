@@ -128,15 +128,13 @@ class GameView:
         self.pause_overlay.fill((0, 0, 0, 140))
         self.pause_text = self.score_font.render('PAUSED - ESC to resume', True, (255, 255, 255))
         self.rendered_background = (0, 0, 0)
-        title_font = pygame.font.SysFont('malgungothic,applegothic,nanumgothic', 36, bold=True)
         prompt_font = pygame.font.SysFont('malgungothic,applegothic,nanumgothic', 22)
         hint_font = pygame.font.SysFont('malgungothic,applegothic,nanumgothic', 16)
-        self.title_text = title_font.render(GAME_TITLE, True, (20, 40, 65))
         self.start_text = prompt_font.render('아무 키나 누르면 시작', True, (20, 40, 65))
         self.controls_text = hint_font.render('SPACE 점프  ·  ESC 일시정지', True, (90, 100, 110))
         self.startup_labels = pygame.Surface(SCREEN_SIZE, pygame.SRCALPHA)
         center_x = SCREEN_SIZE[0] // 2
-        for text, y in ((self.title_text, 90), (self.start_text, 160), (self.controls_text, 200)):
+        for text, y in ((self.start_text, 160), (self.controls_text, 200)):
             self.startup_labels.blit(text, text.get_rect(center=(center_x, y)))
 
     def draw_scrolling_background(self, background, background_x):

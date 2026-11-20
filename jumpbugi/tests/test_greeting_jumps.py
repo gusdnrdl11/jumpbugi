@@ -29,9 +29,10 @@ class GreetingJumpTests(unittest.TestCase):
         self.app.reset()
         pygame.event.clear()
 
-    def spawn_pattern(self, name, pattern, seconds=240):
+    def spawn_pattern(self, name, pattern, seconds=None):
         state = self.app.state
-        state.background_elapsed = seconds
+        state.background_elapsed = (config.WAVE_JUMP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL
+                                    if seconds is None else seconds)
         if pattern is None:
             with patch.object(backend.random, 'random', return_value=1.0):
                 state.spawn_obstacle(name)
@@ -68,9 +69,10 @@ class GreetingJumpTests(unittest.TestCase):
 
     def test_first_year_only_waves_and_jump_eligibility_is_captured_at_spawn(self):
         state = self.app.state
-        self.assertEqual(config.WAVE_JUMP_UNLOCK_SECONDS, 240)
+        self.assertEqual(config.WAVE_JUMP_UNLOCK_SLOT, 8)
+        unlock_seconds = config.WAVE_JUMP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL
         for name in config.WAVE_IMAGE_FILES:
-            for seconds in (0, 30, 60, 120, 180, 239.999):
+            for seconds in tuple(slot * config.DAY_NIGHT_INTERVAL for slot in (0, 1, 2, 4, 6)) + (unlock_seconds - 0.001,):
                 with self.subTest(name=name, seconds=seconds):
                     state.background_elapsed = seconds
                     with patch.object(backend.random, 'random', return_value=0.0):
@@ -79,9 +81,9 @@ class GreetingJumpTests(unittest.TestCase):
                     self.assertIsNone(state.wave_jump)
                     self.assertFalse(state.wave_jump_active)
                     self.assertTrue(state.obstacle_requires_jump)
-            state.background_elapsed = 239.999
+            state.background_elapsed = unlock_seconds - 0.001
             state.spawn_obstacle(name)
-            state.background_elapsed = 240
+            state.background_elapsed = unlock_seconds
             state.obstacle_x = 300
             ground_y = state.obstacle_y
             with patch.object(backend.random, 'random', side_effect=AssertionError('접근 중 점프 재선택')):
@@ -89,20 +91,21 @@ class GreetingJumpTests(unittest.TestCase):
             self.assertTrue(state.greeting_jumps_enabled)
             self.assertIsNone(state.wave_jump)
             self.assertEqual(state.obstacle_y, ground_y)
-            self.spawn_pattern(name, 'high', seconds=240)
+            self.spawn_pattern(name, 'high', seconds=unlock_seconds)
             self.assertFalse(state.obstacle_requires_jump)
 
     def test_later_years_randomly_choose_ground_or_each_of_three_patterns(self):
         state = self.app.state
         self.assertEqual(set(config.WAVE_JUMP_HEIGHTS), {'high', 'near', 'low'})
         for name in config.WAVE_IMAGE_FILES:
-            for seconds in (240, 480, 960):
+            for seconds in (slot * config.DAY_NIGHT_INTERVAL for slot in (8, 16, 32)):
                 for pattern in (None, 'high', 'near', 'low'):
                     with self.subTest(name=name, seconds=seconds, pattern=pattern):
                         self.spawn_pattern(name, pattern, seconds)
                         self.assertEqual(state.obstacle_requires_jump, pattern in (None, 'low'))
                         self.assertEqual(state.obstacle_y + state.obstacle_size[1], 358)
-        state.spawn_obstacle('chicken_white_flying')
+        with patch.object(backend.random, 'random', return_value=0.5):
+            state.spawn_obstacle('chicken_white_flying')
         self.assertIsNone(state.wave_jump)
         self.assertFalse(state.obstacle_requires_jump)
 
@@ -161,7 +164,7 @@ class GreetingJumpTests(unittest.TestCase):
                     with self.subTest(name=name, pattern=pattern, hz=hz):
                         self.app.reset()
                         state = self.app.state
-                        plan = self.spawn_pattern(name, pattern, seconds=269.95)
+                        plan = self.spawn_pattern(name, pattern, seconds=9 * config.DAY_NIGHT_INTERVAL - 0.05)
                         state.obstacle_x = plan.center_x + plan.half_distance * 0.5
                         original_speed = state.speed_multiplier
                         crossed = False
@@ -201,7 +204,7 @@ class GreetingJumpTests(unittest.TestCase):
     def test_all_patterns_have_the_intended_escape_at_multiple_speeds_and_frame_rates(self):
         for name in config.WAVE_IMAGE_FILES:
             for pattern in (None, 'high', 'near', 'low'):
-                for seconds in (240, 300, 600):
+                for seconds in (slot * config.DAY_NIGHT_INTERVAL for slot in (8, 10, 20)):
                     for hz in (30, 60, 120):
                         with self.subTest(name=name, pattern=pattern, seconds=seconds, hz=hz):
                             self.app.reset()

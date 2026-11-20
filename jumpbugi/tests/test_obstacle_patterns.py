@@ -45,15 +45,17 @@ class ObstaclePatternTests(unittest.TestCase):
         def select(pool):
             return next((p for p in pool if isinstance(p, tuple) and p[0] in config.CHICKEN_TYPES), pool[0])
         with patch.object(backend.random, 'choice', side_effect=select) as choose:
-            for elapsed, enabled in ((0, False), (30, False), (59.999, False), (60, True),
-                                     (120, True), (180, True), (239.999, True),
-                                     (240, True), (270, True), (299.999, True), (300, True),
-                                     (480, True), (540, True)):
+            interval = config.DAY_NIGHT_INTERVAL
+            for elapsed, enabled in ((0, False), (interval, False), (2 * interval - 0.001, False),
+                                     (2 * interval, True), (4 * interval, True), (6 * interval, True),
+                                     (8 * interval - 0.001, True), (8 * interval, True),
+                                     (9 * interval, True), (10 * interval - 0.001, True),
+                                     (10 * interval, True), (16 * interval, True), (18 * interval, True)):
                 state.background_elapsed = elapsed
                 state.pattern_queue = []
                 state.spawn_obstacle()
                 self.assertEqual(state.obstacle_name in config.CHICKEN_TYPES, enabled)
-                available = {kind for pattern in choose.call_args.args[0] for kind in pattern}
+                available = {kind for pattern in state.available_patterns for kind in pattern}
                 self.assertEqual(available.intersection(config.CHICKEN_TYPES),
                                  set(config.CHICKEN_TYPES) if enabled else set())
         self.app.reset()
@@ -63,7 +65,7 @@ class ObstaclePatternTests(unittest.TestCase):
 
     def test_first_spring_filters_all_chickens_but_second_spring_preserves_them(self):
         state = self.app.state
-        state.background_elapsed = 30
+        state.background_elapsed = config.DAY_NIGHT_INTERVAL
         state.pattern_queue = list(config.CHICKEN_TYPES) + ['sj.png']
         state.spawn_obstacle()
         self.assertEqual(state.obstacle_name, 'sj.png')
@@ -71,7 +73,7 @@ class ObstaclePatternTests(unittest.TestCase):
         state.pattern_queue = list(config.CHICKEN_TYPES)
         state.spawn_obstacle()
         self.assertNotIn(state.obstacle_name, config.CHICKEN_TYPES)
-        state.background_elapsed = 240
+        state.background_elapsed = config.SLOTS_PER_CYCLE * config.DAY_NIGHT_INTERVAL
         state.pattern_queue = list(config.CHICKEN_TYPES)
         for kind in config.CHICKEN_TYPES:
             state.spawn_obstacle()
@@ -79,7 +81,7 @@ class ObstaclePatternTests(unittest.TestCase):
 
     def test_first_spring_random_patterns_only_use_basic_types(self):
         state = self.app.state
-        for second in range(60):
+        for second in range(2 * config.DAY_NIGHT_INTERVAL):
             state.background_elapsed = second
             for _ in range(20):
                 state.spawn_obstacle()
@@ -148,7 +150,7 @@ class ObstaclePatternTests(unittest.TestCase):
                     with self.subTest(stage=stage, hz=hz, pattern=pattern):
                         self.app.reset()
                         state = self.app.state
-                        state.background_elapsed = stage * 30
+                        state.background_elapsed = stage * config.DAY_NIGHT_INTERVAL
                         state.pattern_queue = list(pattern)
                         state.spawn_obstacle()
                         cleared = 0
@@ -169,9 +171,15 @@ class ObstaclePatternTests(unittest.TestCase):
                                 cleared += 1
                                 expected_bonus += config.PASS_BONUS * (2 if old_name == 'sj_pair'
                                                                       else 3 if old_name == 'sj_triple' else 1)
-                                approach = (state.obstacle_x - state.player_size[0]) / (
+                                # 생성 뒤 같은 출력 프레임의 남은 물리가 이미 진행될 수 있다.
+                                # 접근 여유는 정확한 생성 좌표에서 측정하고 잔여 이동도 확인한다.
+                                approach = (state.obstacle_spawn_x - state.player_size[0]) / (
                                     config.OBSTACLE_SPEED * config.PHYSICS_HZ * state.speed_multiplier)
-                                self.assertGreaterEqual(approach + 1e-9, config.OBSTACLE_RECOVERY_SECONDS)
+                                self.assertGreaterEqual(approach + 1e-9, state.obstacle_recovery_seconds)
+                                frame_distance = (config.OBSTACLE_SPEED * config.PHYSICS_HZ
+                                                  * state.speed_multiplier / hz)
+                                self.assertGreaterEqual(state.obstacle_x + 1e-9,
+                                                        state.obstacle_spawn_x - frame_distance)
                                 if cleared == len(pattern):
                                     break
                         self.assertEqual(cleared, len(pattern))

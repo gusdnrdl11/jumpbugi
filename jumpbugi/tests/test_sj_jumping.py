@@ -30,10 +30,11 @@ class SjJumpingTests(unittest.TestCase):
         self.app.reset()
         pygame.event.clear()
 
-    def spawn_plan(self, name, patterns, seed=1, seconds=240):
+    def spawn_plan(self, name, patterns, seed=1, seconds=None):
         generator = random.Random(seed)
         rolls = {'high': 0.0, 'low': config.SJ_HOP_PROBABILITY * 0.75, None: 1.0}
-        self.app.state.background_elapsed = seconds
+        self.app.state.background_elapsed = (config.SJ_JUMP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL
+                                            if seconds is None else seconds)
         with patch.object(backend.random, 'random', side_effect=[rolls[pattern] for pattern in patterns]), \
              patch.object(backend.random, 'uniform', side_effect=generator.uniform):
             self.app.state.spawn_obstacle(name)
@@ -79,11 +80,12 @@ class SjJumpingTests(unittest.TestCase):
             self.assertGreater(mask.count(), 0)
             self.assertGreaterEqual(frame.get_bounding_rect(min_alpha=20).bottom, frame.get_height() - 1)
 
-    def test_first_year_has_no_jumps_and_existing_plans_do_not_change_at_240(self):
+    def test_first_year_has_no_jumps_and_existing_plans_do_not_change_at_unlock(self):
         state = self.app.state
-        self.assertEqual(config.SJ_GROUP_UNLOCK_SECONDS, 240)
-        self.assertEqual(config.SJ_JUMP_UNLOCK_SECONDS, 240)
-        for seconds in (0, 60, 120, 180, 210, 239.999):
+        self.assertEqual(config.SJ_GROUP_UNLOCK_SLOT, 8)
+        self.assertEqual(config.SJ_JUMP_UNLOCK_SLOT, 8)
+        unlock_seconds = config.SJ_JUMP_UNLOCK_SLOT * config.DAY_NIGHT_INTERVAL
+        for seconds in tuple(slot * config.DAY_NIGHT_INTERVAL for slot in (0, 2, 4, 6, 7)) + (unlock_seconds - 0.001,):
             for name in config.SJ_SINGLE_JUMP_TYPES + config.SJ_CLUSTER_TYPES:
                 with self.subTest(seconds=seconds, name=name):
                     state.background_elapsed = seconds
@@ -93,10 +95,10 @@ class SjJumpingTests(unittest.TestCase):
                     self.assertFalse(state.sj_jumps_enabled)
                     self.assertIsNone(state.wave_jump)
                     self.assertTrue(all(member.pattern is None for member in state.sj_members))
-        state.background_elapsed = 239.999
+        state.background_elapsed = unlock_seconds - 0.001
         state.spawn_obstacle('sj_pair')
         original = tuple(state.sj_members)
-        state.background_elapsed = 240
+        state.background_elapsed = unlock_seconds
         state.obstacle_x = 300
         state.player_y = -1000
         with patch.object(backend.random, 'random', side_effect=AssertionError('접근 중 재선택')):
@@ -249,7 +251,7 @@ class SjJumpingTests(unittest.TestCase):
     def test_every_mixed_group_is_clearable_at_second_year_speeds_and_frame_rates(self):
         for name, count in zip(config.SJ_CLUSTER_TYPES, (2, 3)):
             for patterns in itertools.product((None, 'low', 'high'), repeat=count):
-                for seconds in (240, 300, 600):
+                for seconds in (slot * config.DAY_NIGHT_INTERVAL for slot in (8, 10, 20)):
                     for hz in (30, 60, 120):
                         with self.subTest(name=name, patterns=patterns, seconds=seconds, hz=hz):
                             self.clear_encounter(name, patterns, seconds, hz)
@@ -257,7 +259,7 @@ class SjJumpingTests(unittest.TestCase):
     def test_single_running_sj_selects_ground_low_or_high_after_the_first_year(self):
         for name in config.SJ_SINGLE_JUMP_TYPES:
             for pattern in (None, 'low', 'high'):
-                for seconds in (240, 300, 600):
+                for seconds in (slot * config.DAY_NIGHT_INTERVAL for slot in (8, 10, 20)):
                     for hz in (30, 60, 120):
                         with self.subTest(name=name, pattern=pattern, seconds=seconds, hz=hz):
                             self.clear_encounter(name, (pattern,), seconds, hz)
