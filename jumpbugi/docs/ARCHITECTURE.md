@@ -21,12 +21,15 @@ jumpbugi/
 │  ├─ TODO.md
 │  ├─ CHANGELOG.md
 │  ├─ ARCHITECTURE.md
+│  ├─ WEB_REVIEW.md      웹 이식 상태와 점검 기록
+│  ├─ web-srudy.md       웹 입문·코드 구조·실습 학습 문서
 │  ├─ DIFFICULTY_REPORT.json 자동 회피·연속 플레이 결과
 │  ├─ STUDY_NOTES.md
 │  ├─ GAME_IDEA.md
 │  └─ archive/          이전 문서·배경 작업 자료
 ├─ image/               실행 그림·계절 배경·원본·미리보기
 ├─ tools/verify_difficulty.py 실제 이미지의 계획별 회피·연속 플레이 검증
+├─ web/                 독립 브라우저 게임·자산·Node 검사
 ├─ txt/
 │  ├─ README.md         점수 데이터와 문서 안내
 │  └─ high_score.txt    실제 기록
@@ -54,9 +57,9 @@ jumpbugi/
 
 `__pycache__`는 파이썬이 만드는 캐시입니다. 현재 게임은 상위 폴더의 image·txt·테스트·실행 래퍼 없이 실행할 수 있습니다.
 
-이 문서는 **HansungRun Pygame Prototype 1.0**의 현재 구조를 설명합니다. 480×360 Pygame 기준본은 라즈베리파이 이식과 규칙 참고용으로 유지하며, 웹 버전은 별도 프로젝트로 진행합니다. 공부하면서 배운 개념은 [STUDY_NOTES](STUDY_NOTES.md), 게임 기획과 아이디어는 [GAME_IDEA](GAME_IDEA.md)에 모읍니다. 선택한 다음 작업은 [TODO](TODO.md), 완료 기록은 [CHANGELOG](CHANGELOG.md)에 둡니다.
+이 문서는 **HansungRun Pygame Prototype 1.0**과 `web/` 이식본의 현재 구조를 설명합니다. 480×360 Pygame 기준본은 라즈베리파이 이식과 규칙 참고용으로 유지하며, 웹은 640×360의 독립 JavaScript 게임으로 구현했습니다. 아래 Pygame 구조와 [웹 이식본 구조](#웹-이식본-구조)를 구분해 읽습니다. Python 학습 개념은 [STUDY_NOTES](STUDY_NOTES.md), 웹 학습은 [web-srudy](web-srudy.md), 기획은 [GAME_IDEA](GAME_IDEA.md), 다음 작업은 [TODO](TODO.md), 완료 기록은 [CHANGELOG](CHANGELOG.md)에 둡니다.
 
-## 역할과 연결
+## Pygame 역할과 연결
 
 ```text
 main → frontend → assets
@@ -243,7 +246,7 @@ run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 �
 
 ## 자동 검사
 
-기존 146개 검사는 기능별 통합 검사로 유지합니다. 새 모듈로 계산 위치를 옮겼지만 `GameState`의 공개 계약은 같으므로 테스트 파일을 이름만 바꾸거나 삭제·합치지 않았습니다. 리팩터링 전후에는 326개 계획·26,995프레임·828화면과 전체 자원·저장 파일 해시를 비교해 결과가 같은 것을 확인했습니다. 전체 회귀 검사와 실제 실행의 최종 결과는 [CHANGELOG](CHANGELOG.md)에 기록합니다.
+Pygame의 기존 146개 검사는 기능별 통합 검사로 유지합니다. 새 모듈로 계산 위치를 옮겼지만 `GameState`의 공개 계약은 같으므로 테스트 파일을 이름만 바꾸거나 삭제·합치지 않았습니다. 리팩터링 전후에는 326개 계획·26,995프레임·828화면과 전체 자원·저장 파일 해시를 비교해 결과가 같은 것을 확인했습니다. 전체 회귀 검사와 실제 실행의 최종 결과는 [CHANGELOG](CHANGELOG.md)에 기록합니다. 웹 검사는 아래 별도 명령을 사용합니다.
 
 ```powershell
 python -B -m unittest discover -s tests -v
@@ -267,6 +270,57 @@ python -B tools/verify_difficulty.py --output docs/DIFFICULTY_REPORT.json
 
 해금·난이도 경계 검사는 슬롯을 기준으로 하며, 슬롯 길이를 바꾼 경우에도 같은 단계에서 해금되는지 확인합니다. 실제 회피는 30·60·120FPS 등 여러 프레임 속도에서 검사합니다. `tools/verify_difficulty.py`의 결과는 자동 입력으로 확인한 이론적 회피 가능성과 탐색 범위의 표본이며, 사람의 반응 시간이나 실제 조작감을 보증하지 않습니다. 최종 명령·검사 수·연속 플레이 결과는 [CHANGELOG](CHANGELOG.md)에 기록합니다.
 
-2026-11-21 [난이도 보고서](DIFFICULTY_REPORT.json)는 현재 `DAY_NIGHT_INTERVAL=5`, `MID_SPEED_INCREASE=0.002` 설정에서 0·2·4·6·7·8·15·16·64슬롯의 해금된 유형·동작·비행 높이·상찌 무리 조합을 고정해 검사한 결과입니다. 각 입력은 새 상태에서 120Hz로 진행하고, x=80~400을 4픽셀 간격의 81개 지점으로 탐색합니다. 337개 슬롯·계획 조합의 27,297회 입력 시뮬레이션에서 각각 안전한 입력 구간이 있었습니다. 끊어진 안전 구간은 합쳐서 보고하지 않습니다. 상찌 출발 시점의 무작위 흔들림은 12.5픽셀의 중앙값으로 고정하며, 그 밖의 동작은 계획마다 분리합니다. 보고서의 `passed=true`, `failures=[]`를 확인했습니다.
+2026-11-22 [난이도 보고서](DIFFICULTY_REPORT.json)는 현재 `DAY_NIGHT_INTERVAL=25`, `MID_SPEED_INCREASE=0.002` 설정으로 재생성한 결과입니다. 0·2·4·6·7·8·15·16·64의 9개 슬롯에서 해금된 유형·동작·비행 높이·상찌 무리 조합을 고정했습니다. 각 입력은 새 상태에서 120Hz로 진행하고 x=80~400을 4픽셀 간격의 81개 지점으로 탐색합니다. 337개 슬롯·계획 조합의 27,297회 입력 시뮬레이션에서 각각 안전한 입력 구간이 있었으며 `passed=true`, `failures=[]`를 확인했습니다. 끊어진 안전 구간은 합쳐서 보고하지 않습니다. 상찌 출발 시점의 무작위 흔들림은 12.5픽셀의 중앙값으로 고정하며 그 밖의 동작은 계획마다 분리합니다. 보고서 날짜는 실행 호스트와 사용자 기준일이 일치하는 2026-11-22이며 수동 보정하지 않았습니다.
 
-연속 검사는 고정 시드 20261120으로 실제 Space 이벤트를 넣고 프레임마다 상태를 갱신하며 1초마다 화면을 출력합니다. 30·60·120FPS에서 각각 600초를 무충돌로 완료했고 마지막 속도 배율은 모두 약 1.631655배였습니다. 점수는 각각 7,490·7,490·7,440점이며, 생존 600점과 통과 보너스 6,890·6,890·6,840점의 합과 일치했습니다. 통과한 장애물 단위는 각각 475·475·476개로 프레임 속도별 교체 횟수에는 작은 차이가 있었습니다. 상찌 무리는 마리별 보너스를 주므로 통과한 장애물 단위 수와 보너스의 10점 단위 수는 같지 않습니다.
+연속 검사는 고정 시드 20261120으로 실제 Space 이벤트를 넣고 프레임마다 상태를 갱신하며 1초마다 화면을 출력합니다. 현재 25초 슬롯에서 30·60·120FPS 각각 600초를 무충돌로 완료했고 마지막 속도 배율은 모두 약 1.631655배였습니다. 점수는 각각 6,240·6,240·6,250점이며 생존 600점과 통과 보너스 5,640·5,640·5,650점의 합과 일치했습니다. 통과한 장애물 단위는 각각 425·425·426개로 프레임 속도별 교체 횟수에는 작은 차이가 있었습니다. 상찌 무리는 마리별 보너스를 주므로 통과한 장애물 단위 수와 보너스의 10점 단위 수는 같지 않습니다. 이전 5초 슬롯 검증은 [CHANGELOG](CHANGELOG.md)의 2026-11-21 기록으로 보존합니다.
+
+## 웹 이식본 구조
+
+웹 실행은 Pygame을 호출하지 않습니다. `web/`에는 실행에 필요한 PNG와 충돌 마스크가 포함되어 있어 폴더만 복사해 정적 HTTP 서버로 제공할 수 있습니다. Node·Pygame은 각각 개발 검사·자산 재생산 때 사용합니다. `serve.py`는 정적 파일을 전달하는 개발 서버이며 점수 계산이나 저장을 수행하지 않습니다.
+
+```text
+브라우저 → index.html → style.css
+                     → src/app.js → src/engine.js
+                                  → src/storage.js
+                                  → assets/manifest.json → PNG
+
+자산 재생산만: tools/export_assets.py → 부모 assets.py / config.py
+                                     → web/assets/ PNG·마스크
+```
+
+| 파일 | 현재 책임 |
+| --- | --- |
+| `web/index.html` | 640×360 Canvas, 시작·정지·결과 오버레이, 고정 HUD와 기록판의 DOM |
+| `web/style.css` | 화면 배치·아이콘·색상, PC 두 열과 좁은 화면 한 열 전환 |
+| `web/src/app.js` | 이미지 선로딩, 상태 전환, 프레임 루프, Canvas 렌더링, 키보드·터치 입력, UI·결과 저장 연결 |
+| `web/src/engine.js` | `RULES`, `GameEngine`, 물리·해금·패턴·포즈·충돌·통과 점수·계절·난이도 |
+| `web/src/storage.js` | `PlayerStore`, 브라우저 ID·임시 닉네임, 로컬 결과·예시 기록·상위 5개 |
+| `web/assets/manifest.json` | 자산 경로·크기·포즈별 이진 마스크. PNG와 함께 사용 |
+| `web/serve.py`, `start_web.bat` | 웹 폴더만 제공하는 로컬 HTTP 서버와 Windows 실행 래퍼 |
+| `web/tools/export_assets.py` | 부모 게임에서 준비한 프레임·마스크를 읽어 `web/assets/`에 내보내기 |
+| `web/tests/`, `tools/browser-smoke.mjs` | Node 엔진·저장 검사와 실제 브라우저의 PC·모바일 모사 검사 |
+
+### 웹 시작과 한 프레임
+
+`load()`가 manifest와 PNG를 모두 불러온 뒤 `GameEngine`을 만들고 `splash → ready → transition → playing → gameover` 순서로 진행합니다. `splash`는 2초이며, `ready`는 입력할 때까지 전체 인트로 그림을 유지합니다. `transition`은 1.25초 배경 페이드와 부기 달리기·스크롤을 연결합니다. Pygame과 달리 웹의 `ready`는 흰 배경 달리기 화면이 아닙니다. 재시작은 `engine.reset()` 후 바로 `playing`으로 갑니다.
+
+`requestAnimationFrame(frame)` → 실제 시간차 `dt` 계산 → 단계에 따라 `engine.update(dt)` → `draw()` → `refreshUI()` 순서입니다. 일시정지는 `phase`를 바꾸지 않고 `engine.paused`로 관리합니다. 창·탭 이탈은 자동 정지하며 복귀 후 사용자가 재개합니다. 시작 입력과 점프 입력, 게임오버 재시작 입력은 현재 단계에서 분리합니다.
+
+엔진은 실제 경과 시간으로 생존 점수·계절을 계산하고, 이동 적분은 한 프레임 최대 0.1초로 제한합니다. 빠른 이동은 추가로 작은 단계로 나눠 충돌을 검사합니다. 따라서 장시간 멈춘 브라우저의 이동을 한 번에 보충하지 않습니다. 렌더러와 충돌은 `drawParts`의 같은 포즈·정수 좌표를 사용하며, `masksOverlap()`이 내보낸 마스크의 겹친 `1` 픽셀을 검사합니다. 굴 구덩이는 몸체 전용 마스크 덕분에 빈 상태에서 안전합니다.
+
+### 웹 화면·규칙·저장 경계
+
+웹의 논리 크기는 640×360이며 부기 위치는 `RULES.playerX=25`입니다. CSS 확대와 별개이고, 고해상도 화면의 실제 Canvas 해상도는 `syncCanvasResolution()`에서 최대 2배로 보정합니다. 가로로 넓힌 영역에 맞춰 장애물 동작 기준을 부기의 x좌표에 연결하며, 장애물 간격은 화면 폭의 비율로 일괄 확대하지 않습니다. 해금·속도·통과 점수 규칙은 Pygame에서 이식했고, 현재 슬롯 길이는 두 버전 모두 25초입니다. Python 설정을 수정해도 JavaScript `RULES`가 자동으로 바뀌지는 않습니다.
+
+너비 1001px 이상에서는 게임·기록이 약 3:1의 두 열이며 카드 높이를 맞추고 기록 목록 내부에서 스크롤합니다. 1000px 이하와 터치 가로 화면은 한 열입니다. 게임 아래 SCORE·TIME 줄과 기록판 컨테이너는 상태 변경 중에도 같은 자리를 유지하며, 기록 항목만 갱신합니다. 모바일도 동일한 `GameEngine`을 사용합니다.
+
+결과는 게임오버 때 `recorded` 가드로 한 번만 저장합니다. `PlayerStore`는 `jumpbugi.web.v1.identity`와 `jumpbugi.web.v1.results`를 `localStorage`에 저장합니다. 결과가 없을 때 예시를 명시하고, 이후 실제 결과 최대 50개와 상위 5개를 표시하며 오래된 최고 결과도 보존합니다. 저장소가 차단되면 이번 접속의 메모리 상태를 사용합니다. 브라우저·접속 주소별 데이터이며 Pygame 점수 파일이나 온라인 서버 랭킹과 연결되지 않습니다.
+
+```powershell
+python -B web/serve.py
+# 아래 두 명령은 web 폴더에서 실행
+node --test tests/*.test.js
+node tools/browser-smoke.mjs http://127.0.0.1:8000/
+```
+
+브라우저 검사의 `.qa/` 화면·프로필·보고서는 Git 추적에서 제외합니다. 검사 범위와 최신 결과는 [WEB_REVIEW](WEB_REVIEW.md), 초보자용 읽기 순서와 실습은 [web-srudy](web-srudy.md), 실행·휴대폰 접속은 [웹 README](../web/README.md)에 정리합니다. 설계 지침은 이식 의도를 설명하는 문서이며 현재 구현 여부는 코드와 이 구조 문서를 기준으로 확인합니다.

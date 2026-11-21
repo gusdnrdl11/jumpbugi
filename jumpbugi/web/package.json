@@ -1,0 +1,11 @@
+{
+  "name": "jumpbugi-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "점프부기 독립 웹 프로토타입",
+  "scripts": {
+    "start": "python -B serve.py",
+    "test": "node --test tests/*.test.js"
+  }
+}

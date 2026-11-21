@@ -1,8 +1,8 @@
 # 점프부기
 
-점프부기는 장애물에 따라 뛰어넘거나 아래로 달려 통과하는 Pygame 러너입니다. 기준 폴더는 `jumpbugi/`입니다.
+점프부기는 장애물에 따라 뛰어넘거나 아래로 달려 통과하는 러너입니다. `jumpbugi/`에 Pygame 기준본과 브라우저용 `web/` 이식본을 함께 보관합니다.
 
-이 버전은 **HansungRun Pygame Prototype 1.0**의 기준본입니다. Pygame의 논리 화면은 480×360으로 유지하며, 이후 라즈베리파이 이식과 게임 규칙 참고용 원본으로 사용합니다. 웹 버전은 별도 프로젝트에서 설계합니다.
+Python 코드는 **HansungRun Pygame Prototype 1.0**, 웹 코드는 **점프부기 Web 0.1.0**입니다. Pygame은 480×360, 웹은 640×360 논리 화면을 사용합니다. 두 버전의 실행·저장은 독립적이며, Pygame은 라즈베리파이 이식과 게임 규칙 참고용 기준본으로 유지합니다.
 
 GitHub 저장소는 [개인 jumpbugi](https://github.com/gusdnrdl11/jumpbugi)와 [튜터링 jumpbugi](https://github.com/hansung-tutoring/jumpbugi)이며, 두 저장소의 기본 브랜치는 `main`입니다.
 
@@ -26,11 +26,14 @@ jumpbugi/
 │  ├─ TODO.md               다음에 할 일
 │  ├─ CHANGELOG.md          완료한 작업과 검증 기록
 │  ├─ ARCHITECTURE.md       현재 구조와 실행 흐름
-│  ├─ DIFFICULTY_REPORT.json 현재 설정의 자동 회피·연속 플레이 결과
+│  ├─ DIFFICULTY_REPORT.json 현재 25초 슬롯의 난이도 검사 결과
+│  ├─ WEB_REVIEW.md         웹 이식 구조 점검과 최신 검증 기록
+│  ├─ web-srudy.md          웹 코드부터 따라 읽는 초보자 학습 문서
 │  ├─ STUDY_NOTES.md        공부하면서 배운 내용
 │  ├─ GAME_IDEA.md          게임 기획과 아이디어
 │  └─ archive/              이전 문서·배경 보고서·프롬프트
-├─ txt/                     실제 최고점수와 폴더 안내
+├─ web/                     640×360 독립 브라우저 게임·자산·테스트
+├─ txt/                     Pygame 실제 최고점수와 폴더 안내
 ├─ tools/verify_difficulty.py 계획별 회피 탐색·연속 플레이 검사
 └─ tests/                   역할별 자동 검사
    ├─ __init__.py
@@ -56,15 +59,18 @@ jumpbugi/
 
 ## 읽는 순서
 
-기능별 코드 위치는 [ARCHITECTURE의 역할과 연결](docs/ARCHITECTURE.md#역할과-연결)을 참고합니다. 플레이어 점프·충돌·득점은 `backend.py`, 패턴 선택은 `patterns.py`, 장애물 점프·포즈는 `obstacles.py`, 계절 전환은 `season.py`, 난이도는 `difficulty.py`, 이미지 준비는 `assets.py`에서 수정합니다. 독립 계산 모듈은 화면을 만들지 않으며 기존 직접 실행·패키지 import 경로는 유지합니다.
+기능별 코드 위치는 [ARCHITECTURE의 역할과 연결](docs/ARCHITECTURE.md#pygame-역할과-연결)을 참고합니다. 플레이어 점프·충돌·득점은 `backend.py`, 패턴 선택은 `patterns.py`, 장애물 점프·포즈는 `obstacles.py`, 계절 전환은 `season.py`, 난이도는 `difficulty.py`, 이미지 준비는 `assets.py`에서 수정합니다. 독립 계산 모듈은 화면을 만들지 않으며 기존 직접 실행·패키지 import 경로는 유지합니다.
 
 | 문서 | 담는 내용 |
 | --- | --- |
 | [STUDY_NOTES](docs/STUDY_NOTES.md) | Python·Pygame을 공부하면서 배운 개념과 연습 |
 | [ARCHITECTURE](docs/ARCHITECTURE.md) | 현재 점프부기의 파일 역할, 실행 흐름과 구현 규칙 |
+| [웹 실행 안내](web/README.md) | PC·모바일 실행, 입력, 브라우저 기록의 범위 |
+| [web-srudy](docs/web-srudy.md) | 웹 입문부터 실제 함수·구조·작은 실습까지 한 문서로 공부 |
+| [WEB_REVIEW](docs/WEB_REVIEW.md) | 현재 이식 상태, 점검 결과와 남은 확인 범위 |
 | [GAME_IDEA](docs/GAME_IDEA.md) | 앞으로 만들고 싶은 게임 방향, 기획과 아이디어 |
 
-다음에 실행할 작업은 [TODO](docs/TODO.md), 완료 작업과 검증 기록은 [CHANGELOG](docs/CHANGELOG.md)에서 확인합니다. 학습 자료는 STUDY_NOTES에 모았으며 AI의 기본 참조 대상에서는 제외합니다.
+다음에 실행할 작업은 [TODO](docs/TODO.md), 완료 작업과 검증 기록은 [CHANGELOG](docs/CHANGELOG.md)에서 확인합니다. 기존 Python 학습 자료는 STUDY_NOTES에 있으며 AI의 기본 참조 대상에서는 제외합니다. 웹 학습 문서의 사용자용 사본은 상위 `pygame/web-srudy.md`, 저장소 문서 보관본은 `docs/web-srudy.md`입니다.
 
 ## 실행과 검사
 
@@ -80,6 +86,8 @@ python -B -m unittest discover -s tests -v
 Space: 점프 / Esc: 정지·재개 / 게임오버 후 Enter: 재시작 / Ctrl+F4 또는 창 닫기: 종료
 
 ## 첫 실행과 재시작
+
+이하 첫 실행·장애물 설명은 Pygame 기준입니다. 웹과의 차이는 [웹 버전](#웹-버전)과 [웹 실행 안내](web/README.md)를 참고합니다.
 
 처음 실행하면 사용자가 제공한 `image/intro.png`를 2초 동안 보여 줍니다. 그림에 ‘점프부기’ 제목이 포함돼 있어 별도 제목이나 말풍선을 겹쳐 그리지 않습니다. 이전 `image/start.png`·`image/start.jpg`는 보존합니다. 이후 흰 배경에서 상상부기가 달리며 ‘아무 키나 누르면 시작’과 조작 안내만 표시합니다. 입력 대기 화면에 게임 제목은 다시 표시하지 않습니다. 키를 누르면 부기의 위치와 달리기 동작을 그대로 이어 가면서 한성대 봄 낮 배경도 정상 게임의 시작 속도인 `BACKGROUND_SPEED × PHYSICS_HZ` 픽셀/초로 가로 스크롤을 시작합니다. 배경 알파만 1.25초 동안 0에서 255로 높여 흰 배경 위로 움직이는 풍경이 천천히 나타납니다. 부기는 페이드 없이 계속 달리고 시작·조작 안내는 함께 사라집니다. 시작에 사용한 Space는 점프 입력으로 중복 처리하지 않습니다.
 
@@ -180,7 +188,7 @@ Space: 점프 / Esc: 정지·재개 / 게임오버 후 Enter: 재시작 / Ctrl+F
 python -B tools/verify_difficulty.py --output docs/DIFFICULTY_REPORT.json
 ```
 
-2026-11-21 보고서는 현재 `DAY_NIGHT_INTERVAL=5`, `MID_SPEED_INCREASE=0.002` 설정의 결과입니다. 누적 0·2·4·6·7·8·15·16·64슬롯에서 해금된 동작을 따로 고정하고, 120Hz에서 시작 거리 80~400픽셀을 4픽셀 간격으로 탐색했습니다. 337개 슬롯·동작 조합의 27,297회 입력 시뮬레이션에서 각각 회피 가능한 구간이 있었고, 30·60·120FPS의 600초 연속 자동 플레이도 모두 무충돌로 완료했습니다. 마지막 속도는 약 1.631655배였으며 `passed=true`, `failures=[]`를 확인했습니다. 상찌 출발 위치의 무작위 흔들림은 중앙값으로 고정한 검사이므로 모든 무작위 경우를 전수 검사한 결과와는 구분합니다.
+2026-11-22에 현재 `DAY_NIGHT_INTERVAL=25`, `MID_SPEED_INCREASE=0.002` 설정으로 보고서를 재생성했습니다. 누적 0·2·4·6·7·8·15·16·64의 9개 슬롯에서 337개 유형·동작 조합을 고정하고, 120Hz에서 시작 거리 80~400픽셀을 4픽셀 간격으로 탐색했습니다. 27,297회 입력 시뮬레이션 모두에서 계획별 회피 구간이 있었고 `passed=true`, `failures=[]`를 확인했습니다. 30·60·120FPS 연속 자동 플레이는 각각 600초 무충돌로 완료했으며 점수는 6,240·6,240·6,250점, 마지막 속도는 모두 약 1.631655배였습니다. 상찌 출발 위치의 무작위 흔들림은 중앙값으로 고정했으므로 모든 무작위 경우를 전수 검사한 결과는 아닙니다. 이전 5초 슬롯 설정의 검증 수치는 [CHANGELOG](docs/CHANGELOG.md)의 2026-11-21 기록에 남아 있습니다.
 
 ## 충돌 판정
 
@@ -190,9 +198,17 @@ python -B tools/verify_difficulty.py --output docs/DIFFICULTY_REPORT.json
 
 검증 내용은 [CHANGELOG](docs/CHANGELOG.md), 구성과 데이터 흐름은 [ARCHITECTURE](docs/ARCHITECTURE.md), 직접 플레이 확인 항목은 [TODO](docs/TODO.md)에 기록합니다.
 
-## Pygame 1.0 이후
+## 웹 버전
 
-Pygame의 480×360 논리 화면과 기본 게임 규칙은 라즈베리파이 이식과 비교를 위한 기준으로 유지합니다. 웹 버전은 별도 프로젝트에서 실제 가로 논리 영역을 넓혀 장애물을 더 일찍 보고 판단할 수 있게 설계합니다. CSS로 화면만 확대하는 방식과 구분하며, 넓어진 화면에 맞춰 생성 위치·이동 시간·등장 템포도 함께 조정합니다. 웹에 맞는 밸런스와 플레이 데이터 수집은 향후 작업입니다.
+`web/`는 HTML·CSS·JavaScript와 Canvas로 만든 독립 이식본입니다. 논리 화면을 640×360으로 넓혔으며, `src/engine.js`가 PC·모바일에 같은 물리·충돌·득점·패턴을 제공합니다. `src/app.js`는 화면과 입력, `src/storage.js`는 브라우저 ID·닉네임·플레이 결과를 담당합니다. CSS는 PC 두 열과 모바일 한 열 배치를 바꾸며 게임 규칙을 바꾸지 않습니다.
+
+```powershell
+python -B web/serve.py
+```
+
+브라우저에서 `http://127.0.0.1:8000/`을 엽니다. Windows의 `web/start_web.bat`도 사용할 수 있습니다. 실행에는 Python 표준 라이브러리만 필요하며 Pygame·npm 패키지는 필요 없습니다. 개발 검사는 `web/`에서 `node --test tests/*.test.js`로 실행합니다.
+
+웹은 인트로 그림을 입력 전까지 유지하고, 게임 아래에 SCORE·TIME을 고정 표시합니다. 시작·재개·재시작 아이콘과 터치 점프, 탭 이탈 시 자동 정지를 지원합니다. 플레이 결과는 이 브라우저의 `localStorage`에 최대 50개 저장하고 상위 5개를 표시합니다. 온라인 공동 랭킹·서버 DB·외부 데이터 전송은 구현하지 않았습니다. 실제 기기에서의 터치감·밸런스 조정과 인터넷 배포는 [TODO](docs/TODO.md)의 후속 작업입니다.
 
 ## 파일 관리 원칙
 

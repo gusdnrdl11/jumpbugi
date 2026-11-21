@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f2f7fc">
+  <meta name="description" content="상상부기와 함께 한성의 사계절을 달려요. PC와 모바일에서 즐기는 점프부기 웹버전.">
+  <title>점프부기 · 사계절을 달려요</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./src/app.js"></script>
+</head>
+<body>
+  <main class="app-shell">
+    <div class="play-layout">
+      <section class="game-column" aria-label="점프부기 게임">
+        <div class="game-card">
+          <div class="game-stage" id="game-stage">
+            <canvas id="game-canvas" width="640" height="360" tabindex="0" aria-label="점프부기 게임 화면. Space로 점프, Esc로 일시정지합니다.">이 게임은 HTML Canvas를 지원하는 브라우저에서 실행됩니다.</canvas>
+            <button class="icon-button pause-button" id="pause-button" type="button" aria-label="일시정지" title="일시정지 (Esc)" disabled hidden><svg id="pause-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4v12M14 4v12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></button>
+            <div class="stage-overlay loading-overlay" id="loading-overlay" role="status"><div class="loading-spinner"></div><strong id="loading-text" class="visually-hidden">부기가 달릴 길을 준비하고 있어요</strong><span id="loading-detail" class="visually-hidden">이미지 불러오는 중 · 0%</span><button id="reload-button" class="icon-button action-button" type="button" aria-label="다시 불러오기" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 8a8 8 0 1 0 1 6M19 3v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+            <div class="stage-overlay ready-overlay" id="ready-overlay" hidden><button class="icon-button action-button" id="start-button" type="button" aria-label="게임 시작" title="게임 시작"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7Z" fill="currentColor"/></svg></button></div>
+            <div class="stage-overlay pause-overlay" id="pause-overlay" hidden><button class="icon-button action-button" id="resume-button" type="button" aria-label="계속 달리기" title="계속 달리기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7Z" fill="currentColor"/></svg></button></div>
+            <div class="stage-overlay result-overlay" id="result-overlay" hidden><h2 class="game-over-title" id="game-over-title" role="status" aria-live="polite">GAME OVER</h2><p class="restart-hint" id="restart-hint">Enter로 다시 시작</p><button class="icon-button action-button" id="restart-button" type="button" aria-label="다시 달리기" title="다시 달리기 (Enter)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 8a8 8 0 1 0 1 6M19 3v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+          </div>
+          <div class="game-hud" id="game-hud" aria-label="점수와 플레이 결과"><span>SCORE <strong id="score">0</strong></span><span>TIME <strong id="elapsed">00:00</strong></span></div>
+        </div>
+      </section>
+
+      <aside class="ranking-card" aria-labelledby="ranking-title">
+        <div class="ranking-heading"><div><p class="eyebrow">RUNNER BOARD</p><h2 id="ranking-title">달리기 기록</h2></div><svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M10 5h12v9a6 6 0 0 1-12 0V5Zm0 2H5v4a5 5 0 0 0 5 5m12-9h5v4a5 5 0 0 1-5 5M16 20v6m-5 1h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="board-badge" id="ranking-mode">예시 기록</span>
+        <div class="ranking-columns" aria-hidden="true"><span>러너</span><span>점수</span></div>
+        <ol class="ranking-list" id="ranking-list"></ol>
+        <div class="my-record"><span id="nickname"></span><span>나의 최고 기록</span><strong id="ranking-best">기록 없음</strong></div>
+        <p class="ranking-note" id="ranking-note">첫 플레이 후 내 기록이 표시됩니다.</p>
+        <p class="storage-note" id="storage-note" hidden>브라우저 저장소를 사용할 수 없어 이번 접속 동안만 기록을 보관해요.</p>
+      </aside>
+    </div>
+    <noscript>점프부기를 플레이하려면 브라우저의 JavaScript를 켜주세요.</noscript>
+  </main>
+</body>
+</html>
