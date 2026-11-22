@@ -1,6 +1,6 @@
 """공통 설정과 파일 경로."""
 from pathlib import Path
-PROJECT_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = Path(__file__).resolve().parent.parent
 GAME_TITLE = '점프부기'
 START_IMAGE_FILE = 'intro.png'
 SPLASH_SECONDS = 2.0

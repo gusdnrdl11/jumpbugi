@@ -11,15 +11,15 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 import pygame
 if __package__ and __package__.startswith('jumpbugi.'):
-    from .. import config
-    from ..assets import load_image
-    from ..main import JumpBugi
-    from ..difficulty import speed_multiplier_for_slot
+    from ..desktop_prototype import config
+    from ..desktop_prototype.assets import load_image
+    from ..desktop_prototype.main import JumpBugi
+    from ..desktop_prototype.difficulty import speed_multiplier_for_slot
 else:
-    import config
-    from assets import load_image
-    from main import JumpBugi
-    from difficulty import speed_multiplier_for_slot
+    from desktop_prototype import config
+    from desktop_prototype.assets import load_image
+    from desktop_prototype.main import JumpBugi
+    from desktop_prototype.difficulty import speed_multiplier_for_slot
 
 
 class SeasonCycleTests(unittest.TestCase):

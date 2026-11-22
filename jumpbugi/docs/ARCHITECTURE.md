@@ -6,17 +6,18 @@
 jumpbugi/
 ├─ README.md            실행 안내와 문서 목차
 ├─ AGENTS.md            AI 참조 범위와 자료 관리 기준
-├─ main.py              실행·입력·반복 순서
-├─ frontend.py          준비된 자원을 사용하는 화면과 UI
-├─ backend.py           GameState와 물리·충돌·득점 갱신 순서
-├─ patterns.py          해금된 패턴 풀·대기열·무작위 순서 선택
-├─ obstacles.py         장애물 점프 계획·포즈·상찌 무리 좌표
-├─ season.py            계절 슬롯·사이클·배경 전환값
-├─ difficulty.py        속도·접근 간격·패턴 난이도 확률
-├─ config.py            공통 설정과 내부 경로
-├─ assets.py            이미지·프레임·충돌 마스크와 GameAssets 조립
-├─ storage.py           최고점수 읽기·저장
-├─ __init__.py          패키지 표시
+├─ desktop_prototype/   Pygame 데스크톱 프로토타입 소스
+│  ├─ main.py           실행·입력·반복 순서
+│  ├─ frontend.py       준비된 자원을 사용하는 화면과 UI
+│  ├─ backend.py        GameState와 물리·충돌·득점 갱신 순서
+│  ├─ patterns.py       해금된 패턴 풀·대기열·무작위 순서 선택
+│  ├─ obstacles.py      장애물 점프 계획·포즈·상찌 무리 좌표
+│  ├─ season.py         계절 슬롯·사이클·배경 전환값
+│  ├─ difficulty.py     속도·접근 간격·패턴 난이도 확률
+│  ├─ config.py         공통 설정과 내부 경로
+│  ├─ assets.py         이미지·프레임·충돌 마스크와 GameAssets 조립
+│  ├─ storage.py        최고점수 읽기·저장
+│  └─ __init__.py       패키지 표시
 ├─ docs/
 │  ├─ TODO.md
 │  ├─ CHANGELOG.md
@@ -55,11 +56,13 @@ jumpbugi/
    └─ test_startup.py
 ```
 
-`__pycache__`는 파이썬이 만드는 캐시입니다. 현재 게임은 상위 폴더의 image·txt·테스트·실행 래퍼 없이 실행할 수 있습니다.
+`__pycache__`는 파이썬이 만드는 캐시입니다. Pygame 소스는 `desktop_prototype/`, 실행 자산·실제 점수·테스트·도구는 `jumpbugi/` 루트 아래의 기존 폴더에 둡니다. 프로젝트를 옮길 때 이 구성을 함께 보관합니다.
 
 이 문서는 **HansungRun Pygame Prototype 1.0**과 `web/` 이식본의 현재 구조를 설명합니다. 480×360 Pygame 기준본은 라즈베리파이 이식과 규칙 참고용으로 유지하며, 웹은 640×360의 독립 JavaScript 게임으로 구현했습니다. 아래 Pygame 구조와 [웹 이식본 구조](#웹-이식본-구조)를 구분해 읽습니다. Python 학습 개념은 [STUDY_NOTES](STUDY_NOTES.md), 웹 학습은 [web-srudy](web-srudy.md), 기획은 [GAME_IDEA](GAME_IDEA.md), 다음 작업은 [TODO](TODO.md), 완료 기록은 [CHANGELOG](CHANGELOG.md)에 둡니다.
 
 ## Pygame 역할과 연결
+
+이 절의 짧은 Python 파일명과 모듈명은 모두 `desktop_prototype/` 안을 가리킵니다. 2026-11-22 정리는 파일 위치와 참조 경로만 변경했으며 함수·클래스·게임 규칙과 기능별 분리를 유지합니다.
 
 ```text
 main → frontend → assets
@@ -80,7 +83,7 @@ tests → 게임 동작 확인
 
 `assets.py`는 그림 읽기·크기 조절·모션 시트 분리·합성·마스크 생성과 `GameAssets` 조립에 집중하고, `frontend.py`는 배경 사본·글꼴·UI·렌더링에 집중합니다. 캐릭터별 시트 처리 함수는 동일한 자원 준비 흐름을 공유하므로 파일 길이만을 이유로 더 나누지 않았습니다. 플레이어 적분·충돌·득점은 짧은 상태 갱신이며 순서가 동작에 영향을 주므로 `backend.GameState`에 함께 유지합니다. 별도 `player.py`·`scoring.py`·`game_state.py`로 옮기기 위한 전달용 계층은 추가하지 않았습니다.
 
-의존성은 위에서 아래 방향이며 새 계산 모듈에서 backend·frontend를 다시 import하지 않습니다. 직접 파일 실행과 상위 폴더의 `jumpbugi.main` 패키지 import를 모두 유지하고, 로컬 모듈 import 그래프에 순환이 없는 것을 확인했습니다.
+의존성은 위에서 아래 방향이며 계산 모듈에서 backend·frontend를 다시 import하지 않습니다. 루트에서는 `python -B -m desktop_prototype.main` 또는 `python -B desktop_prototype/main.py`, 상위 `pygame/`에서는 `python -B -m jumpbugi.desktop_prototype.main`으로 실행합니다. 기존 모듈 간 의존성을 유지합니다.
 
 | 수정하려는 기능 | 확인할 파일 |
 | --- | --- |
@@ -114,11 +117,13 @@ run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 �
 
 ## 경로 기준
 
-`config.PROJECT_DIR = Path(__file__).resolve().parent`입니다. config.py가 있는 jumpbugi 폴더가 기준이며 터미널의 현재 위치와 무관합니다.
+`desktop_prototype/config.py`의 `PROJECT_DIR = Path(__file__).resolve().parent.parent`입니다. 소스 폴더의 상위인 `jumpbugi/` 루트가 기준이며 터미널의 현재 위치와 무관합니다.
 
 - 이미지: `PROJECT_DIR / 'image'`
 - 최고점수: `PROJECT_DIR / 'txt' / 'high_score.txt'`
 - 프로젝트를 다른 곳으로 옮길 때도 이 폴더들을 함께 옮깁니다.
+
+`tests/`와 `tools/verify_difficulty.py`는 `desktop_prototype` 패키지를 import합니다. 웹 자산 내보내기는 `desktop_prototype/assets.py`·`config.py`를 사용하고, 원본 보존용 소스 해시도 `desktop_prototype/*.py`를 대상으로 확인합니다. 웹 실행 자체는 이 Python 소스를 호출하지 않습니다.
 
 ## 현재 사양과 저장
 
@@ -284,8 +289,8 @@ python -B tools/verify_difficulty.py --output docs/DIFFICULTY_REPORT.json
                                   → src/storage.js
                                   → assets/manifest.json → PNG
 
-자산 재생산만: tools/export_assets.py → 부모 assets.py / config.py
-                                     → web/assets/ PNG·마스크
+자산 재생산만: web/tools/export_assets.py → desktop_prototype/assets.py / config.py
+                                        → web/assets/ PNG·마스크
 ```
 
 | 파일 | 현재 책임 |
@@ -297,7 +302,7 @@ python -B tools/verify_difficulty.py --output docs/DIFFICULTY_REPORT.json
 | `web/src/storage.js` | `PlayerStore`, 브라우저 ID·임시 닉네임, 로컬 결과·예시 기록·상위 5개 |
 | `web/assets/manifest.json` | 자산 경로·크기·포즈별 이진 마스크. PNG와 함께 사용 |
 | `web/serve.py`, `start_web.bat` | 웹 폴더만 제공하는 로컬 HTTP 서버와 Windows 실행 래퍼 |
-| `web/tools/export_assets.py` | 부모 게임에서 준비한 프레임·마스크를 읽어 `web/assets/`에 내보내기 |
+| `web/tools/export_assets.py` | `desktop_prototype/`에서 준비한 프레임·마스크를 읽어 `web/assets/`에 내보내기 |
 | `web/tests/`, `tools/browser-smoke.mjs` | Node 엔진·저장 검사와 실제 브라우저의 PC·모바일 모사 검사 |
 
 ### 웹 시작과 한 프레임

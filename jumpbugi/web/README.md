@@ -1,8 +1,8 @@
 # 점프부기 Web 0.1
 
-기존 Pygame 게임을 브라우저로 옮긴 독립 프로토타입입니다. 실행에 필요한 이미지와 충돌 마스크를 이 폴더에 복사했으므로 `web/`만 따로 옮겨도 실행됩니다. 웹 실행은 Python 게임이나 `txt/high_score.txt`를 읽거나 쓰지 않으며, Pygame의 논리 화면은 480×360으로 유지합니다. 현재 두 버전의 낮·밤 슬롯 길이는 25초입니다.
+`../desktop_prototype/`의 Pygame 게임을 브라우저로 옮긴 독립 프로토타입입니다. 실행에 필요한 이미지와 충돌 마스크를 이 폴더에 복사했으므로 `web/`만 따로 옮겨도 실행됩니다. 웹 실행은 Python 게임이나 `txt/high_score.txt`를 읽거나 쓰지 않으며, Pygame의 논리 화면은 480×360으로 유지합니다. 현재 두 버전의 낮·밤 슬롯 길이는 25초입니다.
 
-처음 공부한다면 [코드부터 읽는 web-srudy](../docs/web-srudy.md)를 먼저 읽으세요. 전체 구조는 [ARCHITECTURE](../docs/ARCHITECTURE.md#웹-이식본-구조), 최신 점검 결과와 한계는 [WEB_REVIEW](../docs/WEB_REVIEW.md), 미완료 작업은 [TODO](../docs/TODO.md)에 있습니다. 사용자용 학습 사본은 상위 `pygame/web-srudy.md`입니다.
+처음 공부한다면 [코드부터 읽는 web-srudy](../docs/web-srudy.md)를 먼저 읽으세요. 전체 구조는 [ARCHITECTURE](../docs/ARCHITECTURE.md#웹-이식본-구조), 최신 점검 결과와 한계는 [WEB_REVIEW](../docs/WEB_REVIEW.md), 미완료 작업은 [TODO](../docs/TODO.md)에 있습니다. 웹 학습 문서의 현재 관리본은 프로젝트 내부의 `docs/web-srudy.md`입니다.
 
 ## PC에서 실행
 
@@ -96,7 +96,7 @@ node tools/browser-smoke.mjs http://127.0.0.1:8000/
 
 2026-11-22 검증: Node 자동 테스트 21개와 Chrome의 PC·모바일 세로·가로 흐름 검사를 통과했습니다. 원본 인트로 전체 표시·입력 전 유지, 설정된 부기 위치와 고정 SCORE·TIME 정보 줄, 키보드·터치 입력, 일시정지, 게임오버 시 1회 기록 저장, 새로고침 후 식별자·기록 유지, 재시작, 랭킹 상시 표시·동일 DOM·위치 유지, 상단 일시정지 버튼 숨김을 확인했습니다. 브라우저 콘솔 오류는 0개였습니다. PNG 83개·충돌 마스크 74개도 현재 Pygame 자원과 일치했습니다. 상세 범위와 실행 환경은 [WEB_REVIEW](../docs/WEB_REVIEW.md), 로컬 화면·JSON은 `.qa/`에 있습니다.
 
-자산 재생산만 부모 Pygame 소스와 Pygame 설치가 필요합니다. 웹을 실행할 때는 필요 없습니다. 기존 자산을 가공해 별도로 저장하며 원본을 덮어쓰지 않습니다.
+자산 재생산에는 `../desktop_prototype/`의 Pygame 소스·`../image/`의 원본 자산과 Pygame 설치가 필요합니다. 웹 실행은 이 소스와 독립적입니다. 기존 자산을 가공해 별도로 저장하며 원본을 덮어쓰지 않습니다.
 
 ```powershell
 python -B tools/export_assets.py

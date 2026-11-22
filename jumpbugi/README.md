@@ -1,6 +1,6 @@
 # 점프부기
 
-점프부기는 장애물에 따라 뛰어넘거나 아래로 달려 통과하는 러너입니다. `jumpbugi/`에 Pygame 기준본과 브라우저용 `web/` 이식본을 함께 보관합니다.
+점프부기는 장애물에 따라 뛰어넘거나 아래로 달려 통과하는 러너입니다. `jumpbugi/` 안의 `desktop_prototype/`에 Pygame 데스크톱 프로토타입을, `web/`에 브라우저 이식본을 보관합니다.
 
 Python 코드는 **HansungRun Pygame Prototype 1.0**, 웹 코드는 **점프부기 Web 0.1.0**입니다. Pygame은 480×360, 웹은 640×360 논리 화면을 사용합니다. 두 버전의 실행·저장은 독립적이며, Pygame은 라즈베리파이 이식과 게임 규칙 참고용 기준본으로 유지합니다.
 
@@ -12,16 +12,18 @@ GitHub 저장소는 [개인 jumpbugi](https://github.com/gusdnrdl11/jumpbugi)와
 jumpbugi/
 ├─ README.md                실행 안내와 문서 목차
 ├─ AGENTS.md                AI 참조 범위 안내
-├─ main.py                  입력과 전체 게임 루프
-├─ backend.py               GameState와 물리·충돌·득점 갱신
-├─ patterns.py              장애물 패턴 풀·해금·대기열 선택
-├─ obstacles.py             장애물 점프 궤적·포즈·상찌 무리 좌표
-├─ season.py                계절 슬롯·사이클·배경 전환값
-├─ difficulty.py            속도·접근 간격·패턴 난이도 확률
-├─ frontend.py              화면·UI 렌더링
-├─ assets.py                이미지·애니메이션·마스크 자원 조립
-├─ config.py                조절 가능한 설정과 경로
-├─ storage.py               최고점수 읽기·저장
+├─ desktop_prototype/       Pygame 데스크톱 프로토타입 소스
+│  ├─ __init__.py           패키지 표시
+│  ├─ main.py               입력과 전체 게임 루프
+│  ├─ backend.py            GameState와 물리·충돌·득점 갱신
+│  ├─ patterns.py           장애물 패턴 풀·해금·대기열 선택
+│  ├─ obstacles.py          장애물 점프 궤적·포즈·상찌 무리 좌표
+│  ├─ season.py             계절 슬롯·사이클·배경 전환값
+│  ├─ difficulty.py         속도·접근 간격·패턴 난이도 확률
+│  ├─ frontend.py           화면·UI 렌더링
+│  ├─ assets.py             이미지·애니메이션·마스크 자원 조립
+│  ├─ config.py             조절 가능한 설정과 경로
+│  └─ storage.py            최고점수 읽기·저장
 ├─ docs/
 │  ├─ TODO.md               다음에 할 일
 │  ├─ CHANGELOG.md          완료한 작업과 검증 기록
@@ -33,6 +35,7 @@ jumpbugi/
 │  ├─ GAME_IDEA.md          게임 기획과 아이디어
 │  └─ archive/              이전 문서·배경 보고서·프롬프트
 ├─ web/                     640×360 독립 브라우저 게임·자산·테스트
+├─ image/                   Pygame 실행 자산·보존 이미지
 ├─ txt/                     Pygame 실제 최고점수와 폴더 안내
 ├─ tools/verify_difficulty.py 계획별 회피 탐색·연속 플레이 검사
 └─ tests/                   역할별 자동 검사
@@ -59,7 +62,7 @@ jumpbugi/
 
 ## 읽는 순서
 
-기능별 코드 위치는 [ARCHITECTURE의 역할과 연결](docs/ARCHITECTURE.md#pygame-역할과-연결)을 참고합니다. 플레이어 점프·충돌·득점은 `backend.py`, 패턴 선택은 `patterns.py`, 장애물 점프·포즈는 `obstacles.py`, 계절 전환은 `season.py`, 난이도는 `difficulty.py`, 이미지 준비는 `assets.py`에서 수정합니다. 독립 계산 모듈은 화면을 만들지 않으며 기존 직접 실행·패키지 import 경로는 유지합니다.
+기능별 코드 위치는 [ARCHITECTURE의 역할과 연결](docs/ARCHITECTURE.md#pygame-역할과-연결)을 참고합니다. 아래 Pygame 파일명은 모두 `desktop_prototype/` 기준입니다. 플레이어 점프·충돌·득점은 `backend.py`, 패턴 선택은 `patterns.py`, 장애물 점프·포즈는 `obstacles.py`, 계절 전환은 `season.py`, 난이도는 `difficulty.py`, 이미지 준비는 `assets.py`에서 수정합니다. 기존 기능별 분리를 유지하며 독립 계산 모듈은 화면을 만들지 않습니다. 직접 실행·패키지 실행은 이동한 위치의 아래 명령을 사용합니다.
 
 | 문서 | 담는 내용 |
 | --- | --- |
@@ -70,18 +73,18 @@ jumpbugi/
 | [WEB_REVIEW](docs/WEB_REVIEW.md) | 현재 이식 상태, 점검 결과와 남은 확인 범위 |
 | [GAME_IDEA](docs/GAME_IDEA.md) | 앞으로 만들고 싶은 게임 방향, 기획과 아이디어 |
 
-다음에 실행할 작업은 [TODO](docs/TODO.md), 완료 작업과 검증 기록은 [CHANGELOG](docs/CHANGELOG.md)에서 확인합니다. 기존 Python 학습 자료는 STUDY_NOTES에 있으며 AI의 기본 참조 대상에서는 제외합니다. 웹 학습 문서의 사용자용 사본은 상위 `pygame/web-srudy.md`, 저장소 문서 보관본은 `docs/web-srudy.md`입니다.
+다음에 실행할 작업은 [TODO](docs/TODO.md), 완료 작업과 검증 기록은 [CHANGELOG](docs/CHANGELOG.md)에서 확인합니다. 기존 Python 학습 자료는 STUDY_NOTES에 있으며 AI의 기본 참조 대상에서는 제외합니다. 웹 학습 문서의 현재 관리본은 `docs/web-srudy.md`입니다.
 
 ## 실행과 검사
 
 확인 환경은 Python 3.13.15, pygame 2.6.1입니다. jumpbugi 폴더에서 실행합니다.
 
 ```powershell
-python main.py
+python -B -m desktop_prototype.main
 python -B -m unittest discover -s tests -v
 ```
 
-상위 폴더에서는 `python -m jumpbugi.main`으로 실행할 수도 있습니다.
+파일을 직접 실행하려면 `python -B desktop_prototype/main.py`, 상위 `pygame/` 폴더에서는 `python -B -m jumpbugi.desktop_prototype.main`을 사용합니다. `desktop_prototype/` 안에서 `python -B main.py`로 실행할 수도 있습니다. 이미지와 실제 최고점수는 루트의 `image/`, `txt/high_score.txt`를 그대로 사용하므로 프로젝트를 옮길 때 함께 보관합니다. 테스트와 난이도 도구는 루트의 기존 위치를 유지합니다.
 
 Space: 점프 / Esc: 정지·재개 / 게임오버 후 Enter: 재시작 / Ctrl+F4 또는 창 닫기: 종료
 

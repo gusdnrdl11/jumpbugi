@@ -2,6 +2,18 @@
 
 ## 2026-11-22
 
+### 데스크톱 프로토타입 폴더 분리와 문서 상태 정리
+
+- Pygame 실행 모듈 11개를 루트에서 `desktop_prototype/`으로 모으고 기능별 파일 분리와 게임 규칙을 유지했다. 실행 진입점은 루트 기준 `python -B -m desktop_prototype.main` 또는 `python -B desktop_prototype/main.py`, 상위 폴더 기준 `python -B -m jumpbugi.desktop_prototype.main`으로 바뀐다. 이동에 필요한 실행·자원·테스트·도구의 참조 경로만 맞추며 TODO의 기능 개선 후보를 이번에 구현하지 않는다.
+- 문서 **추가**: 이번 폴더 정리의 완료·검증 상태와 문서 수정 내역을 TODO·변경 기록에 남긴다. 기존의 시작 연출·장애물·점수·계절·난이도·웹 이식·로컬 저장 등 완료 항목은 기록을 유지한다.
+- 문서 **수정**: README·ARCHITECTURE와 현재 실행 안내를 `desktop_prototype/` 위치에 맞추고, GAME_IDEA에 남아 있던 `start.png`를 실제 `image/intro.png`로 바로잡았다. 웹 게임과 브라우저 로컬 기록은 구현 완료, 날씨·추가 장소·온라인 랭킹·서버 DB·분석용 수집은 미구현 아이디어로 구분했다. 수정한 문서는 `README.md`·`AGENTS.md`·`docs/ARCHITECTURE.md`·`docs/TODO.md`·`docs/CHANGELOG.md`·`docs/GAME_IDEA.md`·`docs/WEB_REVIEW.md`·`docs/web-srudy.md`·`web/README.md`·`txt/README.md`의 10개다. 웹 학습 문서의 현재 관리본은 프로젝트 내부 `docs/web-srudy.md`로 안내한다.
+- 문서 **삭제·통합(중복 정리)**: TODO의 완료 구현·자동 검증과 남은 직접 조작 확인을 별도 절로 재배치했다. 중복되던 낮밤/계절 가독성 2항목과 비행 높이 체감 2항목은 각각 1항목으로 통합하고 중복 표현만 삭제했다. 완료 기능과 남은 요구사항은 보존했으며, 점수 파일 오류 처리·저장 실패 안내 같은 미완료 후보는 그대로 남긴다.
+- WEB_REVIEW의 브라우저 검사·146개 Python 검사·21개 웹 검사·83개 자산/74개 마스크 대조·난이도 탐색은 같은 날 **웹 이식 당시**의 결과임을 표시했다. 이전 날짜의 CHANGELOG·보고서·상위 학습 사본을 이번에 다시 검증하거나 동기화한 결과로 바꾸지 않는다. 이번 폴더 이동 검증은 아래에 별도로 기록한다.
+- 이동 검증: `python -B -m unittest discover -s tests -v`의 전체 **146개**가 **253.465초**에 통과했고 종료 코드는 0이었다. 최초 제한 환경 실행은 임시 점수 파일 정리 중 `PermissionError`가 발생해 중단했으며, 승인된 권한으로 같은 명령을 재실행해 통과했다. 테스트의 검사 내용은 유지하고 새 패키지의 import 경로만 맞췄다.
+- 실행 경로 검증: 루트의 `desktop_prototype.main`, 직접 파일을 읽는 `runpy.run_path`, 상위의 `jumpbugi.desktop_prototype.main`에서 각각 `JumpBugi`를 생성해 SDL dummy 환경의 `splash → ready → transition → playing`, 화면 출력과 QUIT 정상 종료를 확인했다. 임시 경로를 전달해 실제 점수 파일을 사용하지 않았고, 상위 `jumpbugi.tests`의 18개 검사 모듈도 모두 import했다. 실제 창의 시각적 확인이나 사람의 조작감 확인으로 간주하지 않는다.
+- 도구·보존 검증: 난이도 도구의 `--help` 실행과 웹 내보내기 도구의 import·원본 해시 대상 11개·이미지/점수 기준 경로를 확인했다. 이동 직전 작업트리의 SHA256과 비교해 `config.py`를 제외한 10개 모듈은 바이트까지 같고, `config.py`는 `PROJECT_DIR` 기준 경로 한 줄만 바뀌었다. 실제 `txt/high_score.txt`와 기존 `docs/DIFFICULTY_REPORT.json`의 해시도 보존했다. 웹 자산과 난이도 보고서는 재생성하지 않았다.
+- 문서 검증: 갱신한 10개 문서의 상대 파일 링크 60개에 누락이 없고, Markdown 코드 블록 58개의 닫힘과 `git diff --check -- .`를 확인했다. TODO의 이번 이동 검증 항목만 새로 완료 처리했으며, 직접 플레이·새 기능·배포·원격 반영 같은 미실행 항목을 완료로 바꾸지 않았다.
+
 ### Web 0.1 이식본과 학습·구조 문서 정리
 
 - `web/`에 브라우저용 독립 이식본을 정리했다. `engine.js`가 물리·마스크 충돌·득점·계절·패턴·장애물 동작을, `app.js`가 Canvas 출력·입력·시작 연출·게임오버 흐름을, `storage.js`가 브라우저 ID·닉네임·플레이 결과를 담당한다. PC·모바일이 동일한 엔진을 사용한다.

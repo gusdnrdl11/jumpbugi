@@ -4,7 +4,7 @@
 
 ## 현재 구현
 
-Pygame과 웹은 실행 경로가 분리되어 있다. Python은 `main.py → backend.py / frontend.py`로 실행하고, 웹은 `index.html → src/app.js → engine.js / storage.js`로 실행한다. 웹의 `serve.py`는 정적 파일만 전달하며 게임 규칙이나 결과를 처리하지 않는다. 웹 실행에 Pygame·npm 의존성 설치는 필요 없다.
+Pygame과 웹은 실행 경로가 분리되어 있다. Python은 `desktop_prototype/main.py → backend.py / frontend.py`로 같은 폴더의 모듈을 호출하고, 웹은 `web/index.html → src/app.js → engine.js / storage.js`로 실행한다. 웹의 `serve.py`는 정적 파일만 전달하며 게임 규칙이나 결과를 처리하지 않는다. 웹 실행에 Pygame·npm 의존성 설치는 필요 없다.
 
 | 영역 | 구현 위치와 점검 내용 |
 | --- | --- |
@@ -13,7 +13,7 @@ Pygame과 웹은 실행 경로가 분리되어 있다. Python은 `main.py → ba
 | 브라우저 기록 | `storage.js`의 `PlayerStore`: 독립 ID·임시 닉네임·결과 최대 50개·상위 5개·예시 표시 |
 | 화면 배치 | HTML의 고정 게임·HUD·기록판 컨테이너와 CSS의 PC 두 열·좁은 화면 한 열 |
 | 실행 자산 | `assets/manifest.json`의 PNG 경로·크기·프레임별 충돌 마스크와 `assets/`의 이미지 |
-| 자산 재생산 | `tools/export_assets.py`: 현재 Python 자원 조립 결과를 `web/assets/`에만 내보내기 |
+| 자산 재생산 | `web/tools/export_assets.py`: `desktop_prototype.assets`의 자원 조립 결과를 `web/assets/`에만 내보내기 |
 | 개발 검사 | Node 내장 테스트와 `tools/browser-smoke.mjs`의 설치된 Chrome/Edge 검사 |
 
 논리 화면은 Pygame 480×360, 웹 640×360이다. 웹 부기의 x좌표는 `RULES.playerX=25`이며 표시 배율과 무관한 논리 좌표다. 두 버전의 낮·밤 슬롯은 현재 25초, 사계절 8슬롯은 200초, 배경 혼합은 4초다. Python의 설정을 수정해도 JavaScript 설정은 자동 갱신되지 않는다.
@@ -22,7 +22,13 @@ Pygame과 웹은 실행 경로가 분리되어 있다. Python은 `main.py → ba
 
 웹의 화면 단계는 `loading → splash(2초) → ready(입력 대기) → transition(1.25초) → playing → gameover`다. 일시정지는 별도 화면 단계가 아니라 `engine.paused`다. 시작 입력은 점프로 중복 사용하지 않고, 게임오버는 Enter 또는 다시 시작 버튼으로 새 판을 시작한다. 웹의 `ready`는 인트로 그림 전체를 유지하므로 Pygame의 흰 배경 달리기 대기와 다르다.
 
-## 이번 브라우저 검사
+## 데스크톱 폴더 분리와 기록의 범위
+
+2026-11-22 폴더 정리에서는 Pygame 모듈의 위치를 `desktop_prototype/`으로 모으고 실행·검사·자산 내보내기의 참조 경로를 맞췄다. 게임 규칙과 기능별 모듈 분리는 유지하며, 루트의 `image/`·`txt/`·`tests/`·`tools/`와 독립 웹 자산의 위치는 유지한다.
+
+아래 브라우저·Python·웹·자산 대조·난이도 수치는 같은 날 수행한 **웹 이식 당시의 검증 기록**이다. 이번 폴더 이동 후의 재검사와 혼동하지 않도록 구분하며, 파일 이동 검증 결과는 [CHANGELOG의 데스크톱 정리 기록](CHANGELOG.md#데스크톱-프로토타입-폴더-분리와-문서-상태-정리)에 기록한다. 폴더 정리만으로 장시간 웹 검증이나 실제 휴대폰 확인을 완료 처리하지 않는다.
+
+## 웹 이식 당시 브라우저 검사 (2026-11-22)
 
 Python 3.13.15, pygame 2.6.1, Node v24.19.0과 Windows에 설치된 Chrome으로 검사했다. 임시 서버는 `127.0.0.1:8765`에서 웹 폴더만 제공했다.
 
@@ -47,7 +53,7 @@ node tools/browser-smoke.mjs http://127.0.0.1:8765/
 
 화면 캡처와 상세 JSON은 로컬 `web/.qa/`에 저장한다. 브라우저 프로필·캐시·화면은 Git에서 제외하고 결과 요약은 이 문서에 남긴다. 브라우저 검사는 전용 임시 프로필을 사용해 실제 브라우저의 게임 기록을 건드리지 않는다.
 
-## Python 회귀 검사와 HTTP 실행
+## 웹 이식 당시 Python 회귀 검사와 HTTP 실행
 
 ```powershell
 # jumpbugi 폴더
@@ -60,7 +66,7 @@ python -B -m unittest discover -s tests -v
 
 로컬 서버에서 HTML·세 JavaScript 모듈·manifest·favicon의 HTTP 200 응답과 올바른 Content-Type, `no-cache`, `nosniff` 헤더를 확인했다. 브라우저가 이 자산으로 정상 실행되는 것도 위 흐름 검사로 확인했다.
 
-## 웹 자동 검사
+## 웹 이식 당시 자동 검사
 
 ```powershell
 # jumpbugi/web 폴더
@@ -71,9 +77,9 @@ node --test tests/*.test.js
 
 첫 샌드박스 실행은 테스트 파일 실행용 하위 프로세스를 시작할 수 없어 `spawn EPERM`으로 중단됐다. 정상 권한으로 같은 명령을 다시 실행해 위 통과 결과를 확인했다.
 
-## 실행 자산 대조
+## 웹 이식 당시 실행 자산 대조
 
-SDL dummy 환경에서 현재 `assets.load_game_assets()`가 만든 결과와 `web/assets/`를 읽기 전용으로 대조했다. 원본 소스·실제로 로드한 원본 이미지·웹 자산의 검사 전후 해시가 같았으며, 자산을 다시 내보내거나 덮어쓰지 않았다.
+SDL dummy 환경에서 당시 `assets.load_game_assets()`가 만든 결과와 `web/assets/`를 읽기 전용으로 대조했다. 이 로더의 현재 위치는 `desktop_prototype.assets.load_game_assets()`다. 원본 소스·실제로 로드한 원본 이미지·웹 자산의 검사 전후 해시가 같았으며, 자산을 다시 내보내거나 덮어쓰지 않았다.
 
 | 대상 | 결과 |
 | --- | --- |
@@ -85,7 +91,7 @@ SDL dummy 환경에서 현재 `assets.load_game_assets()`가 만든 결과와 `w
 
 따라서 현재 커밋에 포함하는 웹 자산은 현재 Python 자원 조립 결과와 일치한다. 원본 이미지의 보관 여부만으로 실행 사용 여부를 추정하지 않고 실제 로더와 manifest로 확인했다.
 
-## 현재 25초 설정의 난이도 보고서
+## 25초 설정의 기존 난이도 보고서
 
 ```powershell
 # jumpbugi 폴더
@@ -110,13 +116,13 @@ python -B tools/verify_difficulty.py --output docs/DIFFICULTY_REPORT.json
 
 - [README](../README.md): Pygame 기준본과 실제 웹 이식본, 실행·검사 안내와 문서 목차.
 - [ARCHITECTURE](ARCHITECTURE.md): 현재 Python 모듈 관계 및 웹의 호출·상태·저장·화면 경계.
-- [web-srudy](web-srudy.md): 처음 읽는 사람을 위한 코드 설명·실습·자가 점검. 요청한 상위 `pygame/web-srudy.md`에도 같은 내용을 저장한다.
+- [web-srudy](web-srudy.md): 처음 읽는 사람을 위한 코드 설명·실습·자가 점검. 웹 이식 당시 상위 `pygame/web-srudy.md`에도 사본을 제공했으며, 이번 폴더 정리의 갱신 대상은 프로젝트 내부 문서다.
 - [웹 README](../web/README.md): 단독 웹 실행·조작·휴대폰 접속·기록의 범위.
 - [TODO](TODO.md), [CHANGELOG](CHANGELOG.md): 앞으로의 작업과 완료 기록을 구분한다.
 
-실제 Git 루트는 상위 `pygame/`다. 따라서 상위 스터디 문서와 `jumpbugi/`의 변경을 한 커밋으로 관리할 수 있다. 개인 `origin`과 튜터링 `tutoring`의 `main`에 동일한 커밋을 일반 push로 반영한다.
+실제 Git 루트는 상위 `pygame/`다. 과거 두 저장소의 동기화는 [CHANGELOG](CHANGELOG.md)의 당시 완료 기록으로 보존한다. 이번 파일·문서 정리의 완료와 새 커밋·push의 완료는 별개이며, 이번 정리만으로 원격 저장소 반영을 완료 처리하지 않는다.
 
-갱신 문서 7개의 상대 파일 링크 46개에서 누락 경로가 없음을 확인하고 코드 블록의 짝도 검사했다. 상위 스터디 문서와 docs 보관본은 같은 내용으로 저장했다.
+웹 이식 당시 갱신한 문서 7개의 상대 파일 링크 46개에서 누락 경로가 없음을 확인하고 코드 블록의 짝도 검사했다. 당시 상위 사본과 docs 문서도 같은 내용으로 저장했다. 이번 갱신 후의 검사 결과는 위 데스크톱 정리 기록에서 구분한다.
 
 ## 확인 범위와 남은 작업
 

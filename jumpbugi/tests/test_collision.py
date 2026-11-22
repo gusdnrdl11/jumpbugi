@@ -11,13 +11,13 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 import pygame
 if __package__ and __package__.startswith('jumpbugi.'):
-    from .. import config
-    from ..assets import collision_mask
-    from ..main import JumpBugi
+    from ..desktop_prototype import config
+    from ..desktop_prototype.assets import collision_mask
+    from ..desktop_prototype.main import JumpBugi
 else:
-    import config
-    from assets import collision_mask
-    from main import JumpBugi
+    from desktop_prototype import config
+    from desktop_prototype.assets import collision_mask
+    from desktop_prototype.main import JumpBugi
 
 
 def opaque_pixels(image):

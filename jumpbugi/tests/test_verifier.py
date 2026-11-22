@@ -12,12 +12,12 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 
 if __package__ and __package__.startswith('jumpbugi.'):
-    from .. import backend, config
-    from ..frontend import GameView
+    from ..desktop_prototype import backend, config
+    from ..desktop_prototype.frontend import GameView
     from ..tools import verify_difficulty as verifier
 else:
-    import backend, config
-    from frontend import GameView
+    from desktop_prototype import backend, config
+    from desktop_prototype.frontend import GameView
     from tools import verify_difficulty as verifier
 
 

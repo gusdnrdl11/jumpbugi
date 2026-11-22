@@ -12,11 +12,11 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 
 if __package__ and __package__.startswith('jumpbugi.'):
-    from .. import assets, backend, config
-    from ..main import JumpBugi
+    from ..desktop_prototype import assets, backend, config
+    from ..desktop_prototype.main import JumpBugi
 else:
-    import assets, backend, config
-    from main import JumpBugi
+    from desktop_prototype import assets, backend, config
+    from desktop_prototype.main import JumpBugi
 
 
 class RunningHsucatTests(unittest.TestCase):

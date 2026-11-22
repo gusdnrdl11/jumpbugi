@@ -10,11 +10,11 @@ os.environ['SDL_AUDIODRIVER'] = 'dummy'
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 if __package__ and __package__.startswith('jumpbugi.'):
-    from .. import config, backend
-    from ..main import JumpBugi
+    from ..desktop_prototype import config, backend
+    from ..desktop_prototype.main import JumpBugi
 else:
-    import config, backend
-    from main import JumpBugi
+    from desktop_prototype import config, backend
+    from desktop_prototype.main import JumpBugi
 
 
 class ObstaclePatternTests(unittest.TestCase):

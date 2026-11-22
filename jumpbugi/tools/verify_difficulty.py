@@ -21,15 +21,15 @@ os.environ['SDL_AUDIODRIVER'] = 'dummy'
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 if __package__ and '.' in __package__:
-    from .. import backend, config
-    from ..frontend import GameView
-    from ..main import JumpBugi
+    from ..desktop_prototype import backend, config
+    from ..desktop_prototype.frontend import GameView
+    from ..desktop_prototype.main import JumpBugi
 else:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    import backend
-    import config
-    from frontend import GameView
-    from main import JumpBugi
+    from desktop_prototype import backend
+    from desktop_prototype import config
+    from desktop_prototype.frontend import GameView
+    from desktop_prototype.main import JumpBugi
 
 
 @dataclass(frozen=True)

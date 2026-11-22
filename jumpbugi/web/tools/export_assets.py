@@ -26,8 +26,8 @@ if not OUTPUT.is_relative_to(WEB_ROOT):
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import pygame  # noqa: E402
-import assets as pygame_assets  # noqa: E402
-import config  # noqa: E402
+from desktop_prototype import assets as pygame_assets  # noqa: E402
+from desktop_prototype import config  # noqa: E402
 
 
 def write_surface(surface: pygame.Surface, relative: str) -> dict:
@@ -66,7 +66,7 @@ def frame_data(surface: pygame.Surface, mask: pygame.mask.Mask, relative: str) -
 def source_fingerprints() -> dict[Path, str]:
     # Only executable sources and actual image inputs are inspected. In
     # particular, the score data, study materials and archived docs stay closed.
-    inputs = list(PROJECT_ROOT.glob("*.py"))
+    inputs = list((PROJECT_ROOT / "desktop_prototype").glob("*.py"))
     image_names = set(config.BACKGROUND_FILES) | {
         config.START_IMAGE_FILE, "bugi.png", "bugi_run.png", "hsucat_run.png",
         "hsucat_crouch.png", "hsucat_book.png", "chicken_flap.png", "sj_run.png",

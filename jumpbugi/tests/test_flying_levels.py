@@ -12,11 +12,11 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 
 if __package__ and __package__.startswith('jumpbugi.'):
-    from .. import backend, config
-    from ..main import JumpBugi
+    from ..desktop_prototype import backend, config
+    from ..desktop_prototype.main import JumpBugi
 else:
-    import backend, config
-    from main import JumpBugi
+    from desktop_prototype import backend, config
+    from desktop_prototype.main import JumpBugi
 
 
 class FlyingLevelTests(unittest.TestCase):

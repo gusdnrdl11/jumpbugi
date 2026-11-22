@@ -69,10 +69,11 @@ HTML 버튼과 기록판처럼 브라우저가 관리하는 화면 요소들을 
 
 ```text
 pygame/
-├─ web-srudy.md                    이 스터디 문서의 요청 위치
 └─ jumpbugi/
-   ├─ main.py / backend.py / ...   Pygame 원본 게임
-   ├─ docs/                       구조·작업 기록·점검 문서
+   ├─ desktop_prototype/          Pygame 데스크톱 프로토타입
+   │  └─ main.py / backend.py / ... 기존 기능별 Python 모듈
+   ├─ image/ / txt/               Pygame 실행 이미지·실제 최고점수
+   ├─ docs/                       이 학습 문서·구조·작업 기록·점검 문서
    └─ web/
       ├─ index.html               웹페이지의 뼈대와 버튼
       ├─ style.css                색·크기·PC/모바일 배치
@@ -609,7 +610,7 @@ jumpbugi.web.v1.results
 
 ## 17. Pygame 원본과 웹 코드의 대응
 
-웹 실행은 Python 게임 코드를 직접 호출하지 않습니다. 규칙을 JavaScript로 옮기고 그림·마스크를 준비해 별도 실행할 수 있도록 한 구조입니다.
+웹 실행은 Python 게임 코드를 직접 호출하지 않습니다. 규칙을 JavaScript로 옮기고 그림·마스크를 준비해 별도 실행할 수 있도록 한 구조입니다. 아래 Pygame 파일명은 모두 `jumpbugi/desktop_prototype/` 기준입니다. 2026-11-22에 소스 위치를 정리했으며 기존 기능별 분리는 유지합니다.
 
 | Pygame에서 찾던 곳 | 웹에서 읽을 곳 | 내용 |
 | --- | --- | --- |
@@ -636,7 +637,7 @@ jumpbugi.web.v1.results
 python -B tools/export_assets.py
 ```
 
-이 도구는 원본 `assets.py`가 만든 프레임과 마스크를 읽어 `web/assets/`에 저장합니다. 실제 사용하는 원본 소스·이미지의 해시를 전후로 비교해 원본이 바뀌지 않았는지도 확인합니다. 단순 실행·코드 읽기에는 자산 재생성이 필요하지 않습니다. `manifest.json`의 긴 `0/1` 문자열을 손으로 편집하며 공부할 필요도 없습니다.
+이 도구는 `desktop_prototype/assets.py`가 만든 프레임과 마스크를 읽어 `web/assets/`에 저장합니다. 실제 사용하는 원본 소스·이미지의 해시를 전후로 비교해 원본이 바뀌지 않았는지도 확인합니다. 단순 실행·코드 읽기에는 자산 재생성이 필요하지 않습니다. `manifest.json`의 긴 `0/1` 문자열을 손으로 편집하며 공부할 필요도 없습니다.
 
 ## 18. 직접 해 보는 안전한 작은 실습
 

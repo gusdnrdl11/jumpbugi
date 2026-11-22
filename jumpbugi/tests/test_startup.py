@@ -12,13 +12,13 @@ os.environ.setdefault('SDL_AUDIODRIVER', 'dummy')
 import pygame
 
 if __package__ and __package__.startswith('jumpbugi.'):
-    from .. import config
-    from ..assets import intro_content_rect, prepare_intro_cover
-    from ..main import JumpBugi
+    from ..desktop_prototype import config
+    from ..desktop_prototype.assets import intro_content_rect, prepare_intro_cover
+    from ..desktop_prototype.main import JumpBugi
 else:
-    import config
-    from assets import intro_content_rect, prepare_intro_cover
-    from main import JumpBugi
+    from desktop_prototype import config
+    from desktop_prototype.assets import intro_content_rect, prepare_intro_cover
+    from desktop_prototype.main import JumpBugi
 
 
 class StartupTests(unittest.TestCase):

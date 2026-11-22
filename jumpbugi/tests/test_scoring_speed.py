@@ -10,15 +10,15 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 import pygame
 if __package__ and __package__.startswith('jumpbugi.'):
-    from ..backend import GameState
-    from ..main import JumpBugi
-    from ..difficulty import speed_multiplier_for_slot
-    from .. import config
+    from ..desktop_prototype.backend import GameState
+    from ..desktop_prototype.main import JumpBugi
+    from ..desktop_prototype.difficulty import speed_multiplier_for_slot
+    from ..desktop_prototype import config
 else:
-    from backend import GameState
-    from main import JumpBugi
-    from difficulty import speed_multiplier_for_slot
-    import config
+    from desktop_prototype.backend import GameState
+    from desktop_prototype.main import JumpBugi
+    from desktop_prototype.difficulty import speed_multiplier_for_slot
+    from desktop_prototype import config
 
 
 class ScoringSpeedTests(unittest.TestCase):

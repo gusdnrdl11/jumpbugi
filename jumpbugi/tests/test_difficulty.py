@@ -11,9 +11,9 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 import pygame
 if __package__ and __package__.startswith('jumpbugi.'):
-    from .. import backend, config, difficulty
+    from ..desktop_prototype import backend, config, difficulty
 else:
-    import backend, config, difficulty
+    from desktop_prototype import backend, config, difficulty
 
 
 class DifficultyTests(unittest.TestCase):
