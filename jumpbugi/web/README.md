@@ -1,10 +1,10 @@
 # 점프부기 Web 0.1
 
-`../desktop_prototype/`의 Pygame 게임을 브라우저로 옮긴 독립 프로토타입입니다. 실행에 필요한 이미지와 충돌 마스크를 이 폴더에 복사했으므로 `web/`만 따로 옮겨도 실행됩니다. 웹 실행은 Python 게임이나 `txt/high_score.txt`를 읽거나 쓰지 않으며, Pygame의 논리 화면은 480×360으로 유지합니다. 현재 두 버전의 낮·밤 슬롯 길이는 25초입니다.
+`../desktop_prototype/`의 Pygame 게임을 브라우저로 옮긴 독립 프로토타입입니다. 실행에 필요한 이미지와 충돌 마스크를 이 폴더에 복사했으므로 `web/`만 따로 옮겨도 정적 게임으로 실행됩니다. 별도 로컬 FastAPI 서버에서는 PostgreSQL 저장·공동 기록 모드를 선택할 수 있습니다. 웹 실행은 Python 게임이나 `txt/high_score.txt`를 읽거나 쓰지 않으며, Pygame의 논리 화면은 480×360으로 유지합니다. 현재 두 버전의 낮·밤 슬롯 길이는 25초입니다.
 
-처음 공부한다면 [코드부터 읽는 web-srudy](../docs/web-srudy.md)를 먼저 읽으세요. 전체 구조는 [ARCHITECTURE](../docs/ARCHITECTURE.md#웹-이식본-구조), 최신 점검 결과와 한계는 [WEB_REVIEW](../docs/WEB_REVIEW.md), 미완료 작업은 [TODO](../docs/TODO.md)에 있습니다. 웹 학습 문서의 현재 관리본은 프로젝트 내부의 `docs/web-srudy.md`입니다.
+처음 공부한다면 [WEB_STUDY](../docs/WEB_STUDY.md)를 먼저 읽으세요. 전체 구조는 [ARCHITECTURE](../docs/ARCHITECTURE.md#웹-이식본-구조), 날짜별 점검 결과와 한계는 [WEB_REVIEW](../docs/WEB_REVIEW.md), 미완료 작업은 [TODO](../docs/TODO.md)에 있습니다. 웹 학습 문서의 관리본은 `docs/WEB_STUDY.md`이며, 기술별 학습 순서는 [LEARNING_ROADMAP](../docs/LEARNING_ROADMAP.md)에 있습니다. 문서 링크는 저장소 소스 트리 기준이며 GitHub Pages 배포에는 `docs/`가 포함되지 않습니다.
 
-## PC에서 실행
+## PC에서 정적 게임 실행
 
 Windows에서는 `start_web.bat`을 더블클릭하고 표시된 주소 **http://127.0.0.1:8000/** 를 브라우저에서 여세요. Python 3.10 이상이면 되고 Pygame이나 npm 패키지 설치는 필요 없습니다.
 
@@ -19,6 +19,19 @@ python -B serve.py
 
 `index.html`을 파일로 직접 열면 브라우저의 모듈·자산 보안 제한 때문에 실행되지 않습니다. 반드시 위의 HTTP 주소로 접속하세요.
 
+## 로컬 서버·PostgreSQL 모드
+
+FastAPI 앱은 정적 게임과 API를 같은 주소에서 제공합니다. 프로젝트 `jumpbugi/`에서 다음을 실행합니다. 최초 환경 준비·의존성 설치는 [server README](../server/README.md)를 따릅니다.
+
+```powershell
+.\.venv\Scripts\python.exe -B server/local.py setup
+.\.venv\Scripts\python.exe -B server/local.py run
+```
+
+Chrome과 Edge 각각에서 **http://127.0.0.1:8000/?server=1** 에 접속합니다. 일반 주소 `/`는 기존 브라우저 기록 모드이고, loopback 주소의 `?server=1`에서만 API 연동을 켭니다. `web/serve.py` 대신 FastAPI 앱으로 실행해야 합니다. 같은 포트에서 두 서버를 동시에 실행하지 않습니다.
+
+게임오버 결과는 먼저 로컬에 보관하고 같은 run_id로 서버에 제출합니다. 공동 기록판은 사용자별 최고 결과를 표시하며 서버 저장·대기 상태와 재시도 버튼을 제공합니다. 실패해도 기존 로컬 기록과 게임 진행을 유지합니다. 처음 서버 모드를 켤 때 과거 로컬 결과 전부를 업로드하지 않습니다. 브라우저 ID는 계정 인증이 아니며 실제 플레이의 점수 위변조 검증은 아직 없습니다.
+
 ## 휴대폰에서 실행
 
 PC와 휴대폰을 같은 Wi-Fi에 연결하고 PC에서 실행합니다.
@@ -29,7 +42,7 @@ python -B serve.py --host 0.0.0.0
 
 PC에서 `ipconfig`로 Wi-Fi IPv4 주소를 확인한 뒤, 휴대폰에서 `http://PC의IPv4주소:8000/`에 접속합니다. 예를 들어 PC 주소가 `192.168.0.10`이면 `http://192.168.0.10:8000/`입니다. Windows 방화벽 안내가 나오면 사용하는 개인 네트워크의 Python 연결을 허용해야 합니다. `127.0.0.1`은 휴대폰에서 PC에 접속하는 주소가 아닙니다.
 
-이 버전은 로컬 결과물이며 인터넷에 배포하지 않았습니다. 정적 호스팅에 올릴 때는 `index.html`, `style.css`, `favicon.svg`, `src/`, `assets/`를 동일한 디렉터리 구조로 업로드하면 됩니다.
+웹 버전은 GitHub Pages로 배포합니다. 저장소 루트 `pygame/`의 [배포 워크플로](../../.github/workflows/deploy.yml)는 `./jumpbugi/web`를 정적 파일 산출물로 업로드합니다. `index.html`, `style.css`, `favicon.svg`, `src/`, `assets/`의 상대 경로를 유지해야 합니다. Pages는 기존 로컬 기록 모드이며 로컬 FastAPI·PostgreSQL을 배포하거나 연결하지 않습니다. 위 휴대폰 LAN 실행도 정적 게임 안내이며 loopback 전용 서버 모드와 구분합니다.
 
 ## 조작과 화면
 
@@ -60,9 +73,13 @@ PC에서 `ipconfig`로 Wi-Fi IPv4 주소를 확인한 뒤, 휴대폰에서 `http
 
 첫 접속에 독립 `player_id`와 임시 `nickname`을 만들고 브라우저 `localStorage`에 저장합니다. 닉네임은 식별 키로 사용하지 않습니다. 게임오버 때만 결과를 저장하며, 최근 기록과 최고 기록을 포함해 최대 50개를 보관합니다.
 
-첫 플레이 전 기록판은 **예시**로 명확히 표시됩니다. 플레이 후에는 해당 브라우저의 실제 플레이 결과 상위 5개를 점수순으로 보여줍니다. 여러 사용자의 온라인 랭킹이 아닙니다. Pygame의 `txt/high_score.txt`와도 별개입니다. 저장소가 차단되면 오류 대신 이번 접속의 메모리에 기록하며 안내를 표시합니다.
+플레이어 영역의 닉네임 설정에서 이름을 바꿀 수 있습니다. 앞뒤 공백 정리 후 2~12자이며 한글·영문·숫자와 표시 가능한 기호·이모지를 허용하고 제어·줄 구분 문자는 거부합니다. 저장해도 사용자 UUID·과거 결과·이 브라우저의 최고점수는 유지됩니다. 저장소를 사용할 수 없을 때만 이번 접속 동안 저장된다는 안내를 표시합니다.
 
-결과 필드는 `player_id`, `nickname`, `run_id`, `score`, `survival_time`(초), `game_version`, `played_at`(ISO 시간), `death_obstacle`, `max_speed`(배율), `device_type`입니다. 서버·DB·외부 전송은 없습니다. 서버 랭킹과 실제 기기별 밸런스 조정은 후속 사용자 테스트 범위입니다.
+정적 게임에서는 첫 플레이 전 기록판을 **예시**로 명확히 표시합니다. 플레이 후에는 해당 브라우저의 실제 플레이 결과 상위 5개를 점수순으로 보여줍니다. 서버 모드에서 연결·조회에 성공하면 같은 로컬 서버의 사용자별 최고 결과를 표시합니다. Pygame의 `txt/high_score.txt`와는 별개입니다. 저장소가 차단되면 오류 대신 이번 접속의 메모리에 기록하며 안내를 표시합니다.
+
+개인 최고값 표시는 브라우저 로컬 기록이며 서버 공동 기록 전체의 최고값이 아닙니다. 서버 모드에서 닉네임을 바꾸면 같은 UUID의 현재 이름을 등록하고 공동 기록을 갱신합니다. 과거 결과에는 당시 이름이 남고 공동 기록판은 현재 이름을 표시합니다. 이름이 같은 다른 브라우저 사용자의 UUID와 기록은 합치지 않습니다.
+
+결과 필드는 `player_id`, `nickname`, `run_id`, `score`, `survival_time`(초), `game_version`, `played_at`(ISO 시간), `death_obstacle`, `max_speed`(배율), `device_type`입니다. 서버 모드에서는 이 요약을 loopback API로 보내 PostgreSQL에 저장하고 DB 수신 시각을 추가합니다. 정적 게임은 결과를 전송하지 않습니다. 클라우드 수집·공개 랭킹·실제 기기별 밸런스 검증은 향후 범위입니다.
 
 ## 폴더와 검사
 
@@ -72,6 +89,7 @@ web/
 ├─ src/
 │  ├─ app.js                 화면·입력·첫 실행·게임오버 연결
 │  ├─ engine.js              공통 물리·장애물·충돌·득점·계절
+│  ├─ api.js                 선택한 로컬 서버 모드·대기열·재시도·공동 기록
 │  └─ storage.js             브라우저 ID·기록 저장
 ├─ assets/                  별도로 복사한 PNG와 manifest.json 충돌 마스크
 ├─ serve.py / start_web.bat  Python 표준 라이브러리 로컬 서버
@@ -93,6 +111,10 @@ node --test tests/*.test.js
 ```powershell
 node tools/browser-smoke.mjs http://127.0.0.1:8000/
 ```
+
+로컬 서버가 실행 중인 상태에서 프로젝트 `jumpbugi/`의 `node tools/verify_local_backend.mjs "http://127.0.0.1:8000/?server=1"`은 실제 Chrome·Edge를 각각 새 프로필로 검사합니다. 별도 사용자 기록을 초기화하지 않습니다. 최신 실행 결과는 날짜별 WEB_REVIEW·CHANGELOG를 따릅니다.
+
+2026-11-26 닉네임 변경 검증: Node 45개·실제 PostgreSQL API 14개 통과. 실제 Chrome/Edge에서 이름 변경과 재접속 뒤 같은 UUID·기존 결과·브라우저 최고값을 유지했고, 직접 SQL로 현재 이름과 과거 결과 이름을 구분해 확인했습니다. 응답 유실 재시도는 QA용 과거 대기 payload로 모사한 조건입니다. [최신 점검 기록](../docs/WEB_REVIEW.md#2026-11-26-닉네임-설정과-기록-보존-검증)을 참고하세요.
 
 2026-11-22 검증: Node 자동 테스트 21개와 Chrome의 PC·모바일 세로·가로 흐름 검사를 통과했습니다. 원본 인트로 전체 표시·입력 전 유지, 설정된 부기 위치와 고정 SCORE·TIME 정보 줄, 키보드·터치 입력, 일시정지, 게임오버 시 1회 기록 저장, 새로고침 후 식별자·기록 유지, 재시작, 랭킹 상시 표시·동일 DOM·위치 유지, 상단 일시정지 버튼 숨김을 확인했습니다. 브라우저 콘솔 오류는 0개였습니다. PNG 83개·충돌 마스크 74개도 현재 Pygame 자원과 일치했습니다. 상세 범위와 실행 환경은 [WEB_REVIEW](../docs/WEB_REVIEW.md), 로컬 화면·JSON은 `.qa/`에 있습니다.
 

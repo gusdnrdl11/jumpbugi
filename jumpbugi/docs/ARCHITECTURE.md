@@ -1,5 +1,41 @@
 # 점프부기 현재 구조
 
+## 전체 시스템과 문서 범위
+
+확인 기준은 `desktop_prototype/`·`web/`·`server/`의 실제 소스와 테스트입니다. 두 게임은 실행·저장이 독립적입니다. 현재 Git 루트는 이 프로젝트 폴더의 상위이며 `.github/`·`study/`·저장소 README가 그곳에 있습니다. 아래 폴더 지도는 게임 프로젝트 `jumpbugi/` 기준입니다.
+
+```mermaid
+flowchart LR
+    subgraph Desktop[현재 Pygame 프로그램]
+        Main["main.JumpBugi"] --> View["frontend.GameView"]
+        View --> Assets["assets.load_game_assets"]
+        Assets --> Images["image/ PNG"]
+        Main --> State["backend.GameState"]
+        State --> Rules["patterns / obstacles / season / difficulty"]
+        State --> Storage["storage.py"]
+        Storage --> Score["txt/high_score.txt"]
+    end
+    subgraph Browser[현재 웹 게임]
+        HTML["web/index.html + style.css"] --> App["app.js"]
+        App --> Engine["GameEngine"]
+        App --> Store["PlayerStore"]
+        Store --> Local["localStorage"]
+        App --> Bundle["web/assets/ manifest + PNG"]
+        App -. loopback에서 server=1 .-> Sync["api.js LocalServerSync"]
+    end
+    subgraph LocalBackend[현재 로컬 서버 모드]
+        Sync --> API["server.main FastAPI: 127.0.0.1:8000"]
+        API --> DB["PostgreSQL: 127.0.0.1:55432"]
+        API -. 같은 출처의 정적 게임 제공 .-> HTML
+    end
+    Export["개발 도구 export_assets.py"] -. 자산 재생성 때만 .-> Assets
+    Export -. 내보내기 .-> Bundle
+    Deploy["상위 .github/workflows/deploy.yml"] --> Pages["GitHub Pages 정적 호스팅"]
+    Pages --> HTML
+```
+
+데스크톱 `backend.py`는 프로세스 안의 게임 규칙이고 `web/serve.py`는 개발용 정적 파일 서버입니다. 현재 `server/`의 FastAPI·PostgreSQL은 별도 로컬 실행에서 결과 저장·사용자별 최고 기록 조회를 제공합니다. Pages·정적 실행의 기본 브라우저 기록 모드와 구분하며, 계정 인증·점수 위변조 검증·클라우드 운영은 미구현입니다. [로컬 API와 PostgreSQL](#로컬-api와-postgresql)에서 실제 연결과 남은 범위를 설명합니다.
+
 ## 폴더 지도
 
 ```text
@@ -18,18 +54,30 @@ jumpbugi/
 │  ├─ assets.py         이미지·프레임·충돌 마스크와 GameAssets 조립
 │  ├─ storage.py        최고점수 읽기·저장
 │  └─ __init__.py       패키지 표시
+├─ server/              로컬 FastAPI·PostgreSQL
+│  ├─ main.py           요청 모델·API·DB 연결·정적 웹 제공
+│  ├─ schema.sql        players/runs 테이블·제약·조회 인덱스
+│  ├─ local.py          Windows 로컬 DB 준비·시작·API 실행·검사
+│  ├─ requirements.txt  서버·검사 의존성
+│  ├─ tests/            실제 PostgreSQL API 통합 검사
+│  └─ README.md         로컬 실행·저장 범위 안내
 ├─ docs/
 │  ├─ TODO.md
 │  ├─ CHANGELOG.md
 │  ├─ ARCHITECTURE.md
+│  ├─ BACKEND.md         로컬 서버 실행·중단·재개·검증 절차
 │  ├─ WEB_REVIEW.md      웹 이식 상태와 점검 기록
-│  ├─ web-srudy.md       웹 입문·코드 구조·실습 학습 문서
+│  ├─ WEB_STUDY.md       웹 입문·코드 구조·실습 학습 문서
+│  ├─ LEARNING_ROADMAP.md 기술별 선행 지식·실습·완료 기준
+│  ├─ prompts/          실제 요청 색인·재사용 양식
 │  ├─ DIFFICULTY_REPORT.json 자동 회피·연속 플레이 결과
 │  ├─ STUDY_NOTES.md
 │  ├─ GAME_IDEA.md
 │  └─ archive/          이전 문서·배경 작업 자료
 ├─ image/               실행 그림·계절 배경·원본·미리보기
-├─ tools/verify_difficulty.py 실제 이미지의 계획별 회피·연속 플레이 검증
+├─ tools/
+│  ├─ verify_difficulty.py 실제 이미지의 계획별 회피·연속 플레이 검증
+│  └─ verify_local_backend.mjs 실제 Chrome·Edge와 로컬 API 저장 검사
 ├─ web/                 독립 브라우저 게임·자산·Node 검사
 ├─ txt/
 │  ├─ README.md         점수 데이터와 문서 안내
@@ -58,7 +106,7 @@ jumpbugi/
 
 `__pycache__`는 파이썬이 만드는 캐시입니다. Pygame 소스는 `desktop_prototype/`, 실행 자산·실제 점수·테스트·도구는 `jumpbugi/` 루트 아래의 기존 폴더에 둡니다. 프로젝트를 옮길 때 이 구성을 함께 보관합니다.
 
-이 문서는 **HansungRun Pygame Prototype 1.0**과 `web/` 이식본의 현재 구조를 설명합니다. 480×360 Pygame 기준본은 라즈베리파이 이식과 규칙 참고용으로 유지하며, 웹은 640×360의 독립 JavaScript 게임으로 구현했습니다. 아래 Pygame 구조와 [웹 이식본 구조](#웹-이식본-구조)를 구분해 읽습니다. Python 학습 개념은 [STUDY_NOTES](STUDY_NOTES.md), 웹 학습은 [web-srudy](web-srudy.md), 기획은 [GAME_IDEA](GAME_IDEA.md), 다음 작업은 [TODO](TODO.md), 완료 기록은 [CHANGELOG](CHANGELOG.md)에 둡니다.
+이 문서는 **HansungRun Pygame Prototype 1.0**과 `web/` 이식본의 현재 구조를 설명합니다. 480×360 Pygame 기준본은 라즈베리파이 이식과 규칙 참고용으로 유지하며, 웹은 640×360의 독립 JavaScript 게임으로 구현했습니다. 아래 Pygame 구조와 [웹 이식본 구조](#웹-이식본-구조)를 구분해 읽습니다. Python 학습 개념은 [STUDY_NOTES](STUDY_NOTES.md), 웹 학습은 [WEB_STUDY](WEB_STUDY.md), 전체 학습 순서는 [LEARNING_ROADMAP](LEARNING_ROADMAP.md), 기획은 [GAME_IDEA](GAME_IDEA.md), 다음 작업은 [TODO](TODO.md), 완료 기록은 [CHANGELOG](CHANGELOG.md)에 둡니다. 프롬프트 출처와 재사용 양식은 [prompts](prompts/README.md)에서 관리합니다.
 
 ## Pygame 역할과 연결
 
@@ -101,19 +149,46 @@ tests → 게임 동작 확인
 
 `main() → pygame 초기화 → JumpBugi 생성 → run() → 종료 시 pygame 정리`
 
-`JumpBugi.phase`는 첫 실행의 `splash → ready → transition → playing` 순서를 관리합니다. `splash`에서는 사용자가 제공한 `image/intro.png`를 `SPLASH_SECONDS=2.0`초 동안 표시하고 일반 키 입력을 무시합니다. `config.START_IMAGE_FILE`이 이 파일을 가리키며 그림에 제목이 포함돼 있어 별도 제목·말풍선 오버레이를 만들거나 겹치지 않습니다. 이전 `image/start.png`·`image/start.jpg`는 보존합니다. `ready`에서는 흰 배경에서 별도의 `intro_elapsed`로 상상부기 달리기를 갱신하고 시작·조작 안내만 표시합니다. 아무 키나 누르면 `reset()`을 호출하지 않고 `transition`으로 넘어가므로 부기의 위치와 달리기 시계가 이어집니다.
+`JumpBugi.phase`는 첫 실행의 `splash → ready → transition → playing` 순서를 관리합니다. `splash`에서는 사용자가 제공한 `image/intro.png`를 `SPLASH_SECONDS=2.0`초 동안 표시하고 일반 키 입력을 무시합니다. `config.START_IMAGE_FILE`이 이 파일을 가리키며 그림에 제목이 포함돼 있어 별도 제목·말풍선 오버레이를 만들거나 겹치지 않습니다. 이전 시작 그림 `start.png`·`start.jpg`는 `image/이미지자료/`에 보존합니다. `ready`에서는 흰 배경에서 별도의 `intro_elapsed`로 상상부기 달리기를 갱신하고 시작·조작 안내만 표시합니다. 아무 키나 누르면 `reset()`을 호출하지 않고 `transition`으로 넘어가므로 부기의 위치와 달리기 시계가 이어집니다.
 
 시작 이미지는 `assets.intro_content_rect()`로 알파가 224 이상이면서 흰색과의 채널 차이가 32 이상인 픽셀의 경계를 찾아 희미한 외곽 여백을 제외합니다. `assets.prepare_intro_cover()`는 이 경계의 긴 변을 기준으로 4%의 안전 여백을 더하고 원본 범위 안으로 제한합니다. 이어 `scale = max(화면 너비 / 준비 영역 너비, 화면 높이 / 준비 영역 높이)`로 한 배율을 구해 종횡비를 유지한 크기로 조절합니다. 소수 출력 크기는 올림하고, 넘치는 부분을 중앙에서 잘라 최종 480×360의 불투명 표면을 만듭니다. 이전의 12픽셀 가장자리 투명 처리와 작은 이미지 배치는 사용하지 않습니다.
 
 콘텐츠 경계와 중앙 crop은 현재 `intro.png`에서 계산하므로 이미지에 포함된 제목도 캐릭터·소품과 함께 준비 영역에 반영합니다. 원본 파일은 수정하지 않고 시작 시 표시용 표면만 한 번 준비해 재사용합니다. `GameView.draw_startup()`은 `splash`에서 이 표면만 `(0, 0)`에 그립니다. `GAME_TITLE`은 창 제목에 사용하며 시작 그림 위에 별도 글자로 렌더링하지 않습니다.
 
-`transition`은 시작 키를 누른 뒤 배경을 드러내는 인트로 달리기(`INTRO_RUN`) 단계입니다. 이때 `GameState.scroll_background(dt)`로 `background_x`를 정상 게임과 같은 속도로 갱신합니다. 이 메서드는 배경 위치만 이동하며 일반 플레이의 `update_step()`에서도 함께 사용합니다. 시작 속도는 초당 `BACKGROUND_SPEED × PHYSICS_HZ`, 이며 실제 값은 현재 설정을 따릅니다. 전환에서도 긴 프레임의 이동량은 일반 플레이와 같이 최대 0.1초로 제한하고, 페이드 진행률은 실제 경과 시간으로 계산합니다.
+`transition`은 시작 키를 누른 뒤 배경을 드러내는 인트로 달리기 단계입니다. 이때 `GameState.scroll_background(dt)`로 `background_x`를 정상 게임과 같은 속도로 갱신합니다. 이 메서드는 배경 위치만 이동하며 일반 플레이의 `update_step()`에서도 함께 사용합니다. 시작 속도는 초당 `BACKGROUND_SPEED × PHYSICS_HZ`이며 실제 값은 현재 설정을 따릅니다. 전환에서도 긴 프레임의 이동량은 일반 플레이와 같이 최대 0.1초로 제한하고, 페이드 진행률은 실제 경과 시간으로 계산합니다.
 
 `transition_elapsed`로 `START_FADE_SECONDS=1.25`초의 전환 진행률을 계산합니다. `GameView.draw_startup()`은 흰 배경을 채운 뒤 `background_x`와 `background_x + background_width`에 한성대 봄 낮 배경을 이어 그립니다. 배경 알파만 0에서 255로 부드럽게 높여 이미 스크롤 중인 풍경을 드러내고 시작·조작 안내를 사라지게 합니다. 부기는 항상 그 위에 원래 알파로 그려 계속 달립니다. 전환이 끝나도 `reset()`을 호출하지 않아 스크롤 위치가 그대로 이어지고, 인트로의 달리기 시간을 `GameState.animation_tick`으로 넘겨 첫 플레이 프레임에서도 자세가 끊기지 않게 합니다.
 
 세 시작 단계에서는 `GameState`의 점수·계절·장애물·점프가 진행되지 않습니다. 배경의 가로 위치는 `transition`에서만 먼저 진행하며, 계절 시계인 `background_elapsed`는 플레이 시작까지 0으로 유지합니다. 전환 중 추가 키와 시작 키의 입력 묶음은 무시하며, QUIT와 Ctrl+F4는 모든 단계에서 종료합니다. 배경 전환이 완료되면 `playing`으로 넘어가고 다음 갱신부터 장애물이 화면으로 들어옵니다. 게임오버 후 Enter로 호출하는 `reset()`은 바로 `playing`으로 전환하므로 첫 실행 연출을 반복하지 않습니다. 시작 이미지는 `load_game_assets()`가 한 번 준비하고, `GameView`는 전달받은 이미지와 직접 만든 안내 글자를 재사용합니다.
 
 run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 순서로 반복합니다. `game_over`는 이번 판의 종료, `running=False`는 실행 반복 자체의 종료입니다. 정지·게임오버 동안 일반 갱신은 멈춥니다.
+
+### 한 프레임에서 호출하는 함수
+
+```mermaid
+flowchart TD
+    Tick["Clock.tick / dt 계산"] --> Events["JumpBugi.handle_events"]
+    Events --> Running{"state.running?"}
+    Running -- 아니오 --> Quit["run 종료 → finally pygame.quit"]
+    Running -- 예 --> Intro{"phase가 playing?"}
+    Intro -- 아니오 --> Startup["첫 화면 시간·배경 스크롤 갱신"]
+    Intro -- 예 --> Update["GameState.update(dt)"]
+    Update --> Pause{"paused / game_over?"}
+    Pause -- 아니오 --> Clocks["생존 점수·계절 시계 갱신"]
+    Clocks --> Step["최대 0.1초의 물리 이동을 작은 step으로 분할"]
+    Step --> Move["update_step: 배경·점프·장애물 이동"]
+    Move --> Bonus["award_pass_bonuses"]
+    Bonus --> Hit{"사각형 후보 + 마스크 충돌?"}
+    Hit -- 예 --> Record["game_over 설정 / 신기록 저장"]
+    Hit -- 아니오 --> Spawn["화면 밖 장애물 교체 / 남은 step 진행"]
+    Startup --> Draw["JumpBugi.draw → GameView"]
+    Pause -- 예 --> Draw
+    Record --> Draw
+    Spawn --> Draw
+    Draw --> Tick
+```
+
+그림의 `Step`은 60Hz 수치 기준 시간 비율입니다. 실제 코드는 `remaining=min(dt, 0.1)*PHYSICS_HZ`, `step=min(remaining, 1/speed_multiplier)`로 반복합니다. 생존·계절 시계는 제한 전의 양수 `dt`를 사용합니다. QUIT·Ctrl+F4는 `GameState.stop()`에서 신기록을 반영하고 반복을 끝냅니다. 게임오버의 Enter는 `reset()`으로 한 판 상태를 초기화하며 프로그램 초기화·자산 로딩은 반복하지 않습니다.
 
 ## 경로 기준
 
@@ -139,6 +214,23 @@ run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 �
 
 신기록은 게임오버 또는 종료 요청 시 저장합니다. 기록이 없으면 0으로 시작하지만 숫자가 아닌 내용이나 음수 기록을 자동 복구하지는 않습니다.
 
+점수 조절 지점은 `config.PASS_BONUS`와 `config.SURVIVAL_POINTS_PER_SECOND`입니다. 예를 들어 생존 35초에 단일 장애물 4개를 통과하면 `35 + 4 × 10 = 75`점입니다. 상찌 무리는 장애물 단위 수 대신 통과한 마리 수로 보너스를 계산합니다.
+
+### 데이터의 생성·전달·저장
+
+| 데이터 | 생성·소유 | 전달·처리 | 저장 범위 |
+| --- | --- | --- | --- |
+| PNG·프레임·마스크 | `assets.load_game_assets()`의 `GameAssets` | `GameView`가 보유하고 `JumpBugi`가 크기·마스크를 `GameState`에 전달 | 실행 중 재사용. 원본 이미지 수정 없음 |
+| 입력·프레임 시간 | Pygame 이벤트·`Clock.tick()` | `handle_events()`와 `update(dt)` → 상태 변경 | 입력 이력의 영속 저장 없음 |
+| 플레이 위치·계절·난이도 | `GameState`, 계산 모듈의 반환값 | 상태를 `GameView.draw()`가 읽어 출력 | 실행 중 메모리 |
+| 생존·통과 점수 | `GameState.update()`·`award_pass_bonuses()` | 충돌/종료 → `record_high_score()` | 최고값 하나만 `txt/high_score.txt` |
+| 웹 자산·마스크 | 개발 시 exporter가 생성한 manifest·PNG | `load()` → `GameEngine`·렌더러가 같은 프레임/마스크 사용 | 웹 배포 파일. 실행 때 Python 호출 없음 |
+| 웹 플레이 결과 | `finishRun()`의 엔진 상태 요약 | `PlayerStore.recordRun()` → JSON 직렬화 | 접속 origin의 `localStorage` 또는 이번 접속 메모리 |
+| 서버 전송 대기 | 서버 모드의 `LocalServerSync.submit()` | 같은 run_id 대기열 → 등록/POST → 성공 후 제거 | `jumpbugi.web.v1.pending` 또는 접속 메모리 |
+| 로컬 서버 결과 | `RunInput`으로 검증한 종료 요약 | 요청별 SQL 트랜잭션 → 사용자별 최고 결과 조회 | PostgreSQL `players`·`runs`, 실제 데이터는 로컬 APPDATA |
+
+Pygame 저장은 `load_high_score()`가 기존 값을 읽고 `save_high_score()`가 같은 디렉터리의 `.tmp` 파일을 교체합니다. 웹 결과는 점수·생존시간·사망 장애물·최대 속도·기기 구분과 ID·게임 버전·시각을 포함합니다. 서버 모드도 이 요약을 저장하며 실제 입력 이력·재연산 근거를 수집하지 않습니다. 형식 검증을 통과했다는 사실만으로 점수의 진위를 보장하지 않습니다.
+
 ## 장애물 유형과 패턴
 
 패턴의 후보·잠금 필터·대기열 선택은 `patterns.py`, 점프 계획과 애니메이션 포즈 계산은 `obstacles.py`에서 찾습니다. `GameState.spawn_obstacle()`는 선택한 결과를 현재 장애물 상태에 반영하며 기존 생성·무작위 선택 순서를 유지합니다.
@@ -150,6 +242,8 @@ run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 �
 기본 두 인사 종류는 `WAVE_JUMP_UNLOCK_SLOT=8`, 즉 8단계 이후 생성될 때부터 점프를 선택합니다. 최초 사계절 동안은 지상 인사만 하며 플레이어가 뛰어넘습니다. 점프 여부는 생성 시 65% 확률로 한 번 결정하므로, 8단계 전에 나온 장애물이 접근 중에 갑자기 뛰지는 않습니다. 재시작하면 8단계 조건과 점프 계획을 초기화합니다.
 
 8단계 이후의 계획은 높은 점프(`high`, 192픽셀), 머리 위 점프(`near`, 128픽셀), 낮은 점프(`low`, 12픽셀)의 세 종류입니다. `high`와 `near`는 점프하지 않고 아래로 통과하고, `low`와 점프하지 않는 지상 인사는 플레이어가 뛰어넘습니다. 공중에는 `obstacle_frame_index=0`을 고정하고 지상에서 네 인사 포즈를 재생합니다. `wave_jump`의 계획과 `wave_jump_active` 상태를 사용하며, 검증 봇의 `obstacle_requires_jump`도 같은 회피 구분을 따릅니다.
+
+점프 선택 확률·높이는 `config.WAVE_JUMP_PROBABILITY`와 `config.WAVE_JUMP_HEIGHTS`, 해금 슬롯은 `config.WAVE_JUMP_UNLOCK_SLOT`에서 조절합니다.
 
 궤적은 시간 대신 수평 이동 거리의 진행률로 계산합니다. 수평 접촉 구간 중심 `center=(player_width-obstacle_width)/2`와 반폭 `contact_half=(player_width+obstacle_width)/2`를 구한 뒤, 패턴별 여유 비율과 생성 시 속도·최소 비행 시간을 반영해 `flight_half`를 정합니다. `p=(center+flight_half-obstacle_x)/(2×flight_half)`의 0~1 구간에서 y 오프셋을 `-4×height×p×(1-p)`로 계산합니다. 높은 점프와 머리 위 점프는 전체 수평 접촉 구간에 머리 여유가 남도록 하므로, 가속이나 FPS 변화에도 아래 통과가 가능합니다. 그리기와 마스크 충돌은 이 y좌표와 고정 포즈를 함께 사용합니다.
 
@@ -247,6 +341,8 @@ run은 경과 시간 확인 → 입력 처리 → 백 갱신 → 화면 출력 �
 
 장애물은 높이의 설정 비율(최소 1픽셀)만큼 8방향으로 테두리를 깎습니다. 현재 설정 6%에서 높이 120의 장애물은 7픽셀, 높이 40의 상찌는 2픽셀, 높이 64의 굴 파기는 4픽셀입니다. 투명 여백을 채우거나 사각형으로 축소하지 않으므로 실제 윤곽 안쪽에 판정이 남습니다. 굴 진입·탈출은 표시용 구덩이와 별개인 몸체 전용 마스크를 사용하며, 진입 완료 후 빈 구덩이는 충돌하지 않습니다. 플레이어 마스크는 줄이지 않습니다.
 
+알파 기준과 장애물 윤곽 축소 비율의 조절 지점은 `config.COLLISION_ALPHA_THRESHOLD`, `config.OBSTACLE_MASK_INSET_RATIO`입니다.
+
 백은 사각형으로 후보를 거른 뒤 마스크 겹침으로 게임오버를 결정합니다. `int()`로 변환한 동일한 출력 좌표와 프레임 번호를 렌더링·충돌 양쪽에 사용합니다. 픽셀 검사는 물리 갱신 시점의 위치에서 수행하며 연속 궤적 전체를 검사하는 방식은 아닙니다.
 
 ## 자동 검사
@@ -299,11 +395,12 @@ python -B tools/verify_difficulty.py --output docs/DIFFICULTY_REPORT.json
 | `web/style.css` | 화면 배치·아이콘·색상, PC 두 열과 좁은 화면 한 열 전환 |
 | `web/src/app.js` | 이미지 선로딩, 상태 전환, 프레임 루프, Canvas 렌더링, 키보드·터치 입력, UI·결과 저장 연결 |
 | `web/src/engine.js` | `RULES`, `GameEngine`, 물리·해금·패턴·포즈·충돌·통과 점수·계절·난이도 |
-| `web/src/storage.js` | `PlayerStore`, 브라우저 ID·임시 닉네임, 로컬 결과·예시 기록·상위 5개 |
+| `web/src/storage.js` | `PlayerStore`, 브라우저 ID·닉네임 설정, 로컬 결과·예시 기록·상위 5개 |
+| `web/src/api.js` | loopback의 명시적 서버 모드, `LocalServerSync` 전송 대기열·재시도·공동 기록 조회 |
 | `web/assets/manifest.json` | 자산 경로·크기·포즈별 이진 마스크. PNG와 함께 사용 |
 | `web/serve.py`, `start_web.bat` | 웹 폴더만 제공하는 로컬 HTTP 서버와 Windows 실행 래퍼 |
 | `web/tools/export_assets.py` | `desktop_prototype/`에서 준비한 프레임·마스크를 읽어 `web/assets/`에 내보내기 |
-| `web/tests/`, `tools/browser-smoke.mjs` | Node 엔진·저장 검사와 실제 브라우저의 PC·모바일 모사 검사 |
+| `web/tests/`, `web/tools/browser-smoke.mjs` | Node 엔진·저장·API 클라이언트 검사와 실제 브라우저의 PC·모바일 모사 검사 |
 
 ### 웹 시작과 한 프레임
 
@@ -319,7 +416,9 @@ python -B tools/verify_difficulty.py --output docs/DIFFICULTY_REPORT.json
 
 너비 1001px 이상에서는 게임·기록이 약 3:1의 두 열이며 카드 높이를 맞추고 기록 목록 내부에서 스크롤합니다. 1000px 이하와 터치 가로 화면은 한 열입니다. 게임 아래 SCORE·TIME 줄과 기록판 컨테이너는 상태 변경 중에도 같은 자리를 유지하며, 기록 항목만 갱신합니다. 모바일도 동일한 `GameEngine`을 사용합니다.
 
-결과는 게임오버 때 `recorded` 가드로 한 번만 저장합니다. `PlayerStore`는 `jumpbugi.web.v1.identity`와 `jumpbugi.web.v1.results`를 `localStorage`에 저장합니다. 결과가 없을 때 예시를 명시하고, 이후 실제 결과 최대 50개와 상위 5개를 표시하며 오래된 최고 결과도 보존합니다. 저장소가 차단되면 이번 접속의 메모리 상태를 사용합니다. 브라우저·접속 주소별 데이터이며 Pygame 점수 파일이나 온라인 서버 랭킹과 연결되지 않습니다.
+결과는 게임오버 때 `recorded` 가드로 한 번만 저장합니다. `PlayerStore`는 `jumpbugi.web.v1.identity`와 `jumpbugi.web.v1.results`를 `localStorage`에 저장합니다. 정적 모드에서는 결과가 없을 때 예시를 명시하고, 이후 실제 결과 최대 50개와 상위 5개를 표시하며 오래된 최고 결과도 보존합니다. 저장소가 차단되면 이번 접속의 메모리 상태를 사용합니다. Pygame 점수 파일과는 독립적입니다. loopback 주소의 `?server=1`에서만 이 로컬 저장 이후 API 전송을 추가하고, 성공한 조회의 공동 기록을 표시합니다.
+
+`PlayerStore.setNickname()`은 현재 identity의 이름만 검증·저장합니다. 원문의 `Cc/Cf/Cs/Zl/Zp` 문자를 먼저 거부하고 앞뒤 공백을 정리한 뒤 Unicode 코드 포인트 2~12자로 제한합니다. 표시 가능한 공백·기호·이모지는 허용하며 UUID·과거 결과 배열·브라우저 최고값을 바꾸지 않습니다. 플레이어 영역에 작은 설정 조작을 두고 기존 기록판 컨테이너를 유지합니다. 개인 최고값 표시는 브라우저 로컬 기록과 서버 공동 집계를 구분하며, 저장소 차단 때만 이번 접속의 보관 한계를 안내합니다.
 
 ```powershell
 python -B web/serve.py
@@ -328,4 +427,128 @@ node --test tests/*.test.js
 node tools/browser-smoke.mjs http://127.0.0.1:8000/
 ```
 
-브라우저 검사의 `.qa/` 화면·프로필·보고서는 Git 추적에서 제외합니다. 검사 범위와 최신 결과는 [WEB_REVIEW](WEB_REVIEW.md), 초보자용 읽기 순서와 실습은 [web-srudy](web-srudy.md), 실행·휴대폰 접속은 [웹 README](../web/README.md)에 정리합니다. 설계 지침은 이식 의도를 설명하는 문서이며 현재 구현 여부는 코드와 이 구조 문서를 기준으로 확인합니다.
+브라우저 검사의 `.qa/` 화면·프로필·보고서는 Git 추적에서 제외합니다. 검사 범위와 최신 결과는 [WEB_REVIEW](WEB_REVIEW.md), 초보자용 읽기 순서와 실습은 [WEB_STUDY](WEB_STUDY.md), 실행·휴대폰 접속은 [웹 README](../web/README.md)에 정리합니다. 설계 지침은 이식 의도를 설명하는 문서이며 현재 구현 여부는 코드와 이 구조 문서를 기준으로 확인합니다.
+
+### 웹의 시작·종료와 결과 처리
+
+```mermaid
+sequenceDiagram
+    participant User as 사용자
+    participant App as app.js
+    participant Engine as GameEngine
+    participant Store as PlayerStore
+    participant Local as localStorage
+    App->>Store: 생성 / 기존 identity·results 읽기
+    Store->>Local: getItem / JSON.parse
+    App->>App: manifest fetch / PNG 선로딩 / load()
+    App->>Engine: new GameEngine(manifest)
+    App->>App: splash → ready
+    User->>App: 시작 키·버튼·터치
+    App->>App: transition → playing
+    loop requestAnimationFrame
+        App->>Engine: update(dt)
+        Engine-->>App: 위치·점수·drawParts·gameOver
+        App->>App: draw() / refreshUI()
+    end
+    App->>App: finishRun() / recorded 가드
+    App->>Store: recordRun(점수·시간·장애물·속도·기기)
+    Store->>Local: JSON.stringify / setItem
+    App->>App: gameover / 결과·기록판 표시
+    User->>App: Enter·재시작 버튼
+    App->>Engine: reset()
+    App->>App: playing / recorded=false
+```
+
+위 그림은 두 모드가 공유하는 게임·로컬 저장 흐름입니다. `load()`의 `fetch('./assets/manifest.json')`는 정적 파일 로딩이고, 서버 통신은 별도 `api.js`가 담당합니다. `finishRun()`은 한 판을 한 번만 로컬에 기록한 뒤 서버 모드일 때 같은 결과를 `LocalServerSync.submit()`에 전달합니다. 브라우저 창 닫기·미완료 판을 별도로 기록하는 동작은 없습니다. 탭 이탈은 자동 정지하고, 재개는 사용자 입력을 기다립니다.
+
+## 기술 적용 근거와 두 버전의 차이
+
+아래 이유는 현재 코드에서 확인할 수 있는 구조의 특성입니다. 작성 당시의 모든 기술 선택 배경을 복원한 기록은 아닙니다.
+
+| 선택·차이 | 현재 적용과 의미 |
+| --- | --- |
+| Python/Pygame | 창·이벤트·시간·Surface·픽셀 마스크를 Pygame으로 처리. 게임 규칙은 Python 함수·클래스로 추적할 수 있음 |
+| HTML/CSS/JavaScript·Canvas | 브라우저 기본 API로 화면·입력·저장을 구성. 현재 런타임 프레임워크·번들 빌드 의존성 없음 |
+| 정적 파일·GitHub Pages | 준비된 `web/` 자산을 호스팅. Python 게임을 웹 서버에서 실행하지 않음 |
+| JSON manifest | 프레임 파일·치수·충돌 마스크를 브라우저로 전달. PNG와 함께 관리하고 필요 시 exporter로 재생성 |
+| 로컬 FastAPI·Pydantic | 같은 출처에서 정적 웹과 JSON API를 제공하고 입력 모델·상태 코드로 저장 요청을 검증 |
+| PostgreSQL·psycopg | UUID 키·외래키·값 제약·트랜잭션·SQL 조회로 사용자와 한 판 결과를 영속 저장 |
+| 검사 도구 | Python `unittest`·Node 내장 테스트, 설치된 Chrome/Edge를 쓰는 브라우저 검사. Node는 게임 실행 필수 조건이 아님 |
+| 논리 화면·출력 | Pygame 480×360·플레이어 x=0, 웹 640×360·x=25. 웹 CSS 크기·Canvas DPR 보정은 논리 물리 좌표와 구분 |
+| 시작·입력 | Pygame의 흰 대기 화면과 키보드/창 종료, 웹의 인트로 대기와 DOM 버튼·터치·탭 이탈 정지 |
+| 규칙의 관리 | Python `config`와 JS `RULES`는 별개. 한쪽 수치 수정이 다른 쪽을 자동 변경하지 않음 |
+| 저장 | 데스크톱은 최고점수 TXT, 웹은 브라우저별 결과 JSON. 명시적 로컬 서버 모드만 PostgreSQL 제출을 추가하며 Pygame 기록은 동기화하지 않음 |
+
+## GitHub Pages 배포 경계
+
+[상위 배포 워크플로](../../.github/workflows/deploy.yml)는 `main` push 또는 수동 실행에서 `./jumpbugi/web`을 업로드합니다. 웹은 GitHub Pages에 배포되어 있다는 사용자 제공 상태를 반영했습니다. 원격 Actions의 최근 성공 여부·서비스 주소는 이번 로컬 확인과 구분합니다.
+
+`docs/`·`server/`·Pygame 소스는 업로드 경로 밖입니다. 소스 문서의 상대 링크가 저장소에서 유효해도 Pages에 그 대상이 함께 배포된다는 뜻은 아닙니다. 서버 모드는 loopback 호스트와 `?server=1`을 함께 확인하므로 Pages에서는 실행되지 않습니다. 배포 경로·워크플로·웹 자산은 기존 위치를 유지합니다.
+
+<a id="향후-백엔드-연동-계획"></a>
+
+## 로컬 API와 PostgreSQL
+
+현재 구현은 Windows 로컬 PostgreSQL과 FastAPI를 이용한 개발 환경입니다. [server README](../server/README.md)는 준비·실행 명령, [BACKEND](BACKEND.md)는 중단·재개와 운영 확인 절차를 관리합니다. 이전 `#향후-백엔드-연동-계획` 앵커는 기존 링크를 위해 유지합니다. 클라우드·인증·점수 진위 검증은 아래의 향후 과제로 구분합니다.
+
+```mermaid
+sequenceDiagram
+    participant App as app.js / PlayerStore
+    participant Sync as LocalServerSync
+    participant API as 같은 출처 FastAPI
+    participant DB as PostgreSQL
+    App->>Sync: 시작: 명시적 loopback 서버 모드
+    Sync->>API: POST /api/players
+    API->>DB: 사용자 등록 또는 닉네임 갱신
+    Sync->>API: GET /api/leaderboard
+    App->>App: 닉네임 저장: 같은 UUID의 identity 이름 변경
+    App->>Sync: 최신 현재 이름 등록·기록 갱신
+    Sync->>API: POST /api/players
+    API->>DB: players.nickname만 변경
+    Sync->>API: GET /api/leaderboard
+    App->>App: 게임오버: recordRun → localStorage
+    App->>Sync: submit(같은 run_id 결과)
+    Sync->>Sync: 전송 대기열 먼저 저장
+    Sync->>API: 등록 확인 → POST /api/runs
+    API->>API: RunInput 형식·범위 검증
+    API->>DB: 중복 run_id 확인 / INSERT / commit
+    DB-->>API: 저장 결과 반환
+    API-->>Sync: 저장 응답
+    Sync->>Sync: 성공한 대기 항목 제거
+    Sync->>API: GET /api/leaderboard?limit=5
+    API->>DB: 사용자별 최고 결과 SQL 조회
+    API-->>Sync: 공동 기록 응답
+    Sync-->>App: onChange로 공동 기록 표시
+```
+
+### 파일·함수·실행 경계
+
+`server/local.py`의 `setup()`은 고정한 PostgreSQL Windows 실행 파일의 체크섬을 확인하고 `%LOCALAPPDATA%\JumpBugi`에 클러스터·비공개 설정을 준비합니다. DB 기본 주소는 `127.0.0.1:55432`이며 데이터베이스는 `jumpbugi_local`입니다. `run`은 관리 DB를 시작하고 비공개 연결 정보를 앱 프로세스의 `DATABASE_URL`로 전달한 뒤 `server.main:app`을 `127.0.0.1:8000`에서 실행합니다. API 종료와 DB 종료는 별개이고 기존 데이터는 초기화하지 않습니다.
+
+`server/main.py.create_app()`은 `PlayerInput`·`RunInput`, API, 정적 `web/` 마운트를 구성합니다. API 라우트가 정적 마운트보다 먼저 등록됩니다. lifespan에서 DB를 준비하되 DB가 없으면 정적 파일 제공은 유지하고 API는 503으로 응답합니다. 요청마다 연결을 열어 성공 시 커밋·오류 시 롤백하며, DB 오류 응답에 접속 정보나 비밀번호를 넣지 않습니다.
+
+| API 함수 | 경로와 역할 |
+| --- | --- |
+| `health()` | `GET /api/health`, 실제 DB 연결 검사 |
+| `register_player()` | `POST /api/players`, 현재 이름 2~12자 검증, 신규 201 / 기존 UUID 이름만 갱신 200 |
+| `record_run()` | `POST /api/runs`, 신규 201 / 같은 ID·내용 재시도 200 / 다른 내용 409 |
+| `list_runs()` | `GET /api/runs?player_id=...`, 최근 결과 최대 50개 |
+| `leaderboard()` | `GET /api/leaderboard`, 사용자별 최고 결과 최대 100개, 기본 5개 |
+
+`schema.sql`의 `players`는 UUID·닉네임·등록 시각, `runs`는 기존 웹 결과 필드와 DB 수신 시각을 저장합니다. run_id 기본키와 player_id 외래키, 문자열 길이·숫자 범위 제약을 적용합니다. 랭킹은 사용자마다 점수·생존시간이 가장 높은 결과를 하나 선택하고 같은 값이면 플레이 시각·run_id 순서로 정렬합니다. 브라우저의 `played_at`과 DB의 `received_at`은 서로 다른 시각입니다.
+
+`PlayerInput.nickname`은 현재 이름 변경에 쓰는 2~12자 입력이고 `RunInput.nickname`은 과거·대기 결과를 보존하는 기존 1~40자 입력입니다. 이름 변경은 `players.nickname`만 갱신하고 UUID·등록 시각·과거 `runs` 행을 유지합니다. `leaderboard()`는 최고 결과에 `players`를 조인해 현재 이름을 표시하며 `list_runs()`는 당시 이름을 반환합니다. 이름이 같아도 UUID가 다르면 별도 사용자입니다. API 경로와 DB 스키마는 그대로입니다.
+
+### 전송 실패·기록·신뢰 경계
+
+`isLocalServerMode()`는 loopback 호스트와 `?server=1`을 모두 확인합니다. `LocalServerSync`는 시작 시 사용자 등록·공동 기록을 조회하고 기존 미전송 항목만 재시도합니다. 과거 로컬 플레이 전체를 새로 수집하지 않습니다. 게임오버는 로컬 기록을 먼저 만든 뒤 같은 결과를 `jumpbugi.web.v1.pending`에 보관하고 전송합니다. 대기열은 최대 50개이며 가득 차면 새 결과는 로컬에만 남았음을 알립니다. 저장소를 사용할 수 없으면 대기 상태도 접속 메모리에 한정됩니다.
+
+요청 실패·시간 초과·저장 응답 불일치 때는 전송 대기를 유지하고 서버 오류·재시도 상태를 표시합니다. 재시도는 버튼·다음 서버 모드 접속·온라인 복귀에서 수행합니다. 같은 run_id·동일 내용 재전송은 중복 저장하지 않고, 다른 내용으로 재사용하면 409입니다. 현재 서버는 브라우저에 로그인 세션이나 인증 토큰을 발급하지 않으며 ID를 실제 사람·계정으로 검증하지 않습니다.
+
+닉네임 변경과 등록 응답이 겹치면 최신 identity의 이름이 등록될 때까지 다시 확인한 뒤 공동 기록을 갱신합니다. 늦은 응답으로 현재 로컬 이름을 덮어쓰지 않습니다. 대기 결과의 기존 nickname·run_id·점수는 수정하지 않으며 `record_run()`은 현재 사용자 이름을 갱신하지 않습니다. 따라서 과거 이름의 응답 유실 재시도도 현재 이름을 되돌리지 않습니다.
+
+브라우저 요약의 타입·범위 검사는 점수 위변조 검증이 아닙니다. 입력 이력·규칙 재연산·서버 권위의 게임 판정은 없으며, 현재 공동 기록은 로컬 개발 데이터입니다. 테스트·브라우저 검사·직접 SQL 대조의 실제 결과와 한계는 [CHANGELOG](CHANGELOG.md)와 [WEB_REVIEW](WEB_REVIEW.md)의 날짜별 기록을 따릅니다.
+
+### 향후 개발
+
+클라우드·Linux 운영, 공개 서비스의 인증/인가, 플레이 증거에 근거한 점수 검증, 보존/삭제 정책과 분석 파이프라인은 미구현입니다. [TODO](TODO.md)에서 분리해 관리하고 필요할 때 API·DATABASE·SECURITY·DEPLOYMENT 문서를 추가합니다. 현재 로컬 API·DB는 BACKEND와 이 문서에서 설명하며, [학습 로드맵](LEARNING_ROADMAP.md)의 독립 실습과 제품 구현을 구분합니다.

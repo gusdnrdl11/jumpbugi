@@ -4,6 +4,11 @@
 
 - 프로젝트 관련 답변과 수정은 현재 `desktop_prototype/`의 Python 소스, `web/`의 웹 소스, `tests/`, 루트 `README.md`, `docs/ARCHITECTURE.md`를 기준으로 한다. 문서와 코드가 다르면 실제 코드를 확인한다. Pygame의 이미지·실제 점수·테스트·도구는 루트의 `image/`·`txt/`·`tests/`·`tools/` 위치를 유지한다.
 - `docs/GAME_IDEA.md`는 게임 기획·아이디어, `docs/TODO.md`는 미완료 작업이다. 두 문서의 제안을 구현된 기능으로 설명하지 않는다. `docs/CHANGELOG.md`는 작업 당시의 기록이다.
+- `docs/WEB_REVIEW.md`는 웹 코드 검토와 날짜별 점검 범위, `docs/WEB_STUDY.md`는 웹 학습 관리본, `docs/LEARNING_ROADMAP.md`는 기술 습득 순서·독립 실습·완료 기준이다. 학습 예제와 향후 과제를 현재 게임의 구현으로 간주하지 않는다. 웹 학습 문서의 이전 이름은 과거 변경 기록에서만 유지한다.
+- `server/main.py`·`schema.sql`·`local.py`는 로컬 FastAPI·PostgreSQL과 실행 도구다. `web/src/api.js`는 loopback 주소의 `?server=1`에서 브라우저별 기록을 전송한다. 로컬 저장·사용자별 최고 기록·중복 제출 처리는 코드와 검증 기록을 기준으로 설명하되, 클라우드 운영·사용자 인증·게임 재연산을 통한 점수 위변조 검증은 미구현으로 구분한다. `desktop_prototype/backend.py`는 로컬 게임 로직, `web/serve.py`는 독립 정적 개발 서버다. 실행과 재개 기록은 `docs/BACKEND.md`를 따른다.
+- 닉네임 변경은 기존 UUID·과거 결과를 유지한다. `players.nickname`은 현재 이름, `runs.nickname`은 플레이 당시 이름이며 공동 랭킹은 현재 이름을 사용한다. 예전 전송 대기열의 이름을 현재 사용자 이름으로 덮어쓰거나 과거 기록을 일괄 변경하지 않는다. 실제 DB 비밀번호·연결정보는 Git 밖의 로컬 설정에 두고 값 자체를 출력·문서화·커밋하지 않는다.
+- `docs/prompts/README.md`에서 실제 요청 원문·재사용 양식·기존 설계 자료를 구분한다. 출처나 사용 이력이 확인되지 않은 프롬프트를 과거 사용 기록으로 만들지 않으며 민감정보를 포함하지 않는다. 기존 보관 원문은 색인에서 연결한다.
+- Git 루트는 이 폴더의 상위다. GitHub Pages는 상위 `.github/workflows/deploy.yml`의 `./jumpbugi/web`을 업로드한다. 저장소 문서 경로와 배포 파일 경로를 구분하고, 문서 정리 때문에 실행 소스·자산·워크플로를 이동하거나 기존 모듈을 더 나누지 않는다.
 
 ## 기본 탐색·참조에서 제외할 자료
 

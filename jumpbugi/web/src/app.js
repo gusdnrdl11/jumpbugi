@@ -1,5 +1,6 @@
 import { GameEngine } from './engine.js';
 import { PlayerStore } from './storage.js';
+import { isLocalServerMode, LocalServerSync } from './api.js';
 
 const WIDTH = 640;
 const HEIGHT = 360;
@@ -18,10 +19,15 @@ let transitionElapsed = 0;
 let previousTime = null;
 let recorded = false;
 let lastUI = '';
+const serverSync = new LocalServerSync({
+  enabled: isLocalServerMode(window.location), identity: store.identity,
+  onChange: () => renderLeaderboard(),
+});
 
 // Read-only access to the running instance for local browser verification.
 Object.defineProperty(window, '__JUMPBUGI__', {
-  value: Object.freeze({ get engine() { return engine; }, get phase() { return phase; } }),
+  value: Object.freeze({ get engine() { return engine; }, get phase() { return phase; },
+    get server() { return serverSync.snapshot; } }),
 });
 
 export function formatTime(seconds) {
@@ -50,14 +56,42 @@ function changePhase(next) {
 }
 
 function renderLeaderboard() {
+  const server = serverSync.snapshot;
+  const shared = server.enabled && server.state === 'saved' && server.leaderboard !== null;
   $('nickname').textContent = store.identity.nickname;
-  $('ranking-mode').textContent = store.isDemo ? '예시 기록' : '이 브라우저의 기록';
+  $('ranking-mode').textContent = shared ? '로컬 서버 공동 기록'
+    : server.enabled ? '이 브라우저의 기록 · 서버 대기' : store.isDemo ? '예시 기록' : '이 브라우저의 기록';
+  $('personal-best-label').textContent = '이 브라우저 최고';
   $('ranking-note').textContent = store.isDemo
     ? '첫 플레이 후 내 기록이 표시됩니다.'
     : '이 브라우저에 저장된 기록입니다.';
+  if (server.enabled) {
+    let message = server.state === 'syncing' ? '서버에 반영 중…'
+      : server.state === 'error' ? `${server.error} 기록은 이 브라우저에 보관됩니다.`
+      : shared ? '서버의 사용자별 최고 기록' : '서버 연결 대기';
+    if (server.state === 'saved' && server.lastSavedRunId) message = '서버 저장 완료 · 사용자별 최고 기록';
+    if (server.pendingCount) message += ` 미전송 ${server.pendingCount}개.`;
+    if (server.state === 'error' && server.nicknamePending) message += ' 닉네임 반영도 대기 중입니다.';
+    if (!server.persistent && server.pendingCount) message += ' 전송 대기는 이번 접속 동안만 유지됩니다.';
+    if (server.localOnlyCount) message += ` 대기열 초과 ${server.localOnlyCount}개는 이 브라우저에만 보관됩니다.`;
+    const status = document.createElement('span');
+    status.textContent = message;
+    $('ranking-note').classList.add('server-note');
+    $('ranking-note').dataset.state = server.state;
+    const retry = document.createElement('button');
+    retry.id = 'server-retry-button';
+    retry.className = 'board-button board-refresh';
+    retry.type = 'button';
+    retry.textContent = server.state === 'error' || server.pendingCount ? '재시도' : '새로고침';
+    retry.setAttribute('aria-label', server.state === 'error' || server.pendingCount ? '서버 저장 재시도' : '공동 기록 새로고침');
+    retry.disabled = server.state === 'syncing';
+    retry.addEventListener('click', () => { void serverSync.retry(); });
+    $('ranking-note').replaceChildren(status, retry);
+  }
   $('ranking-best').textContent = store.results.length ? `${store.best.toLocaleString('ko-KR')}점` : '기록 없음';
   $('storage-note').hidden = store.persistent;
-  $('ranking-list').replaceChildren(...store.leaderboard().map((entry, index) => {
+  if (!store.persistent) $('storage-note').textContent = '브라우저 저장소를 사용할 수 없어 닉네임과 기록은 이번 접속 동안만 보관해요.';
+  $('ranking-list').replaceChildren(...(shared ? server.leaderboard : store.leaderboard()).map((entry, index) => {
     const item = document.createElement('li');
     const number = document.createElement('span');
     number.className = 'rank-number';
@@ -65,8 +99,9 @@ function renderLeaderboard() {
     const name = document.createElement('div');
     name.className = 'rank-name';
     const nickname = document.createElement('strong');
-    nickname.textContent = entry.nickname;
-    nickname.title = entry.nickname;
+    const displayName = !shared && entry.player_id === store.identity.player_id ? store.identity.nickname : entry.nickname;
+    nickname.textContent = displayName;
+    nickname.title = displayName;
     const time = document.createElement('span');
     time.textContent = `달린 시간 ${formatTime(entry.survival_time)}`;
     name.append(nickname, time);
@@ -76,6 +111,40 @@ function renderLeaderboard() {
     item.append(number, name, score);
     return item;
   }));
+}
+
+function closeNicknameEditor() {
+  $('nickname-form').hidden = true;
+  $('nickname-edit-button').setAttribute('aria-expanded', 'false');
+  $('nickname-edit-button').focus({ preventScroll: true });
+}
+
+function editNickname() {
+  if (phase === 'playing' && !engine.gameOver) {
+    engine.setPaused(true);
+    refreshUI(true);
+  }
+  $('nickname-input').value = store.identity.nickname;
+  $('nickname-input').removeAttribute('aria-invalid');
+  $('nickname-error').textContent = '';
+  $('nickname-form').hidden = false;
+  $('nickname-edit-button').setAttribute('aria-expanded', 'true');
+  $('nickname-input').focus({ preventScroll: true });
+  $('nickname-input').select();
+}
+
+function saveNickname(event) {
+  event.preventDefault();
+  const result = store.setNickname($('nickname-input').value);
+  if (!result.ok) {
+    $('nickname-error').textContent = result.error;
+    $('nickname-input').setAttribute('aria-invalid', 'true');
+    $('nickname-input').focus({ preventScroll: true });
+    return;
+  }
+  closeNicknameEditor();
+  renderLeaderboard();
+  if (result.changed) void serverSync.syncIdentity();
 }
 
 function refreshUI(force = false) {
@@ -133,7 +202,7 @@ function pauseForBackground() {
 function finishRun() {
   if (recorded) return;
   recorded = true;
-  store.recordRun({
+  const result = store.recordRun({
     score: engine.score, survival_time: engine.elapsed,
     death_obstacle: engine.obstacle?.name,
     max_speed: engine.speedMultiplier,
@@ -143,6 +212,7 @@ function finishRun() {
   changePhase('gameover');
   // Keyboard users can immediately restart; canvas retains focus for Enter.
   canvas.focus({ preventScroll: true });
+  if (result) void serverSync.submit(result);
 }
 
 function drawBackground(index, x, alpha = 1) {
@@ -321,7 +391,25 @@ $('start-button').addEventListener('click', start);
 $('restart-button').addEventListener('click', restart);
 $('resume-button').addEventListener('click', togglePause);
 $('reload-button').addEventListener('click', () => location.reload());
+$('nickname-edit-button').addEventListener('click', editNickname);
+$('nickname-form').addEventListener('submit', saveNickname);
+$('nickname-cancel-button').addEventListener('click', closeNicknameEditor);
+$('nickname-form').addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !event.isComposing) {
+    event.preventDefault();
+    event.stopPropagation();
+    closeNicknameEditor();
+  }
+});
+$('nickname-input').addEventListener('input', () => {
+  $('nickname-input').removeAttribute('aria-invalid');
+  $('nickname-error').textContent = '';
+});
 document.addEventListener('visibilitychange', () => { if (document.hidden) pauseForBackground(); else previousTime = null; });
 window.addEventListener('blur', pauseForBackground);
 window.addEventListener('resize', syncCanvasResolution);
+if (serverSync.enabled) {
+  window.addEventListener('online', () => { void serverSync.retry(); });
+  void serverSync.retry();
+}
 load();

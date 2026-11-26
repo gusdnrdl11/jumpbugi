@@ -1,2 +1,23 @@
 # Local generated previews, screenshots, and task helpers.
 output/
+
+# Local Python/Node environments and dependencies.
+.venv/
+venv/
+node_modules/
+
+# Local configuration and credentials. Examples must contain placeholders only.
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
+database.json
+
+# Interrupted high-score replacement; retain txt/high_score.txt itself.
+txt/*.tmp

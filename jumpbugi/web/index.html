@@ -32,8 +32,17 @@
         <span class="board-badge" id="ranking-mode">예시 기록</span>
         <div class="ranking-columns" aria-hidden="true"><span>러너</span><span>점수</span></div>
         <ol class="ranking-list" id="ranking-list"></ol>
-        <div class="my-record"><span id="nickname"></span><span>나의 최고 기록</span><strong id="ranking-best">기록 없음</strong></div>
-        <p class="ranking-note" id="ranking-note">첫 플레이 후 내 기록이 표시됩니다.</p>
+        <div class="my-record">
+          <div class="nickname-row"><span id="nickname"></span><button class="board-button nickname-edit-button" id="nickname-edit-button" type="button" aria-label="닉네임 변경" aria-controls="nickname-form" aria-expanded="false">변경</button></div>
+          <form class="nickname-form" id="nickname-form" hidden novalidate>
+            <label class="visually-hidden" for="nickname-input">닉네임</label>
+            <input id="nickname-input" name="nickname" type="text" autocomplete="nickname" aria-describedby="nickname-help nickname-error" required>
+            <div class="nickname-actions"><button class="board-button" id="nickname-save-button" type="submit">저장</button><button class="board-button" id="nickname-cancel-button" type="button">취소</button><span id="nickname-help">2~12자 · 한글, 영문, 숫자 가능</span></div>
+            <span class="nickname-error" id="nickname-error" role="status" aria-live="polite"></span>
+          </form>
+          <span id="personal-best-label">이 브라우저 최고</span><strong id="ranking-best">기록 없음</strong>
+        </div>
+        <p class="ranking-note" id="ranking-note" role="status" aria-live="polite">첫 플레이 후 내 기록이 표시됩니다.</p>
         <p class="storage-note" id="storage-note" hidden>브라우저 저장소를 사용할 수 없어 이번 접속 동안만 기록을 보관해요.</p>
       </aside>
     </div>

@@ -115,3 +115,77 @@ test('the personal best survives more than fifty lower attempts and a reload', (
   assert.equal(store.best, 999);
   assert.equal(makeStore(storage).best, 999);
 });
+
+test('renaming trims the name while preserving identity, best score and historical snapshots', () => {
+  const storage = new MemoryStorage();
+  const store = makeStore(storage);
+  const identity = store.identity;
+  const originalId = identity.player_id;
+  const previous = store.recordRun(run(120, 20));
+  const oldResults = JSON.stringify(store.results);
+  const changed = store.setNickname('  새Bugi7  ');
+  assert.deepEqual(changed, { ok: true, nickname: '새Bugi7', changed: true, persistent: true });
+  assert.equal(store.identity, identity, 'the API client must keep its shared identity reference');
+  assert.equal(identity.player_id, originalId);
+  assert.equal(identity.nickname, '새Bugi7');
+  assert.equal(store.best, 120);
+  assert.equal(JSON.stringify(store.results), oldResults);
+  assert.equal(storage.getItem(RESULT_KEY), oldResults);
+  const reloaded = makeStore(storage);
+  assert.deepEqual(reloaded.identity, identity);
+  assert.deepEqual(reloaded.results, [previous]);
+  assert.equal(reloaded.best, 120);
+  assert.equal(store.recordRun(run()).nickname, '새Bugi7');
+  assert.notEqual(previous.nickname, '새Bugi7');
+});
+
+test('nickname limits count Unicode codepoints and allow visible Korean, Latin, numbers and emoji', () => {
+  const store = makeStore(new MemoryStorage());
+  for (const nickname of ['부기', 'Bugi07', '부기 B7', 'B!', '😀부', '😀'.repeat(12)]) {
+    assert.equal(store.setNickname(nickname).ok, true, nickname);
+    assert.equal(store.identity.nickname, nickname);
+  }
+  assert.equal(store.setNickname('😀'.repeat(13)).ok, false);
+  assert.equal(store.setNickname('가'.repeat(12)).ok, true);
+  assert.equal(store.setNickname('가'.repeat(13)).ok, false);
+});
+
+test('invalid nickname edits never change the identity or persisted data', () => {
+  const storage = new MemoryStorage();
+  const store = makeStore(storage);
+  const original = { ...store.identity };
+  const saved = storage.getItem('jumpbugi.web.v1.identity');
+  for (const nickname of ['', '   ', 'A', 'a'.repeat(13), '부\u0000기', '부\u007f기',
+    '부\u200b기', '\t부기', '부기\n', '\ufeff부기', '부\ud800기', '부\u2028기', '부\u2029기', null, 12]) {
+    const result = store.setNickname(nickname);
+    assert.equal(result.ok, false, JSON.stringify(nickname));
+    assert.ok(result.error.length > 0);
+    assert.deepEqual(store.identity, original);
+    assert.equal(storage.getItem('jumpbugi.web.v1.identity'), saved);
+  }
+});
+
+test('nickname edits still work for the current session when browser storage is blocked', () => {
+  const store = makeStore({ getItem() { throw new Error('denied'); }, setItem() { throw new Error('denied'); } });
+  const identity = store.identity;
+  const result = store.setNickname('이번부기');
+  assert.equal(result.ok, true);
+  assert.equal(result.persistent, false);
+  assert.equal(store.identity, identity);
+  assert.equal(identity.nickname, '이번부기');
+});
+
+test('a legacy nickname longer than the editing limit does not regenerate its player ID or history', () => {
+  const storage = new MemoryStorage();
+  const old = { player_id: 'legacy-player', nickname: '기존닉네임'.repeat(4) };
+  storage.setItem('jumpbugi.web.v1.identity', JSON.stringify(old));
+  const store = makeStore(storage);
+  assert.deepEqual(store.identity, old);
+  const previous = store.recordRun(run(120, 20));
+  const reloaded = makeStore(storage);
+  assert.equal(reloaded.identity.player_id, old.player_id);
+  assert.deepEqual(reloaded.results, [previous]);
+  assert.equal(reloaded.setNickname('새부기').ok, true);
+  assert.equal(reloaded.identity.player_id, old.player_id);
+  assert.equal(reloaded.results[0].nickname, old.nickname);
+});

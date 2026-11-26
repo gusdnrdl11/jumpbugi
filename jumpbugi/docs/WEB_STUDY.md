@@ -1,8 +1,12 @@
 # 점프부기 웹 버전 스터디 — 코드에서 전체 구조까지
 
-작성 기준: 2026-11-22의 실제 `jumpbugi/web/` 코드와 테스트. 웹 게임 버전은 `0.1.0`입니다. 파일명은 요청한 `web-srudy.md`를 그대로 사용합니다.
+학습 내용의 작성 기준은 2026-11-22의 실제 `jumpbugi/web/` 코드와 테스트이며, 웹 게임 버전은 `0.1.0`입니다. 2026-11-25 문서 정리에서 기존 `docs/web-srudy.md`를 `docs/WEB_STUDY.md`로 이름을 바꿨습니다. 웹 학습 내용은 이 문서 한 곳에서 관리합니다.
 
 이 문서는 JavaScript와 웹 게임이 처음인 사람을 위한 한 권의 학습 자료입니다. 먼저 게임을 실행하고, 파일 세 개의 역할을 이해한 다음, Space 한 번이 점프로 바뀌는 과정을 따라갑니다. 처음부터 모든 수식을 외울 필요는 없습니다.
+
+전체 기술의 선행 지식·학습 순서·완료 기준은 [LEARNING_ROADMAP](LEARNING_ROADMAP.md), 시스템 구조와 호출 관계는 [ARCHITECTURE](ARCHITECTURE.md), 날짜별 검증 결과와 한계는 [WEB_REVIEW](WEB_REVIEW.md)에서 관리합니다. 이 문서는 HTML/CSS/JavaScript 코드를 읽고 작은 실습으로 확인하는 데 집중합니다. FastAPI·PostgreSQL·서버 점수 검증은 아직 구현되지 않은 후속 학습 항목입니다.
+
+코드를 열어 함께 읽을 핵심 파일은 [index.html](../web/index.html), [style.css](../web/style.css), [app.js](../web/src/app.js), [engine.js](../web/src/engine.js), [storage.js](../web/src/storage.js)입니다. 이 링크와 학습 문서는 저장소 소스 트리를 기준으로 하며, `web/`만 게시하는 GitHub Pages에는 `docs/`가 포함되지 않습니다.
 
 문서에 나오는 파일 경로는 **상위 `pygame/` 폴더 기준**입니다. 예를 들어 `jumpbugi/web/src/engine.js`는 `pygame` 안의 `jumpbugi` → `web` → `src` 폴더에 있습니다. 코드를 찾을 때는 편집기의 `Ctrl+F`로 함수 이름을 검색하세요. 줄 번호는 코드가 바뀌면 달라지므로 함수 이름을 기준으로 안내합니다.
 
@@ -69,10 +73,11 @@ HTML 버튼과 기록판처럼 브라우저가 관리하는 화면 요소들을 
 
 ```text
 pygame/
-├─ web-srudy.md                    이 스터디 문서의 요청 위치
 └─ jumpbugi/
-   ├─ main.py / backend.py / ...   Pygame 원본 게임
-   ├─ docs/                       구조·작업 기록·점검 문서
+   ├─ desktop_prototype/          Pygame 데스크톱 프로토타입
+   │  └─ main.py / backend.py / ... 기존 기능별 Python 모듈
+   ├─ image/ / txt/               Pygame 실행 이미지·실제 최고점수
+   ├─ docs/                       이 학습 문서·구조·작업 기록·점검 문서
    └─ web/
       ├─ index.html               웹페이지의 뼈대와 버튼
       ├─ style.css                색·크기·PC/모바일 배치
@@ -609,7 +614,7 @@ jumpbugi.web.v1.results
 
 ## 17. Pygame 원본과 웹 코드의 대응
 
-웹 실행은 Python 게임 코드를 직접 호출하지 않습니다. 규칙을 JavaScript로 옮기고 그림·마스크를 준비해 별도 실행할 수 있도록 한 구조입니다.
+웹 실행은 Python 게임 코드를 직접 호출하지 않습니다. 규칙을 JavaScript로 옮기고 그림·마스크를 준비해 별도 실행할 수 있도록 한 구조입니다. 아래 Pygame 파일명은 모두 `jumpbugi/desktop_prototype/` 기준입니다. 2026-11-22에 소스 위치를 정리했으며 기존 기능별 분리는 유지합니다.
 
 | Pygame에서 찾던 곳 | 웹에서 읽을 곳 | 내용 |
 | --- | --- | --- |
@@ -636,7 +641,7 @@ jumpbugi.web.v1.results
 python -B tools/export_assets.py
 ```
 
-이 도구는 원본 `assets.py`가 만든 프레임과 마스크를 읽어 `web/assets/`에 저장합니다. 실제 사용하는 원본 소스·이미지의 해시를 전후로 비교해 원본이 바뀌지 않았는지도 확인합니다. 단순 실행·코드 읽기에는 자산 재생성이 필요하지 않습니다. `manifest.json`의 긴 `0/1` 문자열을 손으로 편집하며 공부할 필요도 없습니다.
+이 도구는 `desktop_prototype/assets.py`가 만든 프레임과 마스크를 읽어 `web/assets/`에 저장합니다. 실제 사용하는 원본 소스·이미지의 해시를 전후로 비교해 원본이 바뀌지 않았는지도 확인합니다. 단순 실행·코드 읽기에는 자산 재생성이 필요하지 않습니다. `manifest.json`의 긴 `0/1` 문자열을 손으로 편집하며 공부할 필요도 없습니다.
 
 ## 18. 직접 해 보는 안전한 작은 실습
 

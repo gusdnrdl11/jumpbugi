@@ -11,6 +11,17 @@ const validNumber = value => typeof value === 'number' && Number.isFinite(value)
 const validIdentity = value => value && typeof value.player_id === 'string' && value.player_id.length > 0 && value.player_id.length <= 100 && typeof value.nickname === 'string' && value.nickname.length > 0 && value.nickname.length <= 40;
 const validResult = value => validIdentity(value) && Number.isInteger(value.score) && validNumber(value.score) && validNumber(value.survival_time) && typeof value.played_at === 'string' && typeof value.game_version === 'string';
 
+export function validateNickname(value) {
+  if (typeof value !== 'string') return { ok: false, error: '닉네임을 입력해 주세요.' };
+  if (/[\p{Cc}\p{Cf}\p{Cs}\p{Zl}\p{Zp}]/u.test(value)) {
+    return { ok: false, error: '줄바꿈과 보이지 않는 문자는 사용할 수 없어요.' };
+  }
+  const nickname = value.trim();
+  const length = Array.from(nickname).length;
+  if (length < 2 || length > 12) return { ok: false, error: '닉네임은 2~12자로 입력해 주세요.' };
+  return { ok: true, nickname };
+}
+
 function makeId(random) {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -52,6 +63,16 @@ export class PlayerStore {
   }
 
   get isDemo() { return this.results.length === 0; }
+
+  setNickname(value) {
+    const result = validateNickname(value);
+    if (!result.ok) return result;
+    const changed = this.identity.nickname !== result.nickname;
+    // Keep this object and player_id: the API client shares the same identity.
+    this.identity.nickname = result.nickname;
+    this.write('identity', this.identity);
+    return { ...result, changed, persistent: this.persistent };
+  }
 
   recordRun({ score, survival_time, death_obstacle = null, max_speed = 1, device_type = 'desktop' } = {}) {
     if (!Number.isInteger(score) || !validNumber(score) || !validNumber(survival_time) || !validNumber(max_speed)) return null;

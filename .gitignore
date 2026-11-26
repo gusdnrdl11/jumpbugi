@@ -4,3 +4,10 @@ __pycache__/
 
 # VS Code 개인 설정
 .vscode/
+
+# Local environment and PostgreSQL credentials; examples contain placeholders only.
+.env
+.env.*
+!.env.example
+!.env.*.example
+database.json
