@@ -33,11 +33,11 @@
         <div class="ranking-columns" aria-hidden="true"><span>러너</span><span>점수</span></div>
         <ol class="ranking-list" id="ranking-list"></ol>
         <div class="my-record">
-          <div class="nickname-row"><span id="nickname"></span><button class="board-button nickname-edit-button" id="nickname-edit-button" type="button" aria-label="닉네임 변경" aria-controls="nickname-form" aria-expanded="false">변경</button></div>
+          <div class="nickname-row"><span id="nickname"></span><button class="board-button nickname-edit-button" id="nickname-edit-button" type="button" aria-label="닉네임 변경" aria-controls="nickname-form" aria-expanded="false" disabled>변경</button></div>
           <form class="nickname-form" id="nickname-form" hidden novalidate>
             <label class="visually-hidden" for="nickname-input">닉네임</label>
-            <input id="nickname-input" name="nickname" type="text" autocomplete="nickname" aria-describedby="nickname-help nickname-error" required>
-            <div class="nickname-actions"><button class="board-button" id="nickname-save-button" type="submit">저장</button><button class="board-button" id="nickname-cancel-button" type="button">취소</button><span id="nickname-help">2~12자 · 한글, 영문, 숫자 가능</span></div>
+            <input id="nickname-input" name="nickname" type="text" autocomplete="nickname" aria-describedby="nickname-help nickname-error" required disabled>
+            <div class="nickname-actions"><button class="board-button" id="nickname-save-button" type="submit" disabled>저장</button><button class="board-button" id="nickname-cancel-button" type="button" disabled>취소</button><span id="nickname-help">2~12자 · 한글, 영문, 숫자 가능</span></div>
             <span class="nickname-error" id="nickname-error" role="status" aria-live="polite"></span>
           </form>
           <span id="personal-best-label">이 브라우저 최고</span><strong id="ranking-best">기록 없음</strong>

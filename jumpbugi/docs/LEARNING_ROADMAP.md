@@ -1,6 +1,6 @@
 # 점프부기 기술 학습 로드맵
 
-작성 기준: **2026-11-26**, 현재 `desktop_prototype/`·`web/`·`server/`·테스트·배포 설정. 이 문서는 학습 순서와 독립 실습의 기준을 정합니다. Python/Pygame의 자세한 해설은 [STUDY_NOTES](STUDY_NOTES.md), 웹의 자세한 해설은 [WEB_STUDY](WEB_STUDY.md), 실제 시스템 관계는 [ARCHITECTURE](ARCHITECTURE.md), 로컬 API·DB 실행은 [BACKEND](BACKEND.md)를 함께 읽습니다.
+문서 대조일: **2026-11-28**. 현재 `desktop_prototype/`·`web/`·`server/`와 2026-11-27의 닉네임 입력 수정까지를 기준으로 합니다. 이 문서는 학습 순서와 독립 실습의 기준을 정합니다. Python/Pygame의 자세한 해설은 [STUDY_NOTES](STUDY_NOTES.md), 웹의 자세한 해설은 [WEB_STUDY](WEB_STUDY.md), 실제 시스템 관계는 [ARCHITECTURE](ARCHITECTURE.md), 로컬 API·DB 실행은 [BACKEND](BACKEND.md)를 함께 읽습니다. 검증 결과의 실행일과 문서 대조일은 구분합니다.
 
 ## 적용 상태와 공부하는 방법
 
@@ -90,9 +90,9 @@ flowchart TD
 | --- | --- |
 | 학습 목적 | 웹페이지 구조와 게임 논리 화면을 구분하고 반응형 배치를 읽는다. |
 | 선행 지식 | 파일 경로, 브라우저 개발자 도구의 요소 확인, 기본 좌표·크기. |
-| 핵심 개념 | HTML 요소, DOM, id/class, CSS 선택자, 크기/여백, Grid/Flex, 미디어 쿼리, Canvas와 HTML UI의 차이. |
+| 핵심 개념 | HTML 요소, DOM, id/class, `hidden`·`disabled`·입력 초점, CSS 선택자, 크기/여백, Grid/Flex, 미디어 쿼리, Canvas와 HTML UI의 차이. |
 | 관련 파일·함수 | [index.html](../web/index.html), [style.css](../web/style.css), [app.js](../web/src/app.js)의 `syncCanvasResolution`, `refreshUI`, `renderLeaderboard`. |
-| 실제 적용 방식·상태 | 현재 HTML은 Canvas·조작·SCORE/TIME·기록판을 제공하고 CSS가 PC 두 열/좁은 화면 한 열을 정한다. 웹 논리 화면은 640×360이며 CSS 확대가 물리 규칙을 바꾸지 않는다. |
+| 실제 적용 방식·상태 | 현재 HTML은 Canvas·조작·SCORE/TIME·기록판을 제공하고 CSS가 PC 두 열/좁은 화면 한 열을 정한다. 닉네임 폼은 기존 DOM을 열고 닫으며 ready/gameover에서만 조작을 활성화한다. 웹 논리 화면은 640×360이며 CSS 확대가 물리 규칙을 바꾸지 않는다. |
 | 권장 분석 순서 | WEB_STUDY의 화면 구성 장 → HTML의 게임/HUD/기록판 → CSS의 바깥 배치·크기·미디어 쿼리 → `syncCanvasResolution`. |
 | 독립 실습 과제 | 별도 HTML/CSS에서 가짜 게임 영역과 합성 기록판을 만들고 넓은 화면/좁은 화면의 배치를 전환한다. |
 | 학습 완료 판단 기준 | DOM과 Canvas 내부 그림을 구분하고, 배치를 바꿀 위치와 논리 좌표를 바꿀 위치를 각각 찾는다. |
@@ -103,12 +103,12 @@ flowchart TD
 | --- | --- |
 | 학습 목적 | 브라우저 입력에서 엔진 상태·그리기·결과 저장까지 직접 추적한다. |
 | 선행 지식 | 5단계, 조건문·반복문·함수·객체의 기본 개념. |
-| 핵심 개념 | ES 모듈, 객체/배열, 클래스, 이벤트 콜백, `requestAnimationFrame`, 비동기 함수, Promise, DOM 갱신, localStorage. |
-| 관련 파일·함수 | [app.js](../web/src/app.js)의 `load/start/jump/frame/draw/finishRun`, [engine.js](../web/src/engine.js)의 `GameEngine.jump/update`, [storage.js](../web/src/storage.js)의 `PlayerStore.recordRun/leaderboard`. |
+| 핵심 개념 | ES 모듈, 객체/배열, 클래스, 이벤트 콜백과 전파·기본 동작·IME 조합, `requestAnimationFrame`, 비동기 함수, Promise, DOM 갱신, localStorage. |
+| 관련 파일·함수 | [app.js](../web/src/app.js)의 `load/start/jump/frame/draw/finishRun/canEditNickname/editNickname/saveNickname`, [engine.js](../web/src/engine.js)의 `GameEngine.jump/update`, [storage.js](../web/src/storage.js)의 `PlayerStore.recordRun/leaderboard/setNickname`. |
 | 실제 적용 방식·상태 | app이 자산·입력·화면 단계와 저장 연결을 맡고 engine이 게임 규칙을 계산한다. 게임오버 결과는 한 판에 한 번 PlayerStore에 전달되며 선택한 로컬 서버 모드만 api.js 전송을 추가한다. Python 게임을 브라우저에서 직접 실행하는 구조가 아니다. |
-| 권장 분석 순서 | WEB_STUDY의 작은 문법 사전 → `load` → 시작/키 입력 → `GameEngine.jump` → `frame/update/draw` → `finishRun/recordRun`. |
+| 권장 분석 순서 | WEB_STUDY의 작은 문법 사전 → `load` → 시작/키 입력 → `GameEngine.jump` → `frame/update/draw` → `finishRun/recordRun`. 이어 닉네임 폼의 상태·초점 → `keydown` 전파 차단/IME → 저장·취소를 추적한다. |
 | 독립 실습 과제 | 별도 ES 모듈 두 개로 입력 카운터와 메모리 기록판을 만들고 이벤트 한 번에 기록 하나가 생기는지 확인한다. |
-| 학습 완료 판단 기준 | Space 입력부터 착지까지의 함수·변수 변화와 게임오버 저장 경로를 코드 없이 설명하고, 비동기 자산 준비가 끝나야 하는 이유를 말한다. |
+| 학습 완료 판단 기준 | Space 입력부터 착지까지의 함수·변수 변화와 게임오버 저장 경로를 코드 없이 설명하고, 비동기 자산 준비가 끝나야 하는 이유를 말한다. 닉네임 편집의 Space·Enter·Esc·IME Enter가 게임 입력과 분리되는 이유도 구분한다. |
 
 ## 7. HTTP 및 JSON
 
@@ -144,7 +144,7 @@ flowchart TD
 | 선행 지식 | 표·행·열, 8단계의 데이터 필드/검증, 저장과 조회의 구분. |
 | 핵심 개념 | 기본키/외래키, 제약조건, SELECT/INSERT, JOIN, GROUP BY, 정렬, 인덱스, 트랜잭션, 연결 정보 관리. |
 | 관련 파일·함수 | [schema.sql](../server/schema.sql)의 `players/runs`·제약·인덱스, [main.py](../server/main.py)의 `database/record_run/leaderboard`, [local.py](../server/local.py)의 `setup/connection_info`. |
-| 실제 적용 방식·상태 | 로컬 PostgreSQL에 UUID 사용자와 완료 결과를 저장하고 SQL로 사용자별 최고 결과를 조회한다. Pygame TXT·브라우저 결과와 별개다. 초기화 SQL은 기존 테이블 변경을 관리하는 마이그레이션 체계가 아니다. |
+| 실제 적용 방식·상태 | 로컬 PostgreSQL에 UUID 사용자와 완료 결과를 저장하고 SQL로 사용자별 최고 결과를 조회한다. 공동 기록은 players의 현재 이름을 JOIN하고 과거 결과는 runs의 당시 이름을 보존한다. Pygame TXT·브라우저 결과와 별개이며 초기화 SQL은 마이그레이션 체계가 아니다. |
 | 권장 분석 순서 | 웹 결과 객체 → schema의 키·제약 → INSERT/중복 처리 → 개인 기록 SELECT → 사용자별 최고 결과 SQL → 인덱스·트랜잭션 → 임시 스키마 검사. |
 | 독립 실습 과제 | 별도 실습 DB에 합성 플레이어·결과를 넣고 최고점수·평균 생존시간을 조회한다. 중복 키와 존재하지 않는 플레이어 참조를 시도해 제약을 관찰한다. |
 | 학습 완료 판단 기준 | 같은 결과를 중복 저장하지 않을 기준과 키 관계를 설명하고, 요구한 랭킹/집계를 SQL로 작성하며 접속 비밀번호를 저장소에 남기지 않는다. |
@@ -156,9 +156,9 @@ flowchart TD
 | 학습 목적 | 로컬 한 판 결과를 서버와 주고받는 흐름과 실패 시 동작을 설계한다. |
 | 선행 지식 | 6~9단계, 비동기 처리, 서버 입력 검증, 데이터 저장/조회. |
 | 핵심 개념 | API 계약, 제출/조회, 로딩/실패 UI, 출처와 CORS, 중복 요청, 재시도, 버전, 로컬 기록과 서버 기록의 구분. |
-| 관련 파일·함수 | [app.js](../web/src/app.js)의 `finishRun/renderLeaderboard`, [api.js](../web/src/api.js)의 `isLocalServerMode`와 `LocalServerSync.submit/retry/flush/request`, [main.py](../server/main.py), [브라우저 검증 도구](../tools/verify_local_backend.mjs). |
+| 관련 파일·함수 | [app.js](../web/src/app.js)의 `finishRun/renderLeaderboard`, [storage.js](../web/src/storage.js)의 `PlayerStore.setNickname`, [api.js](../web/src/api.js)의 `isLocalServerMode`와 `LocalServerSync.submit/retry/flush/request/syncIdentity/registerIdentity`, [main.py](../server/main.py), [브라우저 검증 도구](../tools/verify_local_backend.mjs). |
 | 실제 적용 방식·상태 | 기본 모드는 로컬 결과만 저장한다. loopback의 `?server=1`은 로컬 결과 → 미전송 대기열 → 같은 출처 API → PG → 공동 기록 조회를 추가한다. 실패 시 로컬 저장과 재시도를 유지한다. |
-| 권장 분석 순서 | `finishRun/recordRun` → 모드 판별 → 대기열 저장 → `retry/flush` → API 중복 처리 → 공동 기록 DOM → 실패·시간 초과·재접속. |
+| 권장 분석 순서 | `finishRun/recordRun` → 모드 판별 → 대기열 저장 → `retry/flush` → API 중복 처리 → 공동 기록 DOM. 이어 `canEditNickname/editNickname/saveNickname`의 상태·입력 제한 → `setNickname`의 같은 identity 객체·UUID 유지 → `syncIdentity/registerIdentity`의 최신 이름 확인 → 과거 이름 대기열·실패·시간 초과·재접속을 추적한다. |
 | 독립 실습 과제 | 별도 웹 페이지와 실습 API로 합성 결과를 제출·조회한다. 서버 중단·같은 요청 재전송·검증 실패를 관찰하고 각 기대 동작을 적는다. |
 | 학습 완료 판단 기준 | 브라우저·API·DB 순서도를 그리고 성공/실패/중복 상황을 재현하며, 브라우저 ID를 인증된 사용자로 취급하지 않는다. |
 
@@ -182,8 +182,8 @@ flowchart TD
 | 학습 목적 | 데이터 형식 검증과 점수의 진위 확인을 구분하고 서버의 신뢰 경계를 설계한다. |
 | 선행 지식 | 모든 단계의 민감정보 보호 원칙, 7~10단계, 게임의 점수·시간·상태 규칙. |
 | 핵심 개념 | 타입/범위/필수값 검증, 클라이언트 변경 가능성, 인증/인가, 입력 크기·빈도 제한, 중복/재전송, 로그·개인정보 최소화, 서버 검증의 한계. |
-| 관련 파일·함수 | [storage.js](../web/src/storage.js)의 `validIdentity/validResult`, [main.py](../server/main.py)의 `InputModel/RunInput/record_run`, [schema.sql](../server/schema.sql)의 제약, [API 검사](../server/tests/test_api.py), [engine.js](../web/src/engine.js)의 득점 처리. |
-| 실제 적용 방식·상태 | 브라우저·Pydantic·DB가 타입/범위를 검사하고 같은 run_id의 중복·충돌을 처리한다. 현재는 인증·인가나 점수 위변조 검증이 아니며 클라이언트 요약을 저장한다. |
+| 관련 파일·함수 | [storage.js](../web/src/storage.js)의 `validateNickname/validIdentity/validResult`, [main.py](../server/main.py)의 `InputModel/PlayerInput/RunInput/record_run`, [schema.sql](../server/schema.sql)의 제약, [API 검사](../server/tests/test_api.py), [engine.js](../web/src/engine.js)의 득점 처리. |
+| 실제 적용 방식·상태 | 브라우저·Pydantic·DB가 타입/범위를 검사하고 같은 run_id의 중복·충돌을 처리한다. 현재 이름은 2~12자, 과거 결과 이름은 1~40자로 구분한다. 이는 인증·인가나 점수 위변조 검증이 아니며 클라이언트 요약을 저장한다. |
 | 권장 분석 순서 | 득점 생성 위치 → 브라우저 형식 → RunInput 검증 → DB 제약 → 동일/다른 내용 재전송 → 사용자가 바꿀 수 있는 값과 검증 한계. |
 | 독립 실습 과제 | 가짜 저장소와 실습 API에 음수·매우 큰 값·필드 누락·중복 run_id를 넣어 형식/정책/게임 증거 검증을 구분하는 표를 만든다. 실제 브라우저 기록은 수정하지 않는다. |
 | 학습 완료 판단 기준 | UUID·닉네임·정상 JSON만으로 신뢰할 수 없는 이유를 설명하고, 서버가 거절할 조건과 아직 판단할 수 없는 조작을 구분한다. |

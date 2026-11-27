@@ -167,19 +167,25 @@ async function captureFailure(client, result) {
   }
 }
 
-async function click(client, selector) {
+async function click(client, selector, touch = false) {
   const point = await client.evaluate(`(() => {
     const element = document.querySelector(${JSON.stringify(selector)});
     if (!element) throw new Error('Missing control: ' + ${JSON.stringify(selector)});
     element.scrollIntoView({ block: 'center', inline: 'nearest' });
     const r = element.getBoundingClientRect(); return { x:r.x+r.width/2, y:r.y+r.height/2 };
   })()`);
+  if (touch) {
+    await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ ...point, radiusX: 1, radiusY: 1, force: 1, id: 0 }] });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    return;
+  }
   await client.send('Input.dispatchMouseEvent', { type: 'mousePressed', ...point, button: 'left', buttons: 1, clickCount: 1 });
   await client.send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...point, button: 'left', buttons: 0, clickCount: 1 });
 }
 
-async function typeNickname(client, value) {
-  await click(client, '#nickname-input');
+async function typeNickname(client, value, touch = false) {
+  await click(client, '#nickname-input', touch);
+  assert.equal(await client.evaluate(`document.activeElement.id`), 'nickname-input', 'Nickname input did not receive focus');
   await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'a', code: 'KeyA', windowsVirtualKeyCode: 65, modifiers: 2 });
   await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'a', code: 'KeyA', windowsVirtualKeyCode: 65, modifiers: 2 });
   await client.send('Input.insertText', { text: value });
@@ -210,12 +216,12 @@ async function assertNicknameLayout(client, expected, description) {
   return actual;
 }
 
-async function renameInUI(client, nickname, baseline, label) {
-  await click(client, '#nickname-edit-button');
+async function renameInUI(client, nickname, baseline, label, touch = false) {
+  await click(client, '#nickname-edit-button', touch);
   await client.until(`document.querySelector('#nickname-form').hidden === false`);
   await assertNicknameLayout(client, baseline, `${label} open`);
-  await typeNickname(client, nickname);
-  await click(client, '#nickname-save-button');
+  await typeNickname(client, nickname, touch);
+  await click(client, '#nickname-save-button', touch);
   const trimmed = nickname.trim();
   await client.until(`document.querySelector('#nickname-form').hidden === true
     && JSON.parse(localStorage.getItem('jumpbugi.web.v1.identity')).nickname === ${JSON.stringify(trimmed)}
@@ -223,6 +229,68 @@ async function renameInUI(client, nickname, baseline, label) {
     && window.__JUMPBUGI__.server.state === 'saved'`);
   assert.equal(await client.evaluate(`document.querySelector('#nickname').textContent`), trimmed);
   return assertNicknameLayout(client, baseline, `${label} saved`);
+}
+
+async function pressKey(client, key, code, windowsVirtualKeyCode) {
+  const text = key === 'Enter' ? '\r' : key === ' ' ? ' ' : undefined;
+  await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key, code, windowsVirtualKeyCode,
+    ...(text === undefined ? {} : { text, unmodifiedText: text }) });
+  await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode });
+}
+
+async function verifyNicknameBeforeStart(client, result, identity) {
+  result.stage = 'ready nickname editing, keyboard isolation and IME';
+  await client.until(`window.__JUMPBUGI__.server.state === 'saved'`);
+  const baseline = await layout(client);
+  await click(client, '#nickname-edit-button');
+  assert.equal(await client.evaluate(`document.querySelector('#nickname-input').disabled || document.querySelector('#nickname-input').readOnly`), false);
+  await typeNickname(client, 'ReadyBugi');
+  await pressKey(client, ' ', 'Space', 32);
+  assert.equal(await client.evaluate(`window.__JUMPBUGI__.phase`), 'ready', 'Typing Space started the game');
+  for (const composition of [{ isComposing: true }, { keyCode: 229 }]) {
+    assert.equal(await client.evaluate(`document.querySelector('#nickname-input').dispatchEvent(new KeyboardEvent('keydown', {
+      key:'Enter', code:'Enter', bubbles:true, cancelable:true, ...${JSON.stringify(composition)}
+    }))`), false, 'IME Enter must prevent implicit nickname submission');
+    assert.equal(await client.evaluate(`document.querySelector('#nickname-form').hidden`), false);
+  }
+  await client.evaluate(`document.activeElement.blur()`);
+  await pressKey(client, 'a', 'KeyA', 65);
+  await pressKey(client, ' ', 'Space', 32);
+  assert.equal(await client.evaluate(`window.__JUMPBUGI__.phase`), 'ready', 'A key outside the open editor started the game');
+  await click(client, '#nickname-input');
+  await pressKey(client, 'Escape', 'Escape', 27);
+  assert.equal(await client.evaluate(`document.querySelector('#nickname-form').hidden`), true);
+  assert.deepEqual(await client.evaluate(`JSON.parse(localStorage.getItem('jumpbugi.web.v1.identity'))`), identity);
+  await click(client, '#nickname-edit-button');
+  await typeNickname(client, 'ReadyBugi');
+  await pressKey(client, 'Enter', 'Enter', 13);
+  await client.until(`document.querySelector('#nickname-form').hidden && window.__JUMPBUGI__.server.state === 'saved'
+    && window.__JUMPBUGI__.server.registeredNickname === 'ReadyBugi'`);
+  assert.equal(await client.evaluate(`window.__JUMPBUGI__.phase`), 'ready', 'Saving with Enter also started the game');
+  assert.deepEqual(await client.evaluate(`JSON.parse(localStorage.getItem('jumpbugi.web.v1.identity'))`), { ...identity, nickname: 'ReadyBugi' });
+  await renameInUI(client, identity.nickname, baseline, 'restore ready nickname');
+  await click(client, '#nickname-edit-button');
+  await typeNickname(client, 'UnsavedBugi');
+  result.checks.push('Ready input accepts keyboard text; Space, unfocused editor keys and IME Enter cannot start or submit; Escape cancels and Enter saves the same UUID to the server');
+}
+
+async function verifyNicknameBlocked(client, result, expectedPhase) {
+  const state = await client.evaluate(`(() => {
+    const identity = localStorage.getItem('jumpbugi.web.v1.identity');
+    const paused = window.__JUMPBUGI__.engine.paused;
+    const edit = document.querySelector('#nickname-edit-button');
+    edit.click();
+    edit.dispatchEvent(new MouseEvent('click', { bubbles:true }));
+    document.querySelector('#nickname-input').value = 'BlockedBugi';
+    document.querySelector('#nickname-form').dispatchEvent(new Event('submit', { bubbles:true, cancelable:true }));
+    return { phase:window.__JUMPBUGI__.phase, hidden:document.querySelector('#nickname-form').hidden,
+      disabled:['nickname-edit-button','nickname-input','nickname-save-button','nickname-cancel-button']
+        .every(id => document.getElementById(id).disabled),
+      identity_unchanged:localStorage.getItem('jumpbugi.web.v1.identity') === identity,
+      paused_unchanged:window.__JUMPBUGI__.engine.paused === paused };
+  })()`);
+  assert.deepEqual(state, { phase:expectedPhase, hidden:true, disabled:true, identity_unchanged:true, paused_unchanged:true });
+  result.checks.push(`${expectedPhase} (${await client.evaluate(`window.__JUMPBUGI__.engine.paused ? 'paused' : 'active'`)}): nickname controls disabled; forced click/submit cannot edit or save`);
 }
 
 async function verifyNickname(client, result, identity, runs, route) {
@@ -275,8 +343,15 @@ async function verifyNickname(client, result, identity, runs, route) {
   await send('Emulation.setTouchEmulationEnabled', { enabled:true });
   await delay(100);
   const mobile = await layout(client);
-  await renameInUI(client, sharedNickname.repeat(3), mobile, 'mobile 12-character rename');
-  result.nickname_mobile_layout = await renameInUI(client, sharedNickname, mobile, 'mobile final rename');
+  await renameInUI(client, sharedNickname.repeat(3), mobile, 'mobile 12-character rename', true);
+  result.nickname_mobile_layout = await renameInUI(client, sharedNickname, mobile, 'mobile final rename', true);
+  const beforeTouchCancel = await evaluate(`localStorage.getItem('jumpbugi.web.v1.identity')`);
+  await click(client, '#nickname-edit-button', true);
+  await typeNickname(client, 'TouchCancel', true);
+  await click(client, '#nickname-cancel-button', true);
+  assert.equal(await evaluate(`document.querySelector('#nickname-form').hidden`), true);
+  assert.equal(await evaluate(`localStorage.getItem('jumpbugi.web.v1.identity')`), beforeTouchCancel);
+  result.checks.push('Mobile touch events open, focus, save and cancel the nickname editor without changing the UUID or historical runs');
   await send('Emulation.setTouchEmulationEnabled', { enabled:false });
   await send('Emulation.setDeviceMetricsOverride', { width:1280, height:900, deviceScaleFactor:1, mobile:false });
   const current = await evaluate(`JSON.parse(localStorage.getItem('jumpbugi.web.v1.identity'))`);
@@ -317,13 +392,21 @@ try {
       assert.ok(identity?.player_id);
       result.player_id = identity.player_id;
       result.identity = identity;
+      await verifyNicknameBeforeStart(client, result, identity);
       assert.deepEqual(await evaluate(`JSON.parse(localStorage.getItem('jumpbugi.web.v1.results') || '[]')`), []);
       assert.equal(await evaluate(`window.__JUMPBUGI__.server?.enabled`), true, 'Server mode is not enabled');
       result.stage = 'actual start click and natural collision';
       const point = await evaluate(`(() => {const r=document.querySelector('#start-button').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`);
       await send('Input.dispatchMouseEvent', { type: 'mousePressed', ...point, button: 'left', buttons: 1, clickCount: 1 });
       await send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...point, button: 'left', buttons: 0, clickCount: 1 });
+      await until(`window.__JUMPBUGI__.phase === 'transition'`);
+      await verifyNicknameBlocked(client, result, 'transition');
       await until(`window.__JUMPBUGI__.phase === 'playing'`);
+      await verifyNicknameBlocked(client, result, 'playing');
+      await pressKey(client, 'Escape', 'Escape', 27);
+      assert.equal(await evaluate(`window.__JUMPBUGI__.engine.paused`), true);
+      await verifyNicknameBlocked(client, result, 'playing');
+      await pressKey(client, 'Escape', 'Escape', 27);
       await until(`window.__JUMPBUGI__.phase === 'gameover'`, 20000);
       const runs = await evaluate(`JSON.parse(localStorage.getItem('jumpbugi.web.v1.results') || '[]')`);
       assert.equal(runs.length, 1, 'Natural collision must record exactly one run');

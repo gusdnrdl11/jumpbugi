@@ -113,17 +113,18 @@ function renderLeaderboard() {
   }));
 }
 
+function canEditNickname() {
+  return phase === 'ready' || phase === 'gameover';
+}
+
 function closeNicknameEditor() {
   $('nickname-form').hidden = true;
   $('nickname-edit-button').setAttribute('aria-expanded', 'false');
-  $('nickname-edit-button').focus({ preventScroll: true });
+  if (!$('nickname-edit-button').disabled) $('nickname-edit-button').focus({ preventScroll: true });
 }
 
 function editNickname() {
-  if (phase === 'playing' && !engine.gameOver) {
-    engine.setPaused(true);
-    refreshUI(true);
-  }
+  if (!canEditNickname() || !$('nickname-form').hidden) return;
   $('nickname-input').value = store.identity.nickname;
   $('nickname-input').removeAttribute('aria-invalid');
   $('nickname-error').textContent = '';
@@ -135,6 +136,7 @@ function editNickname() {
 
 function saveNickname(event) {
   event.preventDefault();
+  if (!canEditNickname() || $('nickname-form').hidden) return;
   const result = store.setNickname($('nickname-input').value);
   if (!result.ok) {
     $('nickname-error').textContent = result.error;
@@ -155,6 +157,11 @@ function refreshUI(force = false) {
   if (!force && key === lastUI) return;
   lastUI = key;
   document.body.dataset.paused = String(paused);
+  const nicknameEnabled = canEditNickname();
+  for (const id of ['nickname-edit-button', 'nickname-input', 'nickname-save-button', 'nickname-cancel-button']) {
+    $(id).disabled = !nicknameEnabled;
+  }
+  if (!nicknameEnabled && !$('nickname-form').hidden) closeNicknameEditor();
   $('score').textContent = score.toLocaleString('ko-KR');
   $('elapsed').textContent = formatTime(elapsed);
   if (phase === 'loading') showOverlay('loading');
@@ -371,6 +378,7 @@ async function load() {
 }
 
 document.addEventListener('keydown', event => {
+  if (!$('nickname-form').hidden) return;
   if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
   if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
   if (event.code === 'Tab' || ['ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight'].includes(event.code)) return;
@@ -395,9 +403,13 @@ $('nickname-edit-button').addEventListener('click', editNickname);
 $('nickname-form').addEventListener('submit', saveNickname);
 $('nickname-cancel-button').addEventListener('click', closeNicknameEditor);
 $('nickname-form').addEventListener('keydown', event => {
-  if (event.key === 'Escape' && !event.isComposing) {
+  event.stopPropagation();
+  if (event.isComposing || event.keyCode === 229) {
+    if (event.key === 'Enter') event.preventDefault();
+    return;
+  }
+  if (event.key === 'Escape') {
     event.preventDefault();
-    event.stopPropagation();
     closeNicknameEditor();
   }
 });

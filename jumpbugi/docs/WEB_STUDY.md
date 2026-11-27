@@ -1,12 +1,12 @@
 # 점프부기 웹 버전 스터디 — 코드에서 전체 구조까지
 
-학습 내용의 작성 기준은 2026-11-22의 실제 `jumpbugi/web/` 코드와 테스트이며, 웹 게임 버전은 `0.1.0`입니다. 2026-11-25 문서 정리에서 기존 `docs/web-srudy.md`를 `docs/WEB_STUDY.md`로 이름을 바꿨습니다. 웹 학습 내용은 이 문서 한 곳에서 관리합니다.
+기초 학습 내용은 2026-11-22의 실제 `jumpbugi/web/` 코드와 테스트를 기준으로 하며, 로컬 API·닉네임 설명은 2026-11-27 구현까지 반영해 2026-11-28에 대조했습니다. 웹 게임 버전은 `0.1.0`입니다. 웹 학습 내용은 이 문서 한 곳에서 관리하며 이전 이름과 정리 이력은 [CHANGELOG](CHANGELOG.md)에 보존합니다.
 
 이 문서는 JavaScript와 웹 게임이 처음인 사람을 위한 한 권의 학습 자료입니다. 먼저 게임을 실행하고, 파일 세 개의 역할을 이해한 다음, Space 한 번이 점프로 바뀌는 과정을 따라갑니다. 처음부터 모든 수식을 외울 필요는 없습니다.
 
-전체 기술의 선행 지식·학습 순서·완료 기준은 [LEARNING_ROADMAP](LEARNING_ROADMAP.md), 시스템 구조와 호출 관계는 [ARCHITECTURE](ARCHITECTURE.md), 날짜별 검증 결과와 한계는 [WEB_REVIEW](WEB_REVIEW.md)에서 관리합니다. 이 문서는 HTML/CSS/JavaScript 코드를 읽고 작은 실습으로 확인하는 데 집중합니다. FastAPI·PostgreSQL·서버 점수 검증은 아직 구현되지 않은 후속 학습 항목입니다.
+전체 기술의 선행 지식·학습 순서·완료 기준은 [LEARNING_ROADMAP](LEARNING_ROADMAP.md), 시스템 구조와 호출 관계는 [ARCHITECTURE](ARCHITECTURE.md), 날짜별 검증 결과와 한계는 [WEB_REVIEW](WEB_REVIEW.md)에서 관리합니다. 이 문서는 HTML/CSS/JavaScript 코드를 읽고 작은 실습으로 확인하는 데 집중합니다. FastAPI·PostgreSQL은 선택적 로컬 모드에 구현되어 있으며 실행은 [BACKEND](BACKEND.md)를 따릅니다. 클라우드 운영·사용자 인증·게임 재연산을 통한 점수 검증은 후속 항목입니다.
 
-코드를 열어 함께 읽을 핵심 파일은 [index.html](../web/index.html), [style.css](../web/style.css), [app.js](../web/src/app.js), [engine.js](../web/src/engine.js), [storage.js](../web/src/storage.js)입니다. 이 링크와 학습 문서는 저장소 소스 트리를 기준으로 하며, `web/`만 게시하는 GitHub Pages에는 `docs/`가 포함되지 않습니다.
+코드를 열어 함께 읽을 핵심 파일은 [index.html](../web/index.html), [style.css](../web/style.css), [app.js](../web/src/app.js), [engine.js](../web/src/engine.js), [storage.js](../web/src/storage.js)이며 서버 연동은 [api.js](../web/src/api.js)로 이어집니다. 이 링크와 학습 문서는 저장소 소스 트리를 기준으로 하며, `web/`만 게시하는 GitHub Pages에는 `docs/`가 포함되지 않습니다.
 
 문서에 나오는 파일 경로는 **상위 `pygame/` 폴더 기준**입니다. 예를 들어 `jumpbugi/web/src/engine.js`는 `pygame` 안의 `jumpbugi` → `web` → `src` 폴더에 있습니다. 코드를 찾을 때는 편집기의 `Ctrl+F`로 함수 이름을 검색하세요. 줄 번호는 코드가 바뀌면 달라지므로 함수 이름을 기준으로 안내합니다.
 
@@ -17,6 +17,7 @@
 - [Space 입력부터 점프까지](#7-가장-먼저-따라갈-코드-space-한-번이-점프가-되기까지)
 - [한 화면이 갱신되는 순서](#10-한-화면이-갱신되는-순서)
 - [게임오버와 기록 저장](#15-게임오버와-기록-저장)
+- [닉네임 편집과 입력 격리](#15-3-닉네임-편집과-게임-입력을-분리하기)
 - [직접 해 보는 실습](#18-직접-해-보는-안전한-작은-실습)
 - [검사와 문제 해결](#19-자동-테스트와-브라우저-점검)
 
@@ -78,6 +79,8 @@ pygame/
    │  └─ main.py / backend.py / ... 기존 기능별 Python 모듈
    ├─ image/ / txt/               Pygame 실행 이미지·실제 최고점수
    ├─ docs/                       이 학습 문서·구조·작업 기록·점검 문서
+   ├─ server/                     선택적 로컬 FastAPI·PostgreSQL API와 실행 도구
+   ├─ tools/verify_local_backend.mjs  Chrome·Edge·로컬 DB 연동 검사
    └─ web/
       ├─ index.html               웹페이지의 뼈대와 버튼
       ├─ style.css                색·크기·PC/모바일 배치
@@ -89,7 +92,8 @@ pygame/
       ├─ src/
       │  ├─ app.js                화면·입력·시작 연출·기록 연결
       │  ├─ engine.js             물리·장애물·충돌·득점·계절
-      │  └─ storage.js            브라우저 식별자와 플레이 결과 저장
+      │  ├─ storage.js            브라우저 식별자와 플레이 결과 저장
+      │  └─ api.js                선택적 로컬 서버 전송·재시도·현재 이름 동기화
       ├─ assets/
       │  ├─ manifest.json         그림 경로·크기·프레임·충돌 마스크
       │  ├─ intro.png             인트로 그림
@@ -98,7 +102,8 @@ pygame/
       │  └─ obstacles/            장애물별 애니메이션 그림
       ├─ tests/
       │  ├─ engine.test.js        게임 규칙 검사
-      │  └─ storage.test.js       기록 저장 검사
+      │  ├─ storage.test.js       기록 저장 검사
+      │  └─ api.test.js           서버 모드·대기열·닉네임 동기화 검사
       └─ tools/
          ├─ export_assets.py      Pygame 자원을 웹용으로 내보내기
          └─ browser-smoke.mjs     실제 브라우저에서 주요 흐름 검사
@@ -117,6 +122,8 @@ pygame/
 ```
 
 `engine.js`는 버튼이나 브라우저 화면을 직접 조작하지 않습니다. 그래서 화면을 켜지 않고 Node 테스트로 물리와 충돌을 검사할 수 있습니다. `storage.js`도 게임 그림을 그리지 않습니다.
+
+위 흐름은 기본 정적 모드입니다. 로컬 API를 실행하고 loopback 주소에 `?server=1`을 붙인 경우에만 `app.js → api.js → FastAPI → PostgreSQL` 전송이 추가됩니다. `web/serve.py`는 이 API를 실행하지 않습니다.
 
 ## 4. 소스 코드를 읽기 위한 작은 JavaScript 사전
 
@@ -217,6 +224,8 @@ else if (phase === 'playing' && event.code === 'Space') {
 터치는 Canvas의 `pointerdown` 이벤트로 같은 `jump()`에 연결됩니다. PC와 모바일에 서로 다른 물리 엔진이 있는 것이 아닙니다.
 
 키보드 처리 앞부분은 길게 눌러 발생한 반복 입력, Ctrl 같은 조합키, 글자 입력 중인 요소 등을 걸러 냅니다. 버튼에 키보드 초점이 있을 때는 해당 버튼의 기본 키보드 조작이 작동하도록 처리합니다.
+
+닉네임 폼이 열려 있으면 전역 게임 키 처리도 즉시 끝냅니다. 폼 자체의 `keydown`은 `stopPropagation()`으로 상위에 전파되지 않게 합니다. 이 두 확인은 입력란 밖으로 초점이 이동한 경우도 보호합니다. Enter 저장·Esc 취소와 한글 조합 중 Enter의 차이는 [15-3](#15-3-닉네임-편집과-게임-입력을-분리하기)에서 이어 봅니다.
 
 ### 7-2. 점프 가능 여부는 engine.js가 결정한다
 
@@ -553,11 +562,11 @@ jumpbugi.web.v1.identity
 jumpbugi.web.v1.results
 ```
 
-`identity`에는 `player_id`와 임시 `nickname`이 있습니다. 사람을 구분하는 키는 닉네임이 아니라 `player_id`입니다. `results`에는 완료한 게임의 결과 목록이 있습니다.
+`identity`에는 브라우저를 구분하는 `player_id`와 현재 `nickname`이 있습니다. 닉네임은 바꿀 수 있으며 식별 키는 `player_id`입니다. 로그인 계정이나 인증된 사람을 뜻하지 않습니다. `results`에는 완료한 게임의 결과 목록이 있습니다.
 
 | 결과 필드 | 뜻 |
 | --- | --- |
-| `player_id`, `nickname` | 이 결과의 사용자 식별자와 표시 이름 |
+| `player_id`, `nickname` | 이 결과의 사용자 식별자와 플레이 당시 표시 이름 |
 | `run_id` | 이번 판을 구분하는 ID |
 | `score` | 최종 점수 |
 | `survival_time` | 달린 시간, 초 단위 |
@@ -569,9 +578,31 @@ jumpbugi.web.v1.results
 
 최근 기록을 중심으로 최대 50개를 보관하고, 오래된 최고 기록은 낮은 점수를 여러 번 기록해도 사라지지 않도록 남깁니다. `leaderboard()`는 점수 내림차순, 동점이면 생존 시간 내림차순으로 상위 5개를 만듭니다.
 
-첫 플레이 전 기록판은 `DEMO`에 있는 예시입니다. 결과가 생기면 이 브라우저에 저장한 실제 기록으로 바뀝니다. 현재 온라인 공동 랭킹이나 서버 DB는 없습니다. 같은 출처의 브라우저 저장소가 기준이므로 다른 브라우저·주소·포트에서는 기록이 다르게 보일 수 있습니다.
+기본 정적 모드의 첫 플레이 전 기록판은 `DEMO`에 있는 예시입니다. 결과가 생기면 이 브라우저에 저장한 실제 기록으로 바뀝니다. 같은 출처의 브라우저 저장소가 기준이므로 다른 브라우저·주소·포트에서는 기록이 다르게 보일 수 있습니다. 선택적 로컬 서버 모드가 저장과 조회를 마치면 공동 기록판을 표시하며, 실패하면 브라우저 기록과 재시도 안내를 사용합니다.
 
 저장소 접근이 차단돼도 `PlayerStore`는 메모리에 기록을 유지하고 안내를 표시합니다. 이 경우 새로고침 뒤까지 보관되지는 않습니다. Pygame의 `txt/high_score.txt`와 웹 기록은 별개입니다.
+
+### 15-3. 닉네임 편집과 게임 입력을 분리하기
+
+`app.js`의 `canEditNickname()` → `editNickname()` → `saveNickname()`을 차례로 찾습니다. 변경 버튼을 누르면 새 입력창을 만드는 대신 기존 폼의 `hidden`을 해제하고 현재 이름을 넣은 뒤 `focus()`·`select()`로 바로 수정하게 합니다. 열린 폼에서 변경 버튼을 다시 눌러도 작성 중인 내용을 덮어쓰지 않습니다.
+
+| 게임 상태 | 닉네임 편집 |
+| --- | --- |
+| `ready`·`gameover` | 변경·입력·저장·취소 가능 |
+| `loading`·`splash`·`transition` | 변경 불가 |
+| `playing`·`playing`에서 일시정지 | 변경 불가 |
+
+`refreshUI()`는 변경 버튼·입력란·저장·취소의 `disabled`를 상태에 맞춥니다. `hidden`은 폼 표시 여부, `disabled`는 조작 가능 여부입니다. 입력란에 `readonly`는 사용하지 않습니다. 편집 함수도 상태를 다시 확인하고, 다른 단계로 넘어가면 폼을 닫으므로 화면에서 버튼만 막는 것으로 끝나지 않습니다.
+
+폼의 Enter는 기본 제출을 통해 저장하고 Esc는 취소합니다. `stopPropagation()`은 게임의 키 리스너까지 이벤트가 올라가지 않게 하며, 입력 자체의 기본 동작을 모두 막지는 않습니다. `isComposing` 또는 키 코드 229로 한글 조합 중임을 확인한 Enter만 `preventDefault()`로 즉시 제출을 막습니다. 따라서 글자를 확정하는 Enter와 닉네임을 저장하는 Enter를 구분합니다.
+
+저장은 `PlayerStore.setNickname()`의 검증을 거칩니다. 원문의 보이지 않는 문자를 거부하고 앞뒤 공백을 정리한 2~12자를 받습니다. 같은 identity 객체의 이름만 바꾸므로 `player_id`·기존 결과·최고값은 남습니다. 취소는 저장소와 서버를 변경하지 않으며 다음에 열면 저장된 이름을 다시 읽습니다.
+
+### 15-4. 로컬 서버에서 현재 이름과 과거 기록 보존하기
+
+서버 모드의 저장은 `setNickname()` → `LocalServerSync.syncIdentity()` → `registerIdentity()` → `POST /api/players` 순서로 이어집니다. `players.nickname`은 현재 이름, `runs.nickname`은 플레이 당시 이름입니다. 공동 랭킹은 현재 이름을 표시하고 과거 결과와 미전송 대기열은 원래 이름을 유지합니다.
+
+판이 끝나면 로컬 결과를 먼저 보관하고 전송할 결과는 `jumpbugi.web.v1.pending`에 저장합니다. 이는 `PlayerStore`의 두 키와 별도로 `api.js`가 관리하는 최대 50개의 재시도 대기열입니다. 과거 로컬 결과 전체를 자동 업로드하거나 닉네임을 바꿀 때 과거 결과를 일괄 수정하지 않습니다. 서버가 꺼져도 로컬 이름·결과를 유지하고 서버 반영을 재시도합니다. 자세한 입력 범위와 DB 보존 검증은 [BACKEND](BACKEND.md)를 봅니다.
 
 ## 16. 화면 배치: style.css를 읽는 순서
 
@@ -704,6 +735,8 @@ node --test tests/*.test.js
 
 `storage.test.js`는 ID 유지, 결과 필드, 정렬, 잘못된 값 거부, 저장소 차단, 50개 제한, 오래된 최고 기록 보존을 검사합니다.
 
+`api.test.js`는 기본 정적 모드가 API를 사용하지 않는지, 대기열 재시도·진행 중인 닉네임 변경·과거 이름 결과 보존이 맞는지 검사합니다. 2026-11-27에는 이 세 파일의 총 45개 검사가 통과했습니다. 문서를 읽는 날짜의 새 검사 결과와 과거 결과는 구분합니다.
+
 테스트에서 `random: () => 0.9`처럼 난수를 고정하는 이유는 매번 같은 조건으로 재현하기 위해서입니다. `MemoryStorage`는 브라우저 저장소를 흉내 내는 테스트 전용 객체이므로 실제 사용자 기록을 건드리지 않습니다.
 
 ### 19-2. 실제 브라우저 흐름 검사
@@ -715,6 +748,8 @@ node tools/browser-smoke.mjs http://127.0.0.1:8000/
 ```
 
 이 도구는 설치된 Chrome 또는 Edge를 사용하고 Node의 내장 WebSocket 기능이 필요합니다. PC·모바일 크기를 모사해 화면과 주요 입력 흐름을 검사합니다. 화면과 보고서는 로컬 `web/.qa/`에 저장됩니다.
+
+로컬 FastAPI·PostgreSQL 모드의 닉네임·키보드·터치와 저장 검사는 [BACKEND](BACKEND.md)의 실행 준비 후 `jumpbugi/`에서 `node tools/verify_local_backend.mjs "http://127.0.0.1:8000/?server=1"`로 수행합니다. 이어 `server/local.py verify-report`로 보고서의 UUID를 실제 DB와 대조합니다. 2026-11-27에는 Chrome·Edge 각각 10개 검사 묶음과 직접 SQL 대조가 통과했으며 자세한 범위는 [WEB_REVIEW](WEB_REVIEW.md)에 있습니다. 아래 휴대폰 접속 방법은 정적 게임의 확인이며 loopback 전용 API·DB의 모바일 운영 검증이 아닙니다.
 
 모바일 크기를 흉내 낸 검사와 실제 휴대폰의 성능·터치감 확인은 다릅니다. 실제 휴대폰 확인은 같은 Wi-Fi에서 다음처럼 서버를 연 뒤 PC의 IPv4 주소로 접속합니다.
 
@@ -749,6 +784,8 @@ python -B -m unittest discover -s tests -v
 | 휴대폰에서 접속 안 됨 | 같은 Wi-Fi, 서버의 `--host`, PC IPv4·포트·방화벽 확인 |
 | 기록이 다른 주소에서 안 보임 | localStorage의 주소·포트·브라우저가 같은지 확인 |
 | 기록이 새로고침하면 사라짐 | 저장소 안내와 `store.persistent` 경로 확인 |
+| 닉네임을 수정할 수 없음 | `ready`·`gameover`인지, `canEditNickname`·폼 `hidden`·입력 `disabled`·초점 확인 |
+| 닉네임이 DB에 반영되지 않음 | loopback `?server=1`과 로컬 API 실행·서버 상태·재시도 안내 확인 |
 | config.py를 바꿨는데 웹이 같음 | 웹의 `RULES`는 별도 JavaScript 설정임을 확인 |
 
 문제를 찾을 때는 “입력 → 상태 계산 → 그림 → 저장” 중 어느 단계가 기대와 다른지 먼저 나누세요. 예를 들어 `playerY`는 바뀌는데 그림이 안 움직이면 입력보다 그리기 경로를 먼저 확인합니다.
@@ -785,6 +822,8 @@ python -B -m unittest discover -s tests -v
 10. 닉네임이 같은 것과 같은 `player_id`인 것은 왜 다를까요?
 11. 첫 기록판에 보이는 예시 점수는 다른 사람의 실제 온라인 기록일까요?
 12. Pygame의 `config.py`를 수정하면 웹 설정도 자동으로 바뀔까요?
+13. 닉네임 편집 중 Space가 게임 시작으로 전달되지 않는 이유는 무엇일까요?
+14. 닉네임 변경 후 현재 이름과 과거 결과의 이름이 달라도 되는 이유는 무엇일까요?
 
 ### 답을 짧게 확인하기
 
@@ -800,5 +839,7 @@ python -B -m unittest discover -s tests -v
 10. 닉네임은 표시 이름이고 `player_id`는 식별 키입니다.
 11. 아닙니다. 첫 플레이 전의 예시이며, 이후에는 이 브라우저의 기록입니다.
 12. 아닙니다. 웹의 `RULES`와 관련 상수는 별도로 관리합니다.
+13. 폼의 키 전파를 차단하고 전역 키 처리도 편집 중이면 끝내기 때문입니다.
+14. 현재 이름은 identity/players, 플레이 당시 이름은 results/runs에 각각 보존하기 때문입니다.
 
 이 질문에 답할 수 있다면 다음 수정 때 “어느 파일의 어떤 함수부터 볼지”를 스스로 정할 수 있습니다. 그다음에는 한 기능을 골라 실제 호출을 끝까지 따라가며 범위를 넓히면 됩니다.

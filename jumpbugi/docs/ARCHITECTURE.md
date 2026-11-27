@@ -539,6 +539,10 @@ sequenceDiagram
 
 `PlayerInput.nickname`은 현재 이름 변경에 쓰는 2~12자 입력이고 `RunInput.nickname`은 과거·대기 결과를 보존하는 기존 1~40자 입력입니다. 이름 변경은 `players.nickname`만 갱신하고 UUID·등록 시각·과거 `runs` 행을 유지합니다. `leaderboard()`는 최고 결과에 `players`를 조인해 현재 이름을 표시하며 `list_runs()`는 당시 이름을 반환합니다. 이름이 같아도 UUID가 다르면 별도 사용자입니다. API 경로와 DB 스키마는 그대로입니다.
 
+화면에서는 `canEditNickname()`이 시작 대기(`ready`)·게임오버(`gameover`)에서만 편집을 허용합니다. `refreshUI()`가 변경 버튼·입력란·저장·취소의 `disabled`를 동기화하며, 로딩·인트로·시작 전환·플레이·일시정지 중에는 편집기를 닫고 비활성화합니다. `editNickname()`은 기존 이름으로 입력란을 열어 포커스·전체 선택을 제공하고, `saveNickname()`은 `PlayerStore.setNickname()`으로 같은 identity를 바꾼 뒤 서버 모드에서 `syncIdentity()`를 호출합니다. 취소는 저장·서버 요청을 만들지 않습니다.
+
+편집 폼의 `keydown`은 게임 입력으로 전파하지 않고, 폼이 열려 있으면 폼 밖으로 포커스가 이동해도 전역 게임 키 처리를 건너뜁니다. 한글 조합 중 Enter는 제출하지 않으며 일반 Enter는 저장, Esc는 취소합니다. 시작·재시작 버튼을 직접 누르면 해당 상태로 전환하면서 편집기를 닫습니다. 닉네임 변경을 위해 진행 중인 게임을 자동 정지시키는 동작은 없습니다.
+
 ### 전송 실패·기록·신뢰 경계
 
 `isLocalServerMode()`는 loopback 호스트와 `?server=1`을 모두 확인합니다. `LocalServerSync`는 시작 시 사용자 등록·공동 기록을 조회하고 기존 미전송 항목만 재시도합니다. 과거 로컬 플레이 전체를 새로 수집하지 않습니다. 게임오버는 로컬 기록을 먼저 만든 뒤 같은 결과를 `jumpbugi.web.v1.pending`에 보관하고 전송합니다. 대기열은 최대 50개이며 가득 차면 새 결과는 로컬에만 남았음을 알립니다. 저장소를 사용할 수 없으면 대기 상태도 접속 메모리에 한정됩니다.
